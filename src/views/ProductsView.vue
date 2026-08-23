@@ -25,14 +25,14 @@ onMounted(() => {
 main {
   width: min(var(--container), calc(100% - 40px));
   margin: 0 auto;
-  padding: 64px 0 80px;
+  padding: 72px 0 96px;
 }
 
 h1 {
-  margin: 0 0 40px;
-  font-size: clamp(36px, 5vw, 64px);
-  font-weight: 600;
-  line-height: 1;
-  letter-spacing: -0.05em;
+  margin: 0 0 48px;
+  font-size: clamp(42px, 6vw, 72px);
+  font-weight: 500;
+  line-height: 0.95;
+  letter-spacing: -0.06em;
 }
 </style>

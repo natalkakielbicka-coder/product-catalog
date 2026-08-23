@@ -49,51 +49,55 @@ onMounted(() => {
 main {
   width: min(var(--container), calc(100% - 40px));
   margin: 0 auto;
-  padding: 72px 0;
+  padding: 72px 0 96px;
 }
 
 .product {
   display: grid;
-  grid-template-columns: minmax(0, 1.1fr) minmax(320px, 0.9fr);
-  gap: clamp(40px, 7vw, 100px);
+  grid-template-columns: minmax(0, 1.05fr) minmax(320px, 0.95fr);
+  gap: clamp(48px, 8vw, 110px);
   align-items: center;
 }
 
 .product__image {
-  padding: clamp(30px, 6vw, 72px);
-  border-radius: 20px;
+  overflow: hidden;
+  border-radius: 24px;
   background: var(--color-image-bg);
 }
 
 .product__image img {
   width: 100%;
   aspect-ratio: 1 / 1;
-  object-fit: contain;
+  object-fit: cover;
 }
 
 .product__category {
-  margin: 0 0 14px;
-  color: var(--color-muted);
-  font-size: 13px;
-  font-weight: 600;
-  letter-spacing: 0.08em;
+  display: inline-block;
+  margin: 0 0 18px;
+  padding: 7px 12px;
+  border-radius: 999px;
+  color: var(--color-accent);
+  background: var(--color-accent-light);
+  font-size: 12px;
+  font-weight: 700;
+  letter-spacing: 0.06em;
   text-transform: uppercase;
 }
 
 .product__content h1 {
-  margin: 0 0 22px;
-  font-size: clamp(36px, 5vw, 58px);
-  font-weight: 600;
-  line-height: 1.05;
-  letter-spacing: -0.05em;
+  margin: 0 0 24px;
+  font-size: clamp(38px, 5vw, 62px);
+  font-weight: 500;
+  line-height: 1.02;
+  letter-spacing: -0.055em;
 }
 
 .product__description {
-  max-width: 540px;
-  margin: 0 0 28px;
+  max-width: 520px;
+  margin: 0 0 30px;
   color: var(--color-muted);
-  font-size: 17px;
-  line-height: 1.7;
+  font-size: 16px;
+  line-height: 1.75;
 }
 
 .product__price {
@@ -105,18 +109,21 @@ main {
 
 .product__button {
   width: 100%;
-  margin-top: 28px;
-  padding: 16px 24px;
+  margin-top: 30px;
+  padding: 17px 24px;
   border: 0;
-  border-radius: 999px;
+  border-radius: 12px;
   color: #fff;
   background: var(--color-accent);
   font-weight: 600;
   cursor: pointer;
-  transition: background-color 0.2s;
+  transition:
+    transform 0.2s ease,
+    background-color 0.2s ease;
 }
 
 .product__button:hover {
+  transform: translateY(-2px);
   background: var(--color-accent-hover);
 }
 

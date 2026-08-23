@@ -22,9 +22,7 @@ defineProps({
 .cart-summary {
   display: flex;
   justify-content: flex-end;
-  margin-top: 32px;
   padding-top: 24px;
-  border-top: 1px solid var(--color-border);
 }
 
 .cart-summary p {

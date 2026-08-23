@@ -29,18 +29,20 @@ defineProps({
   border-radius: var(--radius);
   background: var(--color-surface);
   transition:
-    transform 0.25s ease,
-    border-color 0.25s ease;
+    transform 0.3s ease,
+    box-shadow 0.3s ease,
+    border-color 0.3s ease;
 }
 
 .product-card:hover {
-  transform: translateY(-4px);
-  border-color: #d9a8bf;
+  transform: translateY(-6px);
+  border-color: #dfc2d1;
+  box-shadow: 0 18px 45px rgba(63, 37, 51, 0.08);
 }
 
 .product-card__link {
   display: block;
-  padding: 14px;
+  padding: 10px 10px 20px;
   color: inherit;
   text-decoration: none;
 }
@@ -48,23 +50,23 @@ defineProps({
 .product-card img {
   width: 100%;
   aspect-ratio: 1 / 1;
-  padding: 24px;
-  border-radius: 10px;
+  border-radius: 13px;
   background: var(--color-image-bg);
-  object-fit: contain;
+  object-fit: cover;
 }
 
 .product-card h2 {
-  margin: 18px 0 8px;
-  font-size: 17px;
+  margin: 18px 8px 7px;
+  font-size: 16px;
   font-weight: 600;
-  line-height: 1.35;
+  line-height: 1.4;
+  letter-spacing: -0.02em;
 }
 
 .product-card p {
-  margin: 0 0 6px;
+  margin: 0 8px;
   color: var(--color-accent);
-  font-size: 17px;
+  font-size: 16px;
   font-weight: 700;
 }
 </style>

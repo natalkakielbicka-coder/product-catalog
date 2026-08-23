@@ -39,25 +39,25 @@ defineProps({
 <style scoped>
 .cart-item {
   display: grid;
-  grid-template-columns: 140px 1fr auto;
-  gap: 28px;
+  grid-template-columns: 120px 1fr;
+  gap: 24px;
   align-items: center;
   padding: 24px 0;
   border-bottom: 1px solid var(--color-border);
 }
 
 .cart-item img {
-  width: 140px;
+  width: 120px;
   aspect-ratio: 1 / 1;
-  padding: 12px;
-  border-radius: 12px;
+  border-radius: 14px;
   background: var(--color-image-bg);
-  object-fit: contain;
+  object-fit: cover;
 }
 
 .cart-item h2 {
-  margin: 0 0 8px;
+  margin: 0 0 6px;
   font-size: 18px;
+  font-weight: 600;
 }
 
 .cart-item p {
@@ -68,29 +68,34 @@ defineProps({
 .cart-item__quantity {
   display: flex;
   align-items: center;
-  gap: 14px;
-  margin-top: 16px;
+  gap: 12px;
+  margin-top: 14px;
 }
 
 .cart-item__quantity button {
   display: grid;
-  width: 36px;
-  height: 36px;
+  width: 34px;
+  height: 34px;
   place-items: center;
   border: 1px solid var(--color-border);
-  border-radius: 50%;
-  background: transparent;
+  border-radius: 8px;
+  background: var(--color-surface);
   cursor: pointer;
+  transition: border-color 0.2s;
+}
+
+.cart-item__quantity button:hover {
+  border-color: var(--color-accent);
 }
 
 .cart-item__remove {
-  margin-top: 16px;
+  margin-top: 14px;
   padding: 0;
   border: 0;
-  color: var(--color-muted);
+  color: var(--color-accent);
   background: transparent;
   cursor: pointer;
-  text-decoration: underline;
+  font-size: 13px;
 }
 
 @media (max-width: 640px) {
