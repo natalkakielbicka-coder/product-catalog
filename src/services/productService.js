@@ -7,3 +7,11 @@ export async function getProducts() {
 
   return data.products
 }
+
+export async function getProduct(id) {
+  const response = await fetch(`${API_URL}/products/${id}`)
+
+  const data = await response.json()
+
+  return data
+}
