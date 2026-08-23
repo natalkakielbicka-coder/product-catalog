@@ -1,6 +1,7 @@
 <script setup>
 import { useCart } from '@/composables/useCart'
 import CartItem from '@/components/CartItem.vue'
+import CartSummary from '@/components/CartSummary.vue'
 const { cartItems, cartCount, cartTotal } = useCart()
 </script>
 
@@ -13,12 +14,7 @@ const { cartItems, cartCount, cartTotal } = useCart()
     <div v-else>
       <CartItem v-for="item in cartItems" :key="item.id" :item="item" />
 
-      <div class="cart-summary">
-        <p>
-          Total:
-          <strong>{{ cartTotal.toFixed(2) }} $</strong>
-        </p>
-      </div>
+      <CartSummary :total="cartTotal" />
     </div>
   </main>
 </template>
@@ -32,12 +28,5 @@ main {
 
 h1 {
   margin: 0 0 32px;
-}
-
-.cart-summary {
-  display: flex;
-  justify-content: flex-end;
-  margin-top: 32px;
-  font-size: 20px;
 }
 </style>

@@ -3,6 +3,7 @@ import { onMounted } from 'vue'
 import { useRoute } from 'vue-router'
 import { useProducts } from '@/composables/useProducts'
 import { useCart } from '@/composables/useCart'
+import { formatCurrency } from '@/utils/currency'
 
 const route = useRoute()
 
@@ -36,7 +37,7 @@ onMounted(() => {
           {{ product.description }}
         </p>
 
-        <p class="product__price">{{ product.price }} $</p>
+        <p class="product__price">{{ formatCurrency(product.price) }}</p>
 
         <button class="product__button" @click="addToCart(product)">Add to cart</button>
       </div>

@@ -1,5 +1,6 @@
 <script setup>
 import { useCart } from '@/composables/useCart'
+import { formatCurrency } from '@/utils/currency'
 
 const { increaseQuantity, decreaseQuantity, removeFromCart } = useCart()
 
@@ -18,7 +19,7 @@ defineProps({
     <div>
       <h2>{{ item.title }}</h2>
 
-      <p>{{ item.price }} $</p>
+      <p>{{ formatCurrency(item.price) }}</p>
 
       <p>Quantity: {{ item.quantity }}</p>
 

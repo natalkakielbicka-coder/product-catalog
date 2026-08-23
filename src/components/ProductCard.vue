@@ -1,5 +1,6 @@
 <script setup>
 import { RouterLink } from 'vue-router'
+import { formatCurrency } from '@/utils/currency'
 
 defineProps({
   product: {
@@ -16,7 +17,7 @@ defineProps({
 
       <h2>{{ product.title }}</h2>
 
-      <p>{{ product.price }} $</p>
+      <p>{{ formatCurrency(product.price) }}</p>
     </RouterLink>
   </article>
 </template>
