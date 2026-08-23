@@ -23,12 +23,16 @@ onMounted(() => {
 
 <style scoped>
 main {
-  width: min(1200px, calc(100% - 32px));
+  width: min(var(--container), calc(100% - 40px));
   margin: 0 auto;
-  padding: 48px 0;
+  padding: 64px 0 80px;
 }
 
 h1 {
-  margin: 0 0 32px;
+  margin: 0 0 40px;
+  font-size: clamp(36px, 5vw, 64px);
+  font-weight: 600;
+  line-height: 1;
+  letter-spacing: -0.05em;
 }
 </style>

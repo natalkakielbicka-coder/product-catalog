@@ -38,15 +38,19 @@ defineProps({
 <style scoped>
 .cart-item {
   display: grid;
-  grid-template-columns: 120px 1fr;
-  gap: 24px;
-  padding: 20px 0;
-  border-bottom: 1px solid #e5e5e5;
+  grid-template-columns: 140px 1fr auto;
+  gap: 28px;
+  align-items: center;
+  padding: 24px 0;
+  border-bottom: 1px solid var(--color-border);
 }
 
 .cart-item img {
-  width: 120px;
+  width: 140px;
   aspect-ratio: 1 / 1;
+  padding: 12px;
+  border-radius: 12px;
+  background: var(--color-image-bg);
   object-fit: contain;
 }
 
@@ -57,20 +61,24 @@ defineProps({
 
 .cart-item p {
   margin: 4px 0;
+  color: var(--color-muted);
 }
+
 .cart-item__quantity {
   display: flex;
   align-items: center;
-  gap: 12px;
-  margin-top: 12px;
+  gap: 14px;
+  margin-top: 16px;
 }
 
 .cart-item__quantity button {
-  width: 32px;
-  height: 32px;
-  border: 1px solid #ddd;
-  border-radius: 6px;
-  background: #fff;
+  display: grid;
+  width: 36px;
+  height: 36px;
+  place-items: center;
+  border: 1px solid var(--color-border);
+  border-radius: 50%;
+  background: transparent;
   cursor: pointer;
 }
 
@@ -78,8 +86,19 @@ defineProps({
   margin-top: 16px;
   padding: 0;
   border: 0;
+  color: var(--color-muted);
   background: transparent;
   cursor: pointer;
   text-decoration: underline;
+}
+
+@media (max-width: 640px) {
+  .cart-item {
+    grid-template-columns: 90px 1fr;
+  }
+
+  .cart-item img {
+    width: 90px;
+  }
 }
 </style>
