@@ -2,10 +2,12 @@
 import { onMounted } from 'vue'
 import { useRoute } from 'vue-router'
 import { useProducts } from '@/composables/useProducts'
+import { useCart } from '@/composables/useCart'
 
 const route = useRoute()
 
 const { product, loading, error, fetchProduct } = useProducts()
+const { addToCart } = useCart()
 
 onMounted(() => {
   fetchProduct(route.params.id)
@@ -35,6 +37,8 @@ onMounted(() => {
         </p>
 
         <p class="product__price">{{ product.price }} $</p>
+
+        <button class="product__button" @click="addToCart(product)">Add to cart</button>
       </div>
     </div>
   </main>
@@ -88,7 +92,15 @@ main {
   font-weight: 700;
 }
 
-@media (max-width: 768px) {
+.product__button {
+  margin-top: 24px;
+  padding: 12px 20px;
+  border: 0;
+  border-radius: 8px;
+  cursor: pointer;
+}
+
+@media (max-width: 767px) {
   .product {
     grid-template-columns: 1fr;
   }
