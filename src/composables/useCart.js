@@ -1,6 +1,7 @@
 import { ref, computed } from 'vue'
+import { useLocalStorage } from '@/composables/useLocalStorage'
 
-const cartItems = ref([])
+const cartItems = useLocalStorage('cart', [])
 
 export function useCart() {
   const cartCount = computed(() => {
