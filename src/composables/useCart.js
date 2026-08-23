@@ -16,17 +16,17 @@ export function useCart() {
     }, 0)
   })
 
-  function addToCart(product) {
+  function addToCart(product, quantity = 1) {
     const existingItem = cartItems.value.find((item) => item.id === product.id)
 
     if (existingItem) {
-      existingItem.quantity++
+      existingItem.quantity += quantity
       return
     }
 
     cartItems.value.push({
       ...product,
-      quantity: 1,
+      quantity,
     })
   }
 

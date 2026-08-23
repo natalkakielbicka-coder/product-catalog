@@ -1,4 +1,5 @@
 <script setup>
+import { ref } from 'vue'
 import { RouterLink } from 'vue-router'
 import { formatCurrency } from '@/utils/currency'
 import { useCart } from '@/composables/useCart'
@@ -11,12 +12,28 @@ defineProps({
 })
 
 const { addToCart } = useCart()
+
+const quantity = ref(1)
+
+function increaseQuantity() {
+  quantity.value++
+}
+
+function decreaseQuantity() {
+  if (quantity.value > 1) {
+    quantity.value--
+  }
+}
 </script>
 
 <template>
   <article class="product-card">
     <RouterLink class="product-card__link" :to="`/product/${product.id}`">
       <img :src="product.thumbnail" :alt="product.title" />
+
+      <span class="product-card__category">
+        {{ product.category }}
+      </span>
 
       <h2>{{ product.title }}</h2>
 
@@ -25,7 +42,19 @@ const { addToCart } = useCart()
       </p>
     </RouterLink>
 
-    <button class="product-card__button" @click="addToCart(product)">Add to cart</button>
+    <div class="product-card__actions">
+      <div class="product-card__quantity">
+        <button type="button" aria-label="Decrease quantity" @click="decreaseQuantity">−</button>
+
+        <span>{{ quantity }}</span>
+
+        <button type="button" aria-label="Increase quantity" @click="increaseQuantity">+</button>
+      </div>
+
+      <button class="product-card__button" @click="addToCart(product, quantity)">
+        Add to cart
+      </button>
+    </div>
   </article>
 </template>
 
@@ -67,7 +96,7 @@ const { addToCart } = useCart()
 }
 
 .product-card h2 {
-  margin: 18px 8px 7px;
+  margin: 10px 8px 7px;
   font-size: 16px;
   font-weight: 600;
   line-height: 1.4;
@@ -88,9 +117,63 @@ const { addToCart } = useCart()
   font-weight: 700;
 }
 
+.product-card__button:hover {
+  transform: translateY(-2px);
+  background: var(--color-accent-hover);
+}
+
+.product-card__category {
+  display: inline-flex;
+  align-self: flex-start;
+  margin: 16px 8px 0;
+  padding: 6px 10px;
+  border-radius: 999px;
+  color: var(--color-accent);
+  background: var(--color-accent-light);
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+}
+
+.product-card__actions {
+  display: grid;
+  grid-template-columns: auto 1fr;
+  gap: 10px;
+  padding: 16px 10px 10px;
+  align-items: center;
+}
+
+.product-card__quantity {
+  display: flex;
+  align-items: center;
+  border: 1px solid var(--color-border);
+  border-radius: 10px;
+  overflow: hidden;
+  height: 45px;
+}
+
+.product-card__quantity button {
+  width: 36px;
+  height: 42px;
+  border: 0;
+  background: transparent;
+  cursor: pointer;
+  transition: background-color 0.2s ease;
+}
+
+.product-card__quantity button:hover {
+  background: var(--color-accent-light);
+}
+
+.product-card__quantity span {
+  min-width: 28px;
+  text-align: center;
+  font-size: 14px;
+  font-weight: 600;
+}
+
 .product-card__button {
-  width: calc(100% - 20px);
-  margin: 14px 10px 10px;
   padding: 12px 16px;
   border: 0;
   border-radius: 10px;
