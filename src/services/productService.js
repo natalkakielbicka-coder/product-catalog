@@ -20,6 +20,17 @@ function normalizeProduct(product) {
   }
 }
 
+function isValidProduct(product) {
+  const hasInvalidTitle = product.title?.startsWith('title-')
+  const hasInvalidDescription = product.description?.startsWith('desc-')
+
+  const hasValidImage = product.images?.some(
+    (image) => typeof image === 'string' && image.startsWith('http'),
+  )
+
+  return !hasInvalidTitle && !hasInvalidDescription && hasValidImage
+}
+
 export async function getProducts({ offset = 0, limit = 50 } = {}) {
   const response = await fetch(`${API_URL}/products?offset=${offset}&limit=${limit}`)
 
@@ -29,7 +40,7 @@ export async function getProducts({ offset = 0, limit = 50 } = {}) {
 
   const data = await response.json()
 
-  return data.map(normalizeProduct)
+  return data.filter(isValidProduct).map(normalizeProduct)
 }
 
 export async function getProduct(id) {
