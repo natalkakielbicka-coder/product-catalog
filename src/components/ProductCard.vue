@@ -1,4 +1,6 @@
 <script setup>
+import { RouterLink } from 'vue-router'
+
 defineProps({
   product: {
     type: Object,
@@ -9,11 +11,13 @@ defineProps({
 
 <template>
   <article class="product-card">
-    <img :src="product.thumbnail" :alt="product.title" />
+    <RouterLink class="product-card__link" :to="`/product/${product.id}`">
+      <img :src="product.thumbnail" :alt="product.title" />
 
-    <h2>{{ product.title }}</h2>
+      <h2>{{ product.title }}</h2>
 
-    <p>{{ product.price }} $</p>
+      <p>{{ product.price }} $</p>
+    </RouterLink>
   </article>
 </template>
 
@@ -41,5 +45,11 @@ defineProps({
   margin: 0;
   font-size: 16px;
   font-weight: 600;
+}
+
+.product-card__link {
+  display: block;
+  color: inherit;
+  text-decoration: none;
 }
 </style>
