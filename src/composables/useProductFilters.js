@@ -50,6 +50,17 @@ export function useProductFilters(products) {
     return result
   })
 
+  const hasActiveFilters = computed(() => {
+    return searchQuery.value !== '' || selectedCategory.value !== '' || sortBy.value !== ''
+  })
+
+  function clearFilters() {
+    searchInput.value = ''
+    searchQuery.value = ''
+    selectedCategory.value = ''
+    sortBy.value = ''
+  }
+
   return {
     searchInput,
     searchQuery,
@@ -58,5 +69,7 @@ export function useProductFilters(products) {
     selectedCategory,
     categories,
     sortBy,
+    hasActiveFilters,
+    clearFilters,
   }
 }

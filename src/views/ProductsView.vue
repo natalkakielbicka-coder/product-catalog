@@ -8,8 +8,17 @@ import ProductCategories from '@/components/ProductCategories.vue'
 import ProductSort from '@/components/ProductSort.vue'
 
 const { products, loading, error, fetchProducts } = useProducts()
-const { searchInput, selectedCategory, categories, sortBy, filteredProducts, applySearch } =
-  useProductFilters(products)
+
+const {
+  searchInput,
+  selectedCategory,
+  categories,
+  sortBy,
+  filteredProducts,
+  hasActiveFilters,
+  applySearch,
+  clearFilters,
+} = useProductFilters(products)
 
 onMounted(() => {
   fetchProducts()
@@ -35,10 +44,22 @@ onMounted(() => {
           {{ filteredProducts.length === 1 ? 'product' : 'products' }}
         </p>
 
-        <ProductSort v-model="sortBy" />
+        <div class="products-toolbar__actions">
+          <button v-if="hasActiveFilters" class="clear-filters" type="button" @click="clearFilters">
+            Clear filters
+          </button>
+
+          <ProductSort v-model="sortBy" />
+        </div>
       </div>
 
-      <ProductGrid :products="filteredProducts" />
+      <div v-if="filteredProducts.length === 0" class="empty-state">
+        <p>No products found.</p>
+
+        <button v-if="hasActiveFilters" type="button" @click="clearFilters">Clear filters</button>
+      </div>
+
+      <ProductGrid v-else :products="filteredProducts" />
     </template>
   </main>
 </template>
@@ -70,6 +91,52 @@ h1 {
   margin: 0;
   color: var(--color-muted);
   font-size: 14px;
+}
+
+.products-toolbar__actions {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.clear-filters {
+  padding: 10px 14px;
+  border: 0;
+  color: var(--color-accent);
+  background: transparent;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.clear-filters:hover {
+  text-decoration: underline;
+}
+
+.empty-state {
+  padding: 64px 24px;
+  border: 1px dashed var(--color-border);
+  border-radius: var(--radius);
+  text-align: center;
+  background: var(--color-surface);
+}
+
+.empty-state p {
+  margin: 0 0 16px;
+  font-size: 18px;
+}
+
+.empty-state button {
+  padding: 12px 18px;
+  border: 0;
+  border-radius: 10px;
+  color: #fff;
+  background: var(--color-accent);
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.empty-state button:hover {
+  background: var(--color-accent-hover);
 }
 
 @media (max-width: 767px) {
