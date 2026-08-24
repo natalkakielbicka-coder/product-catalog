@@ -25,6 +25,8 @@ const {
 } = useProductFilters(products)
 
 watch([searchQuery, selectedCategory, sortBy], () => {
+  currentPage.value = 1
+
   const query = {}
 
   if (searchQuery.value) {
