@@ -2,7 +2,11 @@
 import { onMounted } from 'vue'
 import ProductGrid from '@/components/ProductGrid.vue'
 import { useProducts } from '@/composables/useProducts'
+import ProductSearch from '@/components/ProductSearch.vue'
+import { useProductFilters } from '@/composables/useProductFilters'
+
 const { products, loading, error, fetchProducts } = useProducts()
+const { searchInput, filteredProducts, applySearch } = useProductFilters(products)
 
 onMounted(() => {
   fetchProducts()
@@ -13,11 +17,13 @@ onMounted(() => {
   <main>
     <h1>Products</h1>
 
+    <ProductSearch v-model="searchInput" @search="applySearch" />
+
     <p v-if="loading">Loading products...</p>
 
     <p v-else-if="error">Something went wrong.</p>
 
-    <ProductGrid v-else :products="products" />
+    <ProductGrid v-else :products="filteredProducts" />
   </main>
 </template>
 
