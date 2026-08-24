@@ -113,6 +113,7 @@ function decreaseQuantity() {
     :visible="lightboxVisible"
     :imgs="product?.images || []"
     :index="lightboxIndex"
+    loop
     @hide="closeLightbox"
   />
 </template>
