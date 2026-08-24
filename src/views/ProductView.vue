@@ -12,6 +12,7 @@ const { product, loading, error, fetchProduct } = useProducts()
 const { addToCart } = useCart()
 
 const selectedImage = ref('')
+const quantity = ref(1)
 
 onMounted(async () => {
   await fetchProduct(route.params.id)
@@ -37,6 +38,16 @@ function openLightbox() {
 
 function closeLightbox() {
   lightboxVisible.value = false
+}
+
+function increaseQuantity() {
+  quantity.value++
+}
+
+function decreaseQuantity() {
+  if (quantity.value > 1) {
+    quantity.value--
+  }
 }
 </script>
 
@@ -79,7 +90,21 @@ function closeLightbox() {
 
         <p class="product__price">{{ formatCurrency(product.price) }}</p>
 
-        <button class="product__button" @click="addToCart(product)">Add to cart</button>
+        <div class="product__actions">
+          <div class="product__quantity">
+            <button type="button" aria-label="Decrease quantity" @click="decreaseQuantity">
+              −
+            </button>
+
+            <span>{{ quantity }}</span>
+
+            <button type="button" aria-label="Increase quantity" @click="increaseQuantity">
+              +
+            </button>
+          </div>
+
+          <button class="product__button" @click="addToCart(product, quantity)">Add to cart</button>
+        </div>
       </div>
     </div>
   </main>
@@ -209,10 +234,45 @@ main {
   font-weight: 700;
 }
 
-.product__button {
-  width: 100%;
+.product__actions {
+  display: grid;
+  grid-template-columns: auto 1fr;
+  gap: 12px;
   margin-top: 30px;
-  padding: 17px 24px;
+}
+
+.product__quantity {
+  display: flex;
+  align-items: center;
+  overflow: hidden;
+  border: 1px solid var(--color-border);
+  border-radius: 12px;
+  background: var(--color-surface);
+}
+
+.product__quantity button {
+  width: 44px;
+  height: 52px;
+  border: 0;
+  background: transparent;
+  font-size: 18px;
+  cursor: pointer;
+  transition: background-color 0.2s ease;
+}
+
+.product__quantity button:hover {
+  background: var(--color-accent-light);
+}
+
+.product__quantity span {
+  min-width: 38px;
+  text-align: center;
+  font-size: 15px;
+  font-weight: 600;
+}
+
+.product__button {
+  padding: 16px 24px;
   border: 0;
   border-radius: 12px;
   color: #fff;
@@ -247,6 +307,16 @@ main {
   .product__thumbnail {
     flex: 0 0 72px;
     width: 72px;
+  }
+}
+
+@media (max-width: 480px) {
+  .product__actions {
+    grid-template-columns: 1fr;
+  }
+
+  .product__quantity {
+    justify-content: space-between;
   }
 }
 </style>
