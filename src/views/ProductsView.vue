@@ -6,6 +6,8 @@ import ProductSearch from '@/components/ProductSearch.vue'
 import { useProductFilters } from '@/composables/useProductFilters'
 import ProductCategories from '@/components/ProductCategories.vue'
 import ProductSort from '@/components/ProductSort.vue'
+import ProductPagination from '@/components/ProductPagination.vue'
+import { usePagination } from '@/composables/usePagination'
 
 const { products, loading, error, fetchProducts } = useProducts()
 
@@ -19,6 +21,8 @@ const {
   applySearch,
   clearFilters,
 } = useProductFilters(products)
+
+const { currentPage, totalPages, paginatedItems, goToPage } = usePagination(filteredProducts, 12)
 
 onMounted(() => {
   fetchProducts()
@@ -59,7 +63,15 @@ onMounted(() => {
         <button v-if="hasActiveFilters" type="button" @click="clearFilters">Clear filters</button>
       </div>
 
-      <ProductGrid v-else :products="filteredProducts" />
+      <template v-else>
+        <ProductGrid :products="paginatedItems" />
+
+        <ProductPagination
+          :current-page="currentPage"
+          :total-pages="totalPages"
+          @change-page="goToPage"
+        />
+      </template>
     </template>
   </main>
 </template>
