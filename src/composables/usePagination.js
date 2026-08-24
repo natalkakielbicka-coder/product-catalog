@@ -15,9 +15,12 @@ export function usePagination(items, itemsPerPage = 12) {
   })
 
   function goToPage(page) {
-    if (page < 1 || page > totalPages.value) return
+    if (totalPages.value === 0) {
+      currentPage.value = 1
+      return
+    }
 
-    currentPage.value = page
+    currentPage.value = Math.min(Math.max(page, 1), totalPages.value)
   }
 
   watch(items, () => {

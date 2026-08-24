@@ -82,6 +82,17 @@ function handlePageChange(page) {
     behavior: 'smooth',
   })
 }
+
+watch(
+  () => route.query.page,
+  (page) => {
+    const pageNumber = Number(page) || 1
+
+    if (pageNumber !== currentPage.value) {
+      goToPage(pageNumber)
+    }
+  },
+)
 </script>
 
 <template>
