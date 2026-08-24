@@ -4,9 +4,11 @@ import ProductGrid from '@/components/ProductGrid.vue'
 import { useProducts } from '@/composables/useProducts'
 import ProductSearch from '@/components/ProductSearch.vue'
 import { useProductFilters } from '@/composables/useProductFilters'
+import ProductCategories from '@/components/ProductCategories.vue'
 
 const { products, loading, error, fetchProducts } = useProducts()
-const { searchInput, filteredProducts, applySearch } = useProductFilters(products)
+const { searchInput, selectedCategory, categories, filteredProducts, applySearch } =
+  useProductFilters(products)
 
 onMounted(() => {
   fetchProducts()
@@ -18,6 +20,8 @@ onMounted(() => {
     <h1>Products</h1>
 
     <ProductSearch v-model="searchInput" @search="applySearch" />
+
+    <ProductCategories v-model="selectedCategory" :categories="categories" />
 
     <p v-if="loading">Loading products...</p>
 
