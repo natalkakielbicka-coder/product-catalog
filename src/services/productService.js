@@ -1,12 +1,19 @@
 const API_URL = 'https://dummyjson.com/products'
 
+function formatCategory(category) {
+  return category
+    .split('-')
+    .map((word) => word.charAt(0).toUpperCase() + word.slice(1))
+    .join(' ')
+}
+
 function normalizeProduct(product) {
   return {
     id: product.id,
     title: product.title,
     description: product.description,
     price: product.price,
-    category: product.category,
+    category: formatCategory(product.category),
     categoryId: null,
     categorySlug: product.category,
     thumbnail: product.thumbnail,
