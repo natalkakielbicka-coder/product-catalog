@@ -27,6 +27,15 @@ const { currentPage, totalPages, paginatedItems, goToPage } = usePagination(filt
 onMounted(() => {
   fetchProducts()
 })
+
+function handlePageChange(page) {
+  goToPage(page)
+
+  window.scrollTo({
+    top: 0,
+    behavior: 'smooth',
+  })
+}
 </script>
 
 <template>
@@ -69,7 +78,7 @@ onMounted(() => {
         <ProductPagination
           :current-page="currentPage"
           :total-pages="totalPages"
-          @change-page="goToPage"
+          @change-page="handlePageChange"
         />
       </template>
     </template>
