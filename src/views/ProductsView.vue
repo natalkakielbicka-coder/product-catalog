@@ -44,7 +44,10 @@ watch([searchQuery, selectedCategory, sortBy], () => {
   router.replace({ query })
 })
 
-const { currentPage, totalPages, paginatedItems, goToPage } = usePagination(filteredProducts, 12)
+const { currentPage, totalPages, paginatedItems, goToPage, firstItem, lastItem } = usePagination(
+  filteredProducts,
+  12,
+)
 
 const route = useRoute()
 const router = useRouter()
@@ -96,6 +99,7 @@ function handlePageChange(page) {
     <template v-else>
       <div class="products-toolbar">
         <p class="products-count">
+          Showing {{ firstItem }}–{{ lastItem }} of
           {{ filteredProducts.length }}
           {{ filteredProducts.length === 1 ? 'product' : 'products' }}
         </p>
