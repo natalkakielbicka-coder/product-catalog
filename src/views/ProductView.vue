@@ -18,7 +18,7 @@ onMounted(async () => {
   await fetchProduct(route.params.id)
 
   if (product.value) {
-    selectedImage.value = product.value.thumbnail
+    selectedImage.value = product.value.images[0] || product.value.thumbnail
   }
 })
 
@@ -58,7 +58,10 @@ function decreaseQuantity() {
     <p v-else-if="error">Something went wrong.</p>
 
     <div v-else-if="product" class="product">
-      <div class="product__gallery">
+      <div
+        class="product__gallery"
+        :class="{ 'product__gallery--single': product.images.length <= 1 }"
+      >
         <div v-if="product.images.length > 1" class="product__thumbnails">
           <button
             v-for="image in product.images"
@@ -73,7 +76,12 @@ function decreaseQuantity() {
         </div>
 
         <button class="product__image" type="button" @click="openLightbox">
-          <img :src="selectedImage || product.thumbnail" :alt="product.title" />
+          <img
+            :src="selectedImage || product.images[0] || product.thumbnail"
+            :alt="product.title"
+          />
+
+          <span class="product__zoom">View image</span>
         </button>
       </div>
 
@@ -285,6 +293,42 @@ main {
     background-color 0.2s ease;
 }
 
+.product__zoom {
+  position: absolute;
+  right: 16px;
+  bottom: 16px;
+
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+
+  padding: 9px 14px;
+
+  border: 1px solid rgba(255, 255, 255, 0.7);
+  border-radius: 999px;
+
+  color: var(--color-text);
+  background: rgba(255, 255, 255, 0.88);
+  backdrop-filter: blur(8px);
+
+  font-size: 12px;
+  font-weight: 600;
+  letter-spacing: 0.02em;
+
+  pointer-events: none;
+
+  transition:
+    color 0.2s ease,
+    background-color 0.2s ease,
+    transform 0.2s ease;
+}
+
+.product__image:hover .product__zoom {
+  color: #fff;
+  background: var(--color-accent);
+  transform: translateY(-2px);
+}
+
 .product__button:hover {
   transform: translateY(-2px);
   background: var(--color-accent-hover);
@@ -309,6 +353,10 @@ main {
     flex: 0 0 72px;
     width: 72px;
   }
+}
+
+.product__gallery--single {
+  grid-template-columns: 1fr;
 }
 
 @media (max-width: 480px) {
