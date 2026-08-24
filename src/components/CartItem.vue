@@ -1,6 +1,7 @@
 <script setup>
 import { useCart } from '@/composables/useCart'
 import { formatCurrency } from '@/utils/currency'
+import { RouterLink } from 'vue-router'
 
 const { increaseQuantity, decreaseQuantity, removeFromCart } = useCart()
 
@@ -14,14 +15,16 @@ defineProps({
 
 <template>
   <article class="cart-item">
-    <img :src="item.thumbnail" :alt="item.title" />
+    <RouterLink class="cart-item__image-link" :to="`/product/${item.id}`">
+      <img :src="item.thumbnail" :alt="item.title" />
+    </RouterLink>
 
     <div>
-      <h2>{{ item.title }}</h2>
+      <RouterLink class="cart-item__title" :to="`/product/${item.id}`">
+        <h2>{{ item.title }}</h2>
+      </RouterLink>
 
       <p>{{ formatCurrency(item.price) }}</p>
-
-      <p>Quantity: {{ item.quantity }}</p>
 
       <div class="cart-item__quantity">
         <button @click="decreaseQuantity(item.id)">-</button>
@@ -96,6 +99,23 @@ defineProps({
   background: transparent;
   cursor: pointer;
   font-size: 13px;
+}
+
+.cart-item__image-link {
+  display: block;
+}
+
+.cart-item__title {
+  color: inherit;
+  text-decoration: none;
+}
+
+.cart-item__title:hover {
+  color: var(--color-accent);
+}
+
+.cart-item__title h2 {
+  transition: color 0.2s ease;
 }
 
 @media (max-width: 640px) {
