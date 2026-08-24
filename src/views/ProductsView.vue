@@ -1,5 +1,5 @@
 <script setup>
-import { onMounted } from 'vue'
+import { onMounted, watch } from 'vue'
 import ProductGrid from '@/components/ProductGrid.vue'
 import { useProducts } from '@/composables/useProducts'
 import ProductSearch from '@/components/ProductSearch.vue'
@@ -8,11 +8,13 @@ import ProductCategories from '@/components/ProductCategories.vue'
 import ProductSort from '@/components/ProductSort.vue'
 import ProductPagination from '@/components/ProductPagination.vue'
 import { usePagination } from '@/composables/usePagination'
+import { useRoute, useRouter } from 'vue-router'
 
 const { products, loading, error, fetchProducts } = useProducts()
 
 const {
   searchInput,
+  searchQuery,
   selectedCategory,
   categories,
   sortBy,
@@ -22,14 +24,53 @@ const {
   clearFilters,
 } = useProductFilters(products)
 
+watch([searchQuery, selectedCategory, sortBy], () => {
+  const query = {}
+
+  if (searchQuery.value) {
+    query.search = searchQuery.value
+  }
+
+  if (selectedCategory.value) {
+    query.category = selectedCategory.value
+  }
+
+  if (sortBy.value) {
+    query.sort = sortBy.value
+  }
+
+  router.replace({ query })
+})
+
 const { currentPage, totalPages, paginatedItems, goToPage } = usePagination(filteredProducts, 12)
 
-onMounted(() => {
-  fetchProducts()
+const route = useRoute()
+const router = useRouter()
+
+onMounted(async () => {
+  await fetchProducts()
+
+  searchInput.value = route.query.search ?? ''
+  searchQuery.value = route.query.search ?? ''
+  selectedCategory.value = route.query.category ?? ''
+  sortBy.value = route.query.sort ?? ''
+
+  const page = Number(route.query.page) || 1
+  goToPage(page)
 })
 
 function handlePageChange(page) {
   goToPage(page)
+
+  const query = { ...route.query }
+
+  if (page === 1) {
+    delete query.page
+  } else {
+    query.page = page
+  }
+
+  router.push({ query })
 
   window.scrollTo({
     top: 0,
