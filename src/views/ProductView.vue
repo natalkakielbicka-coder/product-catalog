@@ -286,7 +286,9 @@ const relatedProducts = computed(() => {
         </div>
 
         <div class="product-tabs__content">
-          <component :is="activeTabComponent" v-bind="activeTabProps" />
+          <KeepAlive>
+            <component :is="activeTabComponent" v-bind="activeTabProps" />
+          </KeepAlive>
         </div>
       </section>
 

@@ -1,9 +1,21 @@
 <script setup>
-defineProps({
+import { computed, ref } from 'vue'
+
+const props = defineProps({
   reviews: {
     type: Array,
     required: true,
   },
+})
+
+const showAll = ref(false)
+
+const visibleReviews = computed(() => {
+  if (showAll.value) {
+    return props.reviews
+  }
+
+  return props.reviews.slice(0, 2)
 })
 
 function formatDate(date) {
@@ -30,7 +42,7 @@ function formatDate(date) {
 
     <div v-else class="reviews__list">
       <article
-        v-for="review in reviews"
+        v-for="review in visibleReviews"
         :key="`${review.reviewerEmail}-${review.date}`"
         class="review"
       >
@@ -55,6 +67,15 @@ function formatDate(date) {
         </p>
       </article>
     </div>
+
+    <button
+      v-if="reviews.length > 2"
+      class="reviews__toggle"
+      type="button"
+      @click="showAll = !showAll"
+    >
+      {{ showAll ? 'Show less' : 'Show all reviews' }}
+    </button>
   </section>
 </template>
 
@@ -128,5 +149,26 @@ function formatDate(date) {
 
 .reviews__empty {
   color: var(--color-muted);
+}
+
+.reviews__toggle {
+  display: inline-flex;
+  margin-top: 20px;
+  padding: 11px 16px;
+
+  border: 1px solid var(--color-border);
+  border-radius: 10px;
+
+  color: var(--color-accent);
+  background: var(--color-surface);
+
+  font-size: 13px;
+  font-weight: 700;
+
+  cursor: pointer;
+}
+
+.reviews__toggle:hover {
+  border-color: var(--color-accent);
 }
 </style>
