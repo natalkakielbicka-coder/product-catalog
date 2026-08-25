@@ -1,11 +1,17 @@
 <script setup>
 import { ref } from 'vue'
 import { useCart } from '@/composables/useCart'
+import { useDocumentTitle } from '@/composables/useDocumentTitle'
 import CartItem from '@/components/CartItem.vue'
 import CartSummary from '@/components/CartSummary.vue'
 import BaseModal from '@/components/BaseModal.vue'
 
 const { cartItems, cartCount, cartTotal, clearCart } = useCart()
+
+const pageTitle = ref('Cart | Product Catalog')
+
+useDocumentTitle(pageTitle)
+
 const clearCartModalOpen = ref(false)
 
 function confirmClearCart() {

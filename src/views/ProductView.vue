@@ -7,6 +7,7 @@ import ProductDescription from '@/components/ProductDescription.vue'
 import ProductShipping from '@/components/ProductShipping.vue'
 import { useProducts } from '@/composables/useProducts'
 import { useCart } from '@/composables/useCart'
+import { useDocumentTitle } from '@/composables/useDocumentTitle'
 import { formatCurrency } from '@/utils/currency'
 import VueEasyLightbox from 'vue-easy-lightbox'
 
@@ -16,6 +17,14 @@ const relatedSection = ref(null)
 const relatedVisible = ref(false)
 
 const { product, loading, error, fetchProduct } = useProducts()
+const pageTitle = computed(() => {
+  if (!product.value) {
+    return 'Product | Product Catalog'
+  }
+
+  return `${product.value.title} | Product Catalog`
+})
+useDocumentTitle(pageTitle)
 const { products: relatedSource, fetchProducts: fetchRelatedProducts } = useProducts()
 const { addToCart } = useCart()
 

@@ -1,10 +1,15 @@
 <script setup>
 import { reactive, ref } from 'vue'
 import { useCart } from '@/composables/useCart'
+import { useDocumentTitle } from '@/composables/useDocumentTitle'
 import { formatCurrency } from '@/utils/currency'
 import { vFocus } from '@/directives/vFocus'
 
 const orderPlaced = ref(false)
+
+const pageTitle = ref('Checkout | Product Catalog')
+
+useDocumentTitle(pageTitle)
 
 const form = reactive({
   name: '',

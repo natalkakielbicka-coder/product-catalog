@@ -8,9 +8,14 @@ import ProductCategories from '@/components/ProductCategories.vue'
 import ProductSort from '@/components/ProductSort.vue'
 import ProductPagination from '@/components/ProductPagination.vue'
 import { usePagination } from '@/composables/usePagination'
+import { useDocumentTitle } from '@/composables/useDocumentTitle'
 import { useRoute, useRouter } from 'vue-router'
 
 const { products, loading, error, fetchProducts } = useProducts()
+
+const pageTitle = ref('Products | Product Catalog')
+
+useDocumentTitle(pageTitle)
 
 const {
   searchInput,
