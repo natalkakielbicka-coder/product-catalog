@@ -1,5 +1,5 @@
 <script setup>
-import { onMounted, ref } from 'vue'
+import { computed, onMounted, ref } from 'vue'
 import { RouterLink, useRoute } from 'vue-router'
 import { useProducts } from '@/composables/useProducts'
 import { useCart } from '@/composables/useCart'
@@ -51,6 +51,12 @@ function decreaseQuantity() {
     quantity.value--
   }
 }
+
+const originalPrice = computed(() => {
+  if (!product.value) return 0
+
+  return product.value.price / (1 - product.value.discountPercentage / 100)
+})
 </script>
 
 <template>
@@ -128,7 +134,19 @@ function decreaseQuantity() {
           {{ product.description }}
         </p>
 
-        <p class="product__price">{{ formatCurrency(product.price) }}</p>
+        <div class="product__prices">
+          <span class="product__price">
+            {{ formatCurrency(product.price) }}
+          </span>
+
+          <span v-if="product.discountPercentage > 0" class="product__old-price">
+            {{ formatCurrency(originalPrice) }}
+          </span>
+
+          <span v-if="product.discountPercentage > 0" class="product__discount">
+            -{{ product.discountPercentage.toFixed(0) }}%
+          </span>
+        </div>
 
         <div class="product__actions">
           <div v-if="product.stock > 0" class="product__quantity">
@@ -437,6 +455,34 @@ main {
   opacity: 0.5;
   cursor: not-allowed;
   transform: none;
+}
+
+.product__prices {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 10px;
+}
+
+.product__price {
+  color: var(--color-text);
+  font-size: 28px;
+  font-weight: 700;
+}
+
+.product__old-price {
+  color: var(--color-muted);
+  font-size: 17px;
+  text-decoration: line-through;
+}
+
+.product__discount {
+  padding: 5px 8px;
+  border-radius: 999px;
+  color: var(--color-accent);
+  background: var(--color-accent-light);
+  font-size: 12px;
+  font-weight: 700;
 }
 
 @media (max-width: 767px) {

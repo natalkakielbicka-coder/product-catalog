@@ -13,6 +13,7 @@ function normalizeProduct(product) {
     title: product.title,
     description: product.description,
     price: product.price,
+    discountPercentage: product.discountPercentage ?? 0,
     category: formatCategory(product.category),
     categoryId: null,
     categorySlug: product.category,

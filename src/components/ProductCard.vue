@@ -1,10 +1,10 @@
 <script setup>
-import { ref } from 'vue'
+import { computed, ref } from 'vue'
 import { RouterLink, useRoute } from 'vue-router'
 import { formatCurrency } from '@/utils/currency'
 import { useCart } from '@/composables/useCart'
 
-defineProps({
+const props = defineProps({
   product: {
     type: Object,
     required: true,
@@ -26,6 +26,14 @@ function decreaseQuantity() {
     quantity.value--
   }
 }
+
+const originalPrice = computed(() => {
+  if (!props.product.discountPercentage) {
+    return props.product.price
+  }
+
+  return props.product.price / (1 - props.product.discountPercentage / 100)
+})
 </script>
 
 <template>
@@ -45,9 +53,19 @@ function decreaseQuantity() {
 
       <h2>{{ product.title }}</h2>
 
-      <p class="product-card__price">
-        {{ formatCurrency(product.price) }}
-      </p>
+      <div class="product-card__prices">
+        <span class="product-card__price">
+          {{ formatCurrency(product.price) }}
+        </span>
+
+        <span v-if="product.discountPercentage > 0" class="product-card__old-price">
+          {{ formatCurrency(originalPrice) }}
+        </span>
+
+        <span v-if="product.discountPercentage > 0" class="product-card__discount">
+          -{{ product.discountPercentage.toFixed(0) }}%
+        </span>
+      </div>
     </RouterLink>
 
     <div class="product-card__actions">
@@ -111,17 +129,33 @@ function decreaseQuantity() {
   letter-spacing: -0.02em;
 }
 
-.product-card__price {
-  margin: 0 8px;
-  color: var(--color-accent);
-  font-size: 16px;
-  font-weight: 700;
+.product-card__prices {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 7px;
+  margin: auto 8px 0;
+  padding-top: 12px;
 }
 
 .product-card__price {
-  margin: 0 8px;
+  color: var(--color-text);
+  font-size: 18px;
+  font-weight: 700;
+}
+
+.product-card__old-price {
+  color: var(--color-muted);
+  font-size: 13px;
+  text-decoration: line-through;
+}
+
+.product-card__discount {
+  padding: 4px 7px;
+  border-radius: 999px;
   color: var(--color-accent);
-  font-size: 16px;
+  background: var(--color-accent-light);
+  font-size: 11px;
   font-weight: 700;
 }
 
