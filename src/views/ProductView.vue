@@ -2,6 +2,7 @@
 import { computed, onMounted, ref } from 'vue'
 import { RouterLink, useRoute } from 'vue-router'
 import ProductReviews from '@/components/ProductReviews.vue'
+import ProductGrid from '@/components/ProductGrid.vue'
 import { useProducts } from '@/composables/useProducts'
 import { useCart } from '@/composables/useCart'
 import { formatCurrency } from '@/utils/currency'
@@ -10,6 +11,7 @@ import VueEasyLightbox from 'vue-easy-lightbox'
 const route = useRoute()
 
 const { product, loading, error, fetchProduct } = useProducts()
+const { products: relatedSource, fetchProducts: fetchRelatedProducts } = useProducts()
 const { addToCart } = useCart()
 
 const selectedImage = ref('')
@@ -17,6 +19,7 @@ const quantity = ref(1)
 
 onMounted(async () => {
   await fetchProduct(route.params.id)
+  await fetchRelatedProducts()
 
   if (product.value) {
     selectedImage.value = product.value.images[0] || product.value.thumbnail
@@ -57,6 +60,16 @@ const originalPrice = computed(() => {
   if (!product.value) return 0
 
   return product.value.price / (1 - product.value.discountPercentage / 100)
+})
+
+const relatedProducts = computed(() => {
+  if (!product.value) return []
+
+  return relatedSource.value
+    .filter((item) => {
+      return item.category === product.value.category && item.id !== product.value.id
+    })
+    .slice(0, 4)
 })
 </script>
 
@@ -208,6 +221,25 @@ const originalPrice = computed(() => {
       </div>
 
       <ProductReviews :reviews="product.reviews" />
+
+      <section v-if="relatedProducts.length" class="related-products">
+        <div class="related-products__header">
+          <h2>You may also like</h2>
+
+          <RouterLink
+            :to="{
+              path: '/',
+              query: {
+                category: product.category,
+              },
+            }"
+          >
+            View category
+          </RouterLink>
+        </div>
+
+        <ProductGrid :products="relatedProducts" />
+      </section>
     </div>
   </main>
 
@@ -539,6 +571,32 @@ main {
 
 .breadcrumbs__current {
   color: var(--color-text);
+}
+
+.related-products {
+  margin-top: 80px;
+  padding-top: 48px;
+  border-top: 1px solid var(--color-border);
+}
+
+.related-products__header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 20px;
+  margin-bottom: 28px;
+}
+
+.related-products__header h2 {
+  margin: 0;
+  font-size: 28px;
+}
+
+.related-products__header a {
+  color: var(--color-accent);
+  font-size: 14px;
+  font-weight: 600;
+  text-decoration: none;
 }
 
 @media (max-width: 767px) {
