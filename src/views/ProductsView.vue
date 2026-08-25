@@ -1,5 +1,5 @@
 <script setup>
-import { onMounted, watch } from 'vue'
+import { onMounted, watch, ref } from 'vue'
 import ProductGrid from '@/components/ProductGrid.vue'
 import { useProducts } from '@/composables/useProducts'
 import ProductSearch from '@/components/ProductSearch.vue'
@@ -24,6 +24,8 @@ const {
   clearFilters,
 } = useProductFilters(products)
 
+const itemsPerPage = ref(12)
+
 watch([searchQuery, selectedCategory, sortBy], () => {
   currentPage.value = 1
 
@@ -46,7 +48,7 @@ watch([searchQuery, selectedCategory, sortBy], () => {
 
 const { currentPage, totalPages, paginatedItems, goToPage, firstItem, lastItem } = usePagination(
   filteredProducts,
-  12,
+  itemsPerPage,
 )
 
 const route = useRoute()
@@ -93,6 +95,16 @@ watch(
     }
   },
 )
+
+watch(itemsPerPage, () => {
+  currentPage.value = 1
+
+  const query = { ...route.query }
+
+  delete query.page
+
+  router.replace({ query })
+})
 </script>
 
 <template>
@@ -121,6 +133,32 @@ watch(
           </button>
 
           <ProductSort v-model="sortBy" />
+
+          <div class="per-page">
+            <button
+              type="button"
+              :class="{ active: itemsPerPage === 12 }"
+              @click="itemsPerPage = 12"
+            >
+              12
+            </button>
+
+            <button
+              type="button"
+              :class="{ active: itemsPerPage === 24 }"
+              @click="itemsPerPage = 24"
+            >
+              24
+            </button>
+
+            <button
+              type="button"
+              :class="{ active: itemsPerPage === 48 }"
+              @click="itemsPerPage = 48"
+            >
+              48
+            </button>
+          </div>
         </div>
       </div>
 
@@ -216,6 +254,32 @@ h1 {
 
 .empty-state button:hover {
   background: var(--color-accent-hover);
+}
+
+.per-page {
+  display: flex;
+  gap: 6px;
+}
+
+.per-page button {
+  min-width: 40px;
+  height: 40px;
+  border: 1px solid var(--color-border);
+  border-radius: 10px;
+  color: var(--color-muted);
+  background: var(--color-surface);
+  cursor: pointer;
+}
+
+.per-page button:hover {
+  color: var(--color-accent);
+  border-color: var(--color-accent);
+}
+
+.per-page button.active {
+  color: #fff;
+  border-color: var(--color-accent);
+  background: var(--color-accent);
 }
 
 @media (max-width: 767px) {
