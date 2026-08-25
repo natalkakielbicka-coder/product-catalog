@@ -2,6 +2,7 @@
 import { reactive, ref } from 'vue'
 import { useCart } from '@/composables/useCart'
 import { formatCurrency } from '@/utils/currency'
+import { vFocus } from '@/directives/vFocus'
 
 const orderPlaced = ref(false)
 
@@ -117,6 +118,7 @@ function submitForm() {
 
             <input
               v-model="form.name"
+              v-focus
               type="text"
               placeholder="Your name"
               :class="{ error: errors.name }"
