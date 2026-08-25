@@ -1,13 +1,33 @@
 <script setup>
+import { ref } from 'vue'
 import { useCart } from '@/composables/useCart'
 import CartItem from '@/components/CartItem.vue'
 import CartSummary from '@/components/CartSummary.vue'
-const { cartItems, cartCount, cartTotal } = useCart()
+import BaseModal from '@/components/BaseModal.vue'
+
+const { cartItems, cartCount, cartTotal, clearCart } = useCart()
+const clearCartModalOpen = ref(false)
+
+function confirmClearCart() {
+  clearCart()
+  clearCartModalOpen.value = false
+}
 </script>
 
 <template>
   <main>
-    <h1>Cart</h1>
+    <div class="cart-header">
+      <h1>Cart</h1>
+
+      <button
+        v-if="cartItems.length"
+        class="cart-clear"
+        type="button"
+        @click="clearCartModalOpen = true"
+      >
+        Clear cart
+      </button>
+    </div>
 
     <div v-if="cartItems.length === 0" class="cart-empty">
       <div class="cart-empty__icon">🛍</div>
@@ -24,6 +44,28 @@ const { cartItems, cartCount, cartTotal } = useCart()
 
       <CartSummary :total="cartTotal" />
     </div>
+
+    <BaseModal :open="clearCartModalOpen" @close="clearCartModalOpen = false">
+      <div class="clear-cart-modal">
+        <h2>Clear your cart?</h2>
+
+        <p>This will remove all products from your cart.</p>
+
+        <div class="clear-cart-modal__actions">
+          <button
+            class="clear-cart-modal__cancel"
+            type="button"
+            @click="clearCartModalOpen = false"
+          >
+            Cancel
+          </button>
+
+          <button class="clear-cart-modal__confirm" type="button" @click="confirmClearCart">
+            Clear cart
+          </button>
+        </div>
+      </div>
+    </BaseModal>
   </main>
 </template>
 
@@ -115,6 +157,72 @@ h1 {
 .cart-empty__button:hover {
   background: var(--color-accent-hover);
   transform: translateY(-2px);
+}
+
+.cart-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 20px;
+  margin-bottom: 32px;
+}
+
+.cart-header h1 {
+  margin: 0;
+}
+
+.cart-clear {
+  padding: 10px 14px;
+  border: 1px solid var(--color-border);
+  border-radius: 10px;
+
+  color: var(--color-muted);
+  background: var(--color-surface);
+
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.cart-clear:hover {
+  color: #a33d4a;
+  border-color: #a33d4a;
+}
+
+.clear-cart-modal h2 {
+  margin: 0 0 12px;
+  font-size: 24px;
+}
+
+.clear-cart-modal p {
+  margin: 0;
+  color: var(--color-muted);
+  line-height: 1.6;
+}
+
+.clear-cart-modal__actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 10px;
+  margin-top: 28px;
+}
+
+.clear-cart-modal__actions button {
+  padding: 11px 16px;
+  border-radius: 10px;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.clear-cart-modal__cancel {
+  border: 1px solid var(--color-border);
+  color: var(--color-text);
+  background: var(--color-surface);
+}
+
+.clear-cart-modal__confirm {
+  border: 0;
+  color: #fff;
+  background: #a33d4a;
 }
 
 @media (max-width: 767px) {
