@@ -3,6 +3,8 @@ import { computed, onMounted, ref } from 'vue'
 import { RouterLink, useRoute } from 'vue-router'
 import ProductReviews from '@/components/ProductReviews.vue'
 import ProductGrid from '@/components/ProductGrid.vue'
+import ProductDescription from '@/components/ProductDescription.vue'
+import ProductShipping from '@/components/ProductShipping.vue'
 import { useProducts } from '@/composables/useProducts'
 import { useCart } from '@/composables/useCart'
 import { formatCurrency } from '@/utils/currency'
@@ -24,6 +26,42 @@ onMounted(async () => {
   if (product.value) {
     selectedImage.value = product.value.images[0] || product.value.thumbnail
   }
+})
+
+const activeTab = ref('description')
+
+const tabComponents = {
+  description: ProductDescription,
+  reviews: ProductReviews,
+  shipping: ProductShipping,
+}
+
+const activeTabComponent = computed(() => {
+  return tabComponents[activeTab.value]
+})
+
+const activeTabProps = computed(() => {
+  if (!product.value) return {}
+
+  if (activeTab.value === 'description') {
+    return {
+      description: product.value.description,
+    }
+  }
+
+  if (activeTab.value === 'reviews') {
+    return {
+      reviews: product.value.reviews,
+    }
+  }
+
+  if (activeTab.value === 'shipping') {
+    return {
+      stock: product.value.stock,
+    }
+  }
+
+  return {}
 })
 
 function selectImage(image) {
@@ -220,7 +258,37 @@ const relatedProducts = computed(() => {
         </div>
       </div>
 
-      <ProductReviews :reviews="product.reviews" />
+      <section class="product-tabs">
+        <div class="product-tabs__nav">
+          <button
+            type="button"
+            :class="{ active: activeTab === 'description' }"
+            @click="activeTab = 'description'"
+          >
+            Description
+          </button>
+
+          <button
+            type="button"
+            :class="{ active: activeTab === 'reviews' }"
+            @click="activeTab = 'reviews'"
+          >
+            Reviews
+          </button>
+
+          <button
+            type="button"
+            :class="{ active: activeTab === 'shipping' }"
+            @click="activeTab = 'shipping'"
+          >
+            Shipping
+          </button>
+        </div>
+
+        <div class="product-tabs__content">
+          <component :is="activeTabComponent" v-bind="activeTabProps" />
+        </div>
+      </section>
 
       <section v-if="relatedProducts.length" class="related-products">
         <div class="related-products__header">
@@ -597,6 +665,59 @@ main {
   font-size: 14px;
   font-weight: 600;
   text-decoration: none;
+}
+
+.product-tabs {
+  margin-top: 80px;
+  padding-top: 32px;
+  border-top: 1px solid var(--color-border);
+}
+
+.product-tabs__nav {
+  display: flex;
+  gap: 8px;
+  margin-bottom: 32px;
+  border-bottom: 1px solid var(--color-border);
+}
+
+.product-tabs__nav button {
+  position: relative;
+  padding: 14px 18px;
+
+  border: 0;
+
+  color: var(--color-muted);
+  background: transparent;
+
+  font-size: 14px;
+  font-weight: 600;
+
+  cursor: pointer;
+}
+
+.product-tabs__nav button:hover {
+  color: var(--color-accent);
+}
+
+.product-tabs__nav button.active {
+  color: var(--color-accent);
+}
+
+.product-tabs__nav button.active::after {
+  content: '';
+
+  position: absolute;
+  right: 0;
+  bottom: -1px;
+  left: 0;
+
+  height: 2px;
+
+  background: var(--color-accent);
+}
+
+.product-tabs__content {
+  min-height: 120px;
 }
 
 @media (max-width: 767px) {

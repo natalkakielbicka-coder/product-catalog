@@ -59,12 +59,6 @@ function formatDate(date) {
 </template>
 
 <style scoped>
-.reviews {
-  margin-top: 80px;
-  padding-top: 48px;
-  border-top: 1px solid var(--color-border);
-}
-
 .reviews__header {
   display: flex;
   align-items: baseline;
