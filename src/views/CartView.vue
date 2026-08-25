@@ -40,7 +40,9 @@ function confirmClearCart() {
     </div>
 
     <div v-else>
-      <CartItem v-for="item in cartItems" :key="item.id" :item="item" />
+      <TransitionGroup name="cart-list" tag="div" class="cart-items">
+        <CartItem v-for="item in cartItems" :key="item.id" :item="item" />
+      </TransitionGroup>
 
       <CartSummary :total="cartTotal" />
     </div>
@@ -223,6 +225,31 @@ h1 {
   border: 0;
   color: #fff;
   background: #a33d4a;
+}
+
+.cart-items {
+  position: relative;
+}
+
+.cart-list-enter-active,
+.cart-list-leave-active {
+  transition:
+    opacity 0.3s ease,
+    transform 0.3s ease;
+}
+
+.cart-list-enter-from {
+  opacity: 0;
+  transform: translateX(24px);
+}
+
+.cart-list-leave-to {
+  opacity: 0;
+  transform: translateX(-24px);
+}
+
+.cart-list-move {
+  transition: transform 0.3s ease;
 }
 
 @media (max-width: 767px) {
