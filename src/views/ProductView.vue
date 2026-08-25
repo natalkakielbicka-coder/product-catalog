@@ -1,5 +1,5 @@
 <script setup>
-import { computed, onMounted, ref } from 'vue'
+import { computed, onMounted, ref, watch } from 'vue'
 import { RouterLink, useRoute } from 'vue-router'
 import ProductReviews from '@/components/ProductReviews.vue'
 import ProductGrid from '@/components/ProductGrid.vue'
@@ -11,6 +11,9 @@ import { formatCurrency } from '@/utils/currency'
 import VueEasyLightbox from 'vue-easy-lightbox'
 
 const route = useRoute()
+
+const relatedSection = ref(null)
+const relatedVisible = ref(false)
 
 const { product, loading, error, fetchProduct } = useProducts()
 const { products: relatedSource, fetchProducts: fetchRelatedProducts } = useProducts()
@@ -25,6 +28,20 @@ onMounted(async () => {
 
   if (product.value) {
     selectedImage.value = product.value.images[0] || product.value.thumbnail
+  }
+
+  const observer = new IntersectionObserver((entries) => {
+    const entry = entries[0]
+
+    if (entry.isIntersecting) {
+      relatedVisible.value = true
+
+      observer.disconnect()
+    }
+  })
+
+  if (relatedSection.value) {
+    observer.observe(relatedSection.value)
   }
 })
 
@@ -109,6 +126,24 @@ const relatedProducts = computed(() => {
     })
     .slice(0, 4)
 })
+
+watch(
+  () => route.params.id,
+  async (newId) => {
+    await fetchProduct(newId)
+
+    if (product.value) {
+      selectedImage.value = product.value.images[0] || product.value.thumbnail
+      quantity.value = 1
+      activeTab.value = 'description'
+    }
+
+    window.scrollTo({
+      top: 0,
+      behavior: 'smooth',
+    })
+  },
+)
 </script>
 
 <template>
@@ -292,23 +327,25 @@ const relatedProducts = computed(() => {
         </div>
       </section>
 
-      <section v-if="relatedProducts.length" class="related-products">
-        <div class="related-products__header">
-          <h2>You may also like</h2>
+      <section ref="relatedSection" class="related-products">
+        <template v-if="relatedVisible">
+          <div class="related-products__header">
+            <h2>You may also like</h2>
 
-          <RouterLink
-            :to="{
-              path: '/',
-              query: {
-                category: product.category,
-              },
-            }"
-          >
-            View category
-          </RouterLink>
-        </div>
+            <RouterLink
+              :to="{
+                path: '/',
+                query: {
+                  category: product.category,
+                },
+              }"
+            >
+              View category
+            </RouterLink>
+          </div>
 
-        <ProductGrid :products="relatedProducts" />
+          <ProductGrid :products="relatedProducts" />
+        </template>
       </section>
     </div>
   </main>
