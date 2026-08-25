@@ -1,16 +1,25 @@
 <script setup>
+import { ref } from 'vue'
 import { RouterLink } from 'vue-router'
 import { useCart } from '@/composables/useCart'
+import MiniCart from '@/components/MiniCart.vue'
 
 const { cartCount } = useCart()
+const miniCartOpen = ref(false)
 </script>
 
 <template>
   <header class="header">
     <RouterLink to="/" class="header__logo"> Product Catalog </RouterLink>
 
-    <RouterLink to="/cart" class="header__cart"> Cart ({{ cartCount }}) </RouterLink>
+    <button class="header-cart" type="button" @click="miniCartOpen = true">
+      Cart ({{ cartCount }})
+    </button>
   </header>
+
+  <Transition name="mini-cart">
+    <MiniCart v-if="miniCartOpen" @close="miniCartOpen = false" />
+  </Transition>
 </template>
 
 <style scoped>
@@ -32,22 +41,54 @@ const { cartCount } = useCart()
   text-decoration: none;
 }
 
-.header__cart {
-  padding: 11px 20px;
+.header-cart {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+
+  padding: 10px 16px;
+
   border: 0;
   border-radius: 999px;
+
   color: var(--color-accent);
   background: var(--color-accent-light);
+
   font-size: 14px;
-  font-weight: 600;
-  text-decoration: none;
+  font-weight: 700;
+
+  cursor: pointer;
+
   transition:
     color 0.2s ease,
-    background-color 0.2s ease;
+    background-color 0.2s ease,
+    transform 0.2s ease;
 }
 
-.header__cart:hover {
+.header-cart:hover {
   color: #fff;
   background: var(--color-accent);
+  transform: translateY(-1px);
+}
+
+.mini-cart-enter-active,
+.mini-cart-leave-active {
+  transition: opacity 0.25s ease;
+}
+
+.mini-cart-enter-active :deep(.mini-cart),
+.mini-cart-leave-active :deep(.mini-cart) {
+  transition: transform 0.3s ease;
+}
+
+.mini-cart-enter-from,
+.mini-cart-leave-to {
+  opacity: 0;
+}
+
+.mini-cart-enter-from :deep(.mini-cart),
+.mini-cart-leave-to :deep(.mini-cart) {
+  transform: translateX(100%);
 }
 </style>
