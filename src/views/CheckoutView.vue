@@ -1,5 +1,7 @@
 <script setup>
 import { reactive } from 'vue'
+import { useCart } from '@/composables/useCart'
+import { formatCurrency } from '@/utils/currency'
 
 const form = reactive({
   name: '',
@@ -16,6 +18,8 @@ const errors = reactive({
   city: '',
   postalCode: '',
 })
+
+const { cartItems, cartTotal } = useCart()
 
 function validateForm() {
   errors.name = ''
@@ -75,99 +79,136 @@ function submitForm() {
       <p class="checkout__intro">Enter your details to complete your order.</p>
     </div>
 
-    <form class="checkout-form" novalidate @submit.prevent="submitForm">
-      <div class="checkout-form__grid">
-        <label class="checkout-form__field checkout-form__field--full">
-          <span>Name</span>
+    <div class="checkout__layout">
+      <form class="checkout-form" novalidate @submit.prevent="submitForm">
+        <form class="checkout-form" novalidate @submit.prevent="submitForm">
+          <div class="checkout-form__grid">
+            <label class="checkout-form__field checkout-form__field--full">
+              <span>Name</span>
 
-          <input
-            v-model="form.name"
-            type="text"
-            placeholder="Your name"
-            :class="{ error: errors.name }"
-            @input="errors.name = ''"
-          />
+              <input
+                v-model="form.name"
+                type="text"
+                placeholder="Your name"
+                :class="{ error: errors.name }"
+                @input="errors.name = ''"
+              />
 
-          <small v-if="errors.name" class="form-error">
-            {{ errors.name }}
-          </small>
-        </label>
+              <small v-if="errors.name" class="form-error">
+                {{ errors.name }}
+              </small>
+            </label>
 
-        <label class="checkout-form__field checkout-form__field--full">
-          <span>Email</span>
+            <label class="checkout-form__field checkout-form__field--full">
+              <span>Email</span>
 
-          <input
-            v-model="form.email"
-            type="email"
-            placeholder="you@example.com"
-            :class="{ error: errors.email }"
-            @input="errors.email = ''"
-          />
+              <input
+                v-model="form.email"
+                type="email"
+                placeholder="you@example.com"
+                :class="{ error: errors.email }"
+                @input="errors.email = ''"
+              />
 
-          <small v-if="errors.email" class="form-error">
-            {{ errors.email }}
-          </small>
-        </label>
+              <small v-if="errors.email" class="form-error">
+                {{ errors.email }}
+              </small>
+            </label>
 
-        <label class="checkout-form__field checkout-form__field--full">
-          <span>Address</span>
+            <label class="checkout-form__field checkout-form__field--full">
+              <span>Address</span>
 
-          <input
-            v-model="form.address"
-            type="text"
-            placeholder="Street and number"
-            :class="{ error: errors.address }"
-            @input="errors.address = ''"
-          />
+              <input
+                v-model="form.address"
+                type="text"
+                placeholder="Street and number"
+                :class="{ error: errors.address }"
+                @input="errors.address = ''"
+              />
 
-          <small v-if="errors.address" class="form-error">
-            {{ errors.address }}
-          </small>
-        </label>
+              <small v-if="errors.address" class="form-error">
+                {{ errors.address }}
+              </small>
+            </label>
 
-        <label class="checkout-form__field">
-          <span>City</span>
+            <label class="checkout-form__field">
+              <span>City</span>
 
-          <input
-            v-model="form.city"
-            type="text"
-            placeholder="City"
-            :class="{ error: errors.city }"
-            @input="errors.city = ''"
-          />
+              <input
+                v-model="form.city"
+                type="text"
+                placeholder="City"
+                :class="{ error: errors.city }"
+                @input="errors.city = ''"
+              />
 
-          <small v-if="errors.city" class="form-error">
-            {{ errors.city }}
-          </small>
-        </label>
+              <small v-if="errors.city" class="form-error">
+                {{ errors.city }}
+              </small>
+            </label>
 
-        <label class="checkout-form__field">
-          <span>Postal code</span>
+            <label class="checkout-form__field">
+              <span>Postal code</span>
 
-          <input
-            v-model="form.postalCode"
-            type="text"
-            placeholder="00-000"
-            :class="{ error: errors.postalCode }"
-            @input="errors.postalCode = ''"
-          />
+              <input
+                v-model="form.postalCode"
+                type="text"
+                placeholder="00-000"
+                :class="{ error: errors.postalCode }"
+                @input="errors.postalCode = ''"
+              />
 
-          <small v-if="errors.postalCode" class="form-error">
-            {{ errors.postalCode }}
-          </small>
-        </label>
-      </div>
+              <small v-if="errors.postalCode" class="form-error">
+                {{ errors.postalCode }}
+              </small>
+            </label>
+          </div>
+        </form>
 
-      <button class="checkout-form__button" type="submit">Place order</button>
-    </form>
+        <button class="checkout-form__button" type="submit">Place order</button>
+      </form>
+
+      <aside class="order-summary">
+        <h2>Order summary</h2>
+
+        <div class="order-summary__items">
+          <div v-for="item in cartItems" :key="item.id" class="order-summary__item">
+            <div>
+              <strong>{{ item.title }}</strong>
+
+              <span> {{ item.quantity }} × {{ formatCurrency(item.price) }} </span>
+            </div>
+
+            <strong>
+              {{ formatCurrency(item.price * item.quantity) }}
+            </strong>
+          </div>
+        </div>
+
+        <div class="order-summary__total">
+          <span>Total</span>
+
+          <strong>
+            {{ formatCurrency(cartTotal) }}
+          </strong>
+        </div>
+      </aside>
+    </div>
   </main>
 </template>
 
 <style scoped>
 .checkout {
-  width: min(720px, calc(100% - 40px));
+  width: min(1100px, calc(100% - 40px));
   margin: 0 auto;
   padding: 72px 0 96px;
+}
+
+.checkout__layout {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) 360px;
+  gap: 32px;
+  align-items: start;
 }
 
 .checkout__header {
@@ -285,7 +326,55 @@ function submitForm() {
   transform: translateY(-1px);
 }
 
-@media (max-width: 600px) {
+.order-summary {
+  position: sticky;
+  top: 24px;
+  padding: 28px;
+  border: 1px solid var(--color-border);
+  border-radius: 20px;
+  background: var(--color-surface);
+}
+
+.order-summary h2 {
+  margin: 0 0 24px;
+  font-size: 20px;
+}
+
+.order-summary__items {
+  display: grid;
+}
+
+.order-summary__item {
+  display: flex;
+  justify-content: space-between;
+  gap: 20px;
+  padding: 16px 0;
+  border-bottom: 1px solid var(--color-border);
+}
+
+.order-summary__item > div {
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+}
+
+.order-summary__item strong {
+  font-size: 13px;
+}
+
+.order-summary__item span {
+  color: var(--color-muted);
+  font-size: 12px;
+}
+
+.order-summary__total {
+  display: flex;
+  justify-content: space-between;
+  padding-top: 22px;
+  font-size: 18px;
+}
+
+@media (max-width: 767px) {
   .checkout {
     padding: 48px 0 72px;
   }
@@ -300,6 +389,14 @@ function submitForm() {
 
   .checkout-form__field--full {
     grid-column: auto;
+  }
+
+  .checkout__layout {
+    grid-template-columns: 1fr;
+  }
+
+  .order-summary {
+    position: static;
   }
 }
 </style>
