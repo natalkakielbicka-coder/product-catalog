@@ -24,16 +24,17 @@ const quantity = ref(1)
 
 onMounted(async () => {
   await fetchProduct(route.params.id)
-  await fetchRelatedProducts()
 
   if (product.value) {
     selectedImage.value = product.value.images[0] || product.value.thumbnail
   }
 
-  const observer = new IntersectionObserver((entries) => {
+  const observer = new IntersectionObserver(async (entries) => {
     const entry = entries[0]
 
     if (entry.isIntersecting) {
+      await fetchRelatedProducts()
+
       relatedVisible.value = true
 
       observer.disconnect()
