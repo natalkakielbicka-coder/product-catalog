@@ -31,7 +31,9 @@ defineProps({
 
         <span>{{ item.quantity }}</span>
 
-        <button @click="increaseQuantity(item.id)">+</button>
+        <button @click="increaseQuantity(item.id)" :disabled="item.quantity >= item.stock">
+          +
+        </button>
       </div>
 
       <button class="cart-item__remove" @click="removeFromCart(item.id)">Remove</button>
@@ -85,6 +87,11 @@ defineProps({
   background: var(--color-surface);
   cursor: pointer;
   transition: border-color 0.2s;
+}
+
+.cart-item__quantity button:disabled {
+  opacity: 0.35;
+  cursor: not-allowed;
 }
 
 .cart-item__quantity button:hover {
