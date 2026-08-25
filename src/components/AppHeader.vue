@@ -1,11 +1,19 @@
 <script setup>
-import { ref } from 'vue'
+import { onBeforeUnmount, ref, watch } from 'vue'
 import { RouterLink } from 'vue-router'
 import { useCart } from '@/composables/useCart'
 import MiniCart from '@/components/MiniCart.vue'
 
 const { cartCount } = useCart()
 const miniCartOpen = ref(false)
+
+watch(miniCartOpen, (isOpen) => {
+  document.body.style.overflow = isOpen ? 'hidden' : ''
+})
+
+onBeforeUnmount(() => {
+  document.body.style.overflow = ''
+})
 </script>
 
 <template>
