@@ -1,5 +1,5 @@
 <script setup>
-import { onMounted, watch, ref } from 'vue'
+import { nextTick, onMounted, watch, ref } from 'vue'
 import ProductGrid from '@/components/ProductGrid.vue'
 import { useProducts } from '@/composables/useProducts'
 import ProductSearch from '@/components/ProductSearch.vue'
@@ -25,8 +25,11 @@ const {
 } = useProductFilters(products)
 
 const itemsPerPage = ref(12)
+const isInitializing = ref(true)
 
 watch([searchQuery, selectedCategory, sortBy], () => {
+  if (isInitializing.value) return
+
   currentPage.value = 1
 
   const query = {}
@@ -64,6 +67,10 @@ onMounted(async () => {
 
   const page = Number(route.query.page) || 1
   goToPage(page)
+
+  await nextTick()
+
+  isInitializing.value = false
 })
 
 function handlePageChange(page) {

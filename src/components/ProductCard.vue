@@ -1,6 +1,6 @@
 <script setup>
 import { ref } from 'vue'
-import { RouterLink } from 'vue-router'
+import { RouterLink, useRoute } from 'vue-router'
 import { formatCurrency } from '@/utils/currency'
 import { useCart } from '@/composables/useCart'
 
@@ -10,6 +10,8 @@ defineProps({
     required: true,
   },
 })
+
+const route = useRoute()
 
 const { addToCart } = useCart()
 
@@ -28,7 +30,13 @@ function decreaseQuantity() {
 
 <template>
   <article class="product-card">
-    <RouterLink class="product-card__link" :to="`/product/${product.id}`">
+    <RouterLink
+      class="product-card__link"
+      :to="{
+        path: `/product/${product.id}`,
+        query: route.query,
+      }"
+    >
       <img :src="product.thumbnail" :alt="product.title" />
 
       <span class="product-card__category">

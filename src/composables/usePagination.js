@@ -1,4 +1,4 @@
-import { computed, ref, watch } from 'vue'
+import { computed, ref } from 'vue'
 
 export function usePagination(items, itemsPerPage) {
   const currentPage = ref(1)
@@ -22,10 +22,6 @@ export function usePagination(items, itemsPerPage) {
 
     currentPage.value = Math.min(Math.max(page, 1), totalPages.value)
   }
-
-  watch(items, () => {
-    currentPage.value = 1
-  })
 
   const firstItem = computed(() => {
     if (items.value.length === 0) return 0

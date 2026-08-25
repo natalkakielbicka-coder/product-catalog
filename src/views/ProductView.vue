@@ -1,6 +1,6 @@
 <script setup>
 import { onMounted, ref } from 'vue'
-import { useRoute } from 'vue-router'
+import { RouterLink, useRoute } from 'vue-router'
 import { useProducts } from '@/composables/useProducts'
 import { useCart } from '@/composables/useCart'
 import { formatCurrency } from '@/utils/currency'
@@ -53,6 +53,16 @@ function decreaseQuantity() {
 
 <template>
   <main>
+    <RouterLink
+      class="product-back"
+      :to="{
+        path: '/',
+        query: route.query,
+      }"
+    >
+      ← Back to products
+    </RouterLink>
+
     <p v-if="loading">Loading product...</p>
 
     <p v-else-if="error">Something went wrong.</p>
@@ -332,6 +342,20 @@ main {
 .product__button:hover {
   transform: translateY(-2px);
   background: var(--color-accent-hover);
+}
+
+.product-back {
+  display: inline-flex;
+  margin-bottom: 32px;
+  color: var(--color-muted);
+  font-size: 14px;
+  font-weight: 600;
+  text-decoration: none;
+  transition: color 0.2s ease;
+}
+
+.product-back:hover {
+  color: var(--color-accent);
 }
 
 @media (max-width: 767px) {
