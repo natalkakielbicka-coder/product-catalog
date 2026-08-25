@@ -41,7 +41,9 @@ function closeLightbox() {
 }
 
 function increaseQuantity() {
-  quantity.value++
+  if (quantity.value < product.value.stock) {
+    quantity.value++
+  }
 }
 
 function decreaseQuantity() {
@@ -100,6 +102,26 @@ function decreaseQuantity() {
           {{ product.category }}
         </p>
 
+        <div class="product__meta">
+          <span v-if="product.brand">
+            {{ product.brand }}
+          </span>
+
+          <span class="product__rating">
+            <span class="product__star">★</span>
+            {{ product.rating }}
+          </span>
+
+          <span
+            :class="{
+              'product__stock--available': product.stock > 0,
+              'product__stock--unavailable': product.stock === 0,
+            }"
+          >
+            {{ product.stock > 0 ? `${product.stock} in stock` : 'Out of stock' }}
+          </span>
+        </div>
+
         <h1>{{ product.title }}</h1>
 
         <p class="product__description">
@@ -109,19 +131,31 @@ function decreaseQuantity() {
         <p class="product__price">{{ formatCurrency(product.price) }}</p>
 
         <div class="product__actions">
-          <div class="product__quantity">
+          <div v-if="product.stock > 0" class="product__quantity">
             <button type="button" aria-label="Decrease quantity" @click="decreaseQuantity">
               −
             </button>
 
             <span>{{ quantity }}</span>
 
-            <button type="button" aria-label="Increase quantity" @click="increaseQuantity">
+            <button
+              type="button"
+              aria-label="Increase quantity"
+              :disabled="quantity >= product.stock"
+              @click="increaseQuantity"
+            >
               +
             </button>
           </div>
 
-          <button class="product__button" @click="addToCart(product, quantity)">Add to cart</button>
+          <button
+            class="product__button"
+            type="button"
+            :disabled="product.stock === 0"
+            @click="addToCart(product, quantity)"
+          >
+            {{ product.stock > 0 ? 'Add to cart' : 'Out of stock' }}
+          </button>
         </div>
       </div>
     </div>
@@ -260,6 +294,10 @@ main {
   margin-top: 30px;
 }
 
+.product__actions:has(.product__button:disabled) {
+  grid-template-columns: 1fr;
+}
+
 .product__quantity {
   display: flex;
   align-items: center;
@@ -356,6 +394,49 @@ main {
 
 .product-back:hover {
   color: var(--color-accent);
+}
+
+.product__meta {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px 16px;
+  margin-bottom: 20px;
+  color: var(--color-muted);
+  font-size: 14px;
+}
+
+.product__meta span:not(:last-child) {
+  position: relative;
+}
+
+.product__stock--available {
+  color: #39734d;
+}
+
+.product__stock--unavailable {
+  color: #a33d4a;
+}
+
+.product__rating {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.product__star {
+  color: #f5b301;
+  font-size: 16px;
+}
+
+.product__quantity button:disabled {
+  opacity: 0.35;
+  cursor: not-allowed;
+}
+
+.product__button:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+  transform: none;
 }
 
 @media (max-width: 767px) {

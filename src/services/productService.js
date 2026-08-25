@@ -18,6 +18,10 @@ function normalizeProduct(product) {
     categorySlug: product.category,
     thumbnail: product.thumbnail,
     images: product.images ?? [],
+
+    brand: product.brand ?? '',
+    rating: product.rating ?? 0,
+    stock: product.stock ?? 0,
   }
 }
 
