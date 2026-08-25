@@ -61,119 +61,148 @@ const originalPrice = computed(() => {
 
 <template>
   <main>
-    <RouterLink
-      class="product-back"
-      :to="{
-        path: '/',
-        query: route.query,
-      }"
-    >
-      ← Back to products
-    </RouterLink>
-
     <p v-if="loading">Loading product...</p>
 
     <p v-else-if="error">Something went wrong.</p>
 
-    <div v-else-if="product" class="product">
-      <div
-        class="product__gallery"
-        :class="{ 'product__gallery--single': product.images.length <= 1 }"
-      >
-        <div v-if="product.images.length > 1" class="product__thumbnails">
-          <button
-            v-for="image in product.images"
-            :key="image"
-            type="button"
-            class="product__thumbnail"
-            :class="{ 'product__thumbnail--active': selectedImage === image }"
-            @click="selectImage(image)"
-          >
-            <img :src="image" :alt="product.title" />
-          </button>
-        </div>
+    <div v-else-if="product">
+      <nav class="breadcrumbs" aria-label="Breadcrumb">
+        <RouterLink to="/">Products</RouterLink>
 
-        <button class="product__image" type="button" @click="openLightbox">
-          <img
-            :src="selectedImage || product.images[0] || product.thumbnail"
-            :alt="product.title"
-          />
+        <span>/</span>
 
-          <span class="product__zoom">View image</span>
-        </button>
-      </div>
-
-      <div class="product__content">
-        <p class="product__category">
+        <RouterLink
+          :to="{
+            path: '/',
+            query: {
+              category: product.category,
+            },
+          }"
+        >
           {{ product.category }}
-        </p>
+        </RouterLink>
 
-        <div class="product__meta">
-          <span v-if="product.brand">
-            {{ product.brand }}
-          </span>
+        <span>/</span>
 
-          <span class="product__rating">
-            <span class="product__star">★</span>
-            {{ product.rating }}
-          </span>
+        <span class="breadcrumbs__current">
+          {{ product.title }}
+        </span>
+      </nav>
 
-          <span
-            :class="{
-              'product__stock--available': product.stock > 0,
-              'product__stock--unavailable': product.stock === 0,
-            }"
-          >
-            {{ product.stock > 0 ? `${product.stock} in stock` : 'Out of stock' }}
-          </span>
-        </div>
+      <RouterLink
+        class="product-back"
+        :to="{
+          path: '/',
+          query: route.query,
+        }"
+      >
+        ← Back to products
+      </RouterLink>
 
-        <h1>{{ product.title }}</h1>
-
-        <p class="product__description">
-          {{ product.description }}
-        </p>
-
-        <div class="product__prices">
-          <span class="product__price">
-            {{ formatCurrency(product.price) }}
-          </span>
-
-          <span v-if="product.discountPercentage > 0" class="product__old-price">
-            {{ formatCurrency(originalPrice) }}
-          </span>
-
-          <span v-if="product.discountPercentage > 0" class="product__discount">
-            -{{ product.discountPercentage.toFixed(0) }}%
-          </span>
-        </div>
-
-        <div class="product__actions">
-          <div v-if="product.stock > 0" class="product__quantity">
-            <button type="button" aria-label="Decrease quantity" @click="decreaseQuantity">
-              −
-            </button>
-
-            <span>{{ quantity }}</span>
-
+      <div class="product">
+        <div
+          class="product__gallery"
+          :class="{ 'product__gallery--single': product.images.length <= 1 }"
+        >
+          <div v-if="product.images.length > 1" class="product__thumbnails">
             <button
+              v-for="image in product.images"
+              :key="image"
               type="button"
-              aria-label="Increase quantity"
-              :disabled="quantity >= product.stock"
-              @click="increaseQuantity"
+              class="product__thumbnail"
+              :class="{
+                'product__thumbnail--active': selectedImage === image,
+              }"
+              @click="selectImage(image)"
             >
-              +
+              <img :src="image" :alt="product.title" />
             </button>
           </div>
 
-          <button
-            class="product__button"
-            type="button"
-            :disabled="product.stock === 0"
-            @click="addToCart(product, quantity)"
-          >
-            {{ product.stock > 0 ? 'Add to cart' : 'Out of stock' }}
+          <button class="product__image" type="button" @click="openLightbox">
+            <img
+              :src="selectedImage || product.images[0] || product.thumbnail"
+              :alt="product.title"
+            />
+
+            <span class="product__zoom"> View image </span>
           </button>
+        </div>
+
+        <div class="product__content">
+          <p class="product__category">
+            {{ product.category }}
+          </p>
+
+          <div class="product__meta">
+            <span v-if="product.brand">
+              {{ product.brand }}
+            </span>
+
+            <span class="product__rating">
+              <span class="product__star">★</span>
+              {{ product.rating }}
+            </span>
+
+            <span
+              :class="{
+                'product__stock--available': product.stock > 0,
+                'product__stock--unavailable': product.stock === 0,
+              }"
+            >
+              {{ product.stock > 0 ? `${product.stock} in stock` : 'Out of stock' }}
+            </span>
+          </div>
+
+          <h1>
+            {{ product.title }}
+          </h1>
+
+          <p class="product__description">
+            {{ product.description }}
+          </p>
+
+          <div class="product__prices">
+            <span class="product__price">
+              {{ formatCurrency(product.price) }}
+            </span>
+
+            <span v-if="product.discountPercentage > 0" class="product__old-price">
+              {{ formatCurrency(originalPrice) }}
+            </span>
+
+            <span v-if="product.discountPercentage > 0" class="product__discount">
+              -{{ product.discountPercentage.toFixed(0) }}%
+            </span>
+          </div>
+
+          <div class="product__actions">
+            <div v-if="product.stock > 0" class="product__quantity">
+              <button type="button" aria-label="Decrease quantity" @click="decreaseQuantity">
+                −
+              </button>
+
+              <span>{{ quantity }}</span>
+
+              <button
+                type="button"
+                aria-label="Increase quantity"
+                :disabled="quantity >= product.stock"
+                @click="increaseQuantity"
+              >
+                +
+              </button>
+            </div>
+
+            <button
+              class="product__button"
+              type="button"
+              :disabled="product.stock === 0"
+              @click="addToCart(product, quantity)"
+            >
+              {{ product.stock > 0 ? 'Add to cart' : 'Out of stock' }}
+            </button>
+          </div>
         </div>
       </div>
     </div>
@@ -483,6 +512,30 @@ main {
   background: var(--color-accent-light);
   font-size: 12px;
   font-weight: 700;
+}
+
+.breadcrumbs {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-bottom: 32px;
+  color: var(--color-muted);
+  font-size: 13px;
+}
+
+.breadcrumbs a {
+  color: var(--color-muted);
+  text-decoration: none;
+  transition: color 0.2s ease;
+}
+
+.breadcrumbs a:hover {
+  color: var(--color-accent);
+}
+
+.breadcrumbs__current {
+  color: var(--color-text);
 }
 
 @media (max-width: 767px) {
