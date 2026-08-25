@@ -83,6 +83,10 @@ const { cartItems, cartTotal, removeFromCart, increaseQuantity, decreaseQuantity
           <RouterLink to="/cart" class="mini-cart__cart-link" @click="emit('close')">
             View cart
           </RouterLink>
+
+          <RouterLink to="/checkout" class="mini-cart__checkout" @click="emit('close')">
+            Checkout
+          </RouterLink>
         </div>
       </div>
     </aside>
@@ -276,5 +280,25 @@ const { cartItems, cartTotal, removeFromCart, increaseQuantity, decreaseQuantity
   text-align: center;
   font-size: 13px;
   font-weight: 600;
+}
+
+.mini-cart__checkout {
+  display: block;
+  width: 100%;
+  margin-top: 10px;
+  padding: 15px;
+
+  border-radius: 12px;
+
+  color: #fff;
+  background: var(--color-text);
+
+  font-weight: 600;
+  text-align: center;
+  text-decoration: none;
+}
+
+.mini-cart__checkout:hover {
+  background: var(--color-accent-hover);
 }
 </style>
