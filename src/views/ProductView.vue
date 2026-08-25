@@ -1,6 +1,7 @@
 <script setup>
 import { computed, onMounted, ref } from 'vue'
 import { RouterLink, useRoute } from 'vue-router'
+import ProductReviews from '@/components/ProductReviews.vue'
 import { useProducts } from '@/composables/useProducts'
 import { useCart } from '@/composables/useCart'
 import { formatCurrency } from '@/utils/currency'
@@ -205,6 +206,8 @@ const originalPrice = computed(() => {
           </div>
         </div>
       </div>
+
+      <ProductReviews :reviews="product.reviews" />
     </div>
   </main>
 
