@@ -57,6 +57,10 @@ export function useCart() {
     cartItems.value = cartItems.value.filter((item) => item.id !== id)
   }
 
+  function clearCart() {
+    cartItems.value = []
+  }
+
   return {
     cartItems,
     cartCount,
@@ -65,5 +69,6 @@ export function useCart() {
     increaseQuantity,
     decreaseQuantity,
     removeFromCart,
+    clearCart,
   }
 }

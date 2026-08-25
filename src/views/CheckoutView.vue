@@ -21,7 +21,7 @@ const errors = reactive({
   postalCode: '',
 })
 
-const { cartItems, cartTotal } = useCart()
+const { cartItems, cartTotal, clearCart } = useCart()
 
 function validateForm() {
   errors.name = ''
@@ -71,6 +71,7 @@ function submitForm() {
   if (cartItems.value.length === 0) return
 
   orderPlaced.value = true
+  clearCart()
 }
 </script>
 
@@ -80,12 +81,12 @@ function submitForm() {
       <p class="checkout__eyebrow">Delivery details</p>
       <h1>Checkout</h1>
 
-      <p v-if="cartItems.length > 0" class="checkout__intro">
+      <p v-if="cartItems.length > 0 && !orderPlaced" class="checkout__intro">
         Enter your details to complete your order.
       </p>
     </div>
 
-    <div v-if="cartItems.length === 0" class="checkout-empty">
+    <div v-if="cartItems.length === 0 && !orderPlaced" class="checkout-empty">
       <div class="checkout-empty__icon">🛍</div>
 
       <h2>Your cart is empty</h2>
@@ -96,6 +97,16 @@ function submitForm() {
       </p>
 
       <RouterLink class="checkout-empty__button" to="/"> Continue shopping </RouterLink>
+    </div>
+
+    <div v-else-if="orderPlaced" class="order-success">
+      <div class="order-success__icon">✓</div>
+
+      <h2>Thank you for your order!</h2>
+
+      <p>Your order has been placed successfully.</p>
+
+      <RouterLink to="/" class="order-success__button"> Continue shopping </RouterLink>
     </div>
 
     <div v-else class="checkout__layout">
@@ -469,6 +480,62 @@ function submitForm() {
   justify-content: space-between;
   padding-top: 22px;
   font-size: 18px;
+}
+
+.order-success {
+  display: flex;
+  align-items: center;
+  flex-direction: column;
+
+  max-width: 680px;
+  margin: 0 auto;
+  padding: 72px 40px;
+
+  border: 1px solid var(--color-border);
+  border-radius: 24px;
+
+  background: var(--color-surface);
+
+  text-align: center;
+}
+
+.order-success__icon {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  width: 72px;
+  height: 72px;
+  margin-bottom: 24px;
+
+  border-radius: 50%;
+
+  color: #fff;
+  background: #39734d;
+
+  font-size: 30px;
+  font-weight: 700;
+}
+
+.order-success h2 {
+  margin: 0 0 12px;
+  font-size: clamp(28px, 4vw, 38px);
+}
+
+.order-success p {
+  margin: 0 0 28px;
+  color: var(--color-muted);
+}
+
+.order-success__button {
+  padding: 14px 22px;
+  border-radius: 12px;
+
+  color: #fff;
+  background: var(--color-accent);
+
+  font-weight: 700;
+  text-decoration: none;
 }
 
 @media (max-width: 767px) {
