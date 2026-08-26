@@ -11,6 +11,7 @@ import { useProducts } from '@/composables/useProducts'
 import { useCart } from '@/composables/useCart'
 import { useDocumentTitle } from '@/composables/useDocumentTitle'
 import { useFavorites } from '@/composables/useFavorites'
+import { useRecentlyViewed } from '@/composables/useRecentlyViewed'
 import { formatCurrency } from '@/utils/currency'
 const VueEasyLightbox = defineAsyncComponent(() => import('vue-easy-lightbox'))
 
@@ -31,6 +32,7 @@ useDocumentTitle(pageTitle)
 const { products: relatedSource, fetchProducts: fetchRelatedProducts } = useProducts()
 const { addToCart } = useCart()
 const { isFavorite, toggleFavorite } = useFavorites()
+const { recentlyViewedIds, addRecentlyViewed } = useRecentlyViewed()
 
 const selectedImage = ref('')
 const quantity = ref(1)
@@ -40,6 +42,8 @@ onMounted(async () => {
 
   if (product.value) {
     selectedImage.value = product.value.images[0] || product.value.thumbnail
+
+    addRecentlyViewed(product.value.id)
   }
 
   const observer = new IntersectionObserver(async (entries) => {
@@ -141,6 +145,18 @@ const relatedProducts = computed(() => {
     .slice(0, 4)
 })
 
+const recentlyViewedProducts = computed(() => {
+  if (!product.value) return []
+
+  return recentlyViewedIds.value
+    .filter((id) => id !== product.value.id)
+    .map((id) => {
+      return relatedSource.value.find((item) => item.id === id)
+    })
+    .filter(Boolean)
+    .slice(0, 4)
+})
+
 watch(
   () => route.params.id,
   async (newId) => {
@@ -150,6 +166,7 @@ watch(
       selectedImage.value = product.value.images[0] || product.value.thumbnail
       quantity.value = 1
       activeTab.value = 'description'
+      addRecentlyViewed(product.value.id)
     }
   },
 )
@@ -366,6 +383,14 @@ watch(
 
           <ProductGrid :products="relatedProducts" />
         </template>
+      </section>
+
+      <section v-if="relatedVisible && recentlyViewedProducts.length" class="recently-viewed">
+        <div class="recently-viewed__header">
+          <h2>Recently viewed</h2>
+        </div>
+
+        <ProductGrid :products="recentlyViewedProducts" />
       </section>
     </div>
   </main>
@@ -810,6 +835,21 @@ main {
   color: var(--color-accent);
   border-color: var(--color-accent);
   background: var(--color-accent-light);
+}
+
+.recently-viewed {
+  margin-top: 72px;
+}
+
+.recently-viewed__header {
+  margin-bottom: 24px;
+}
+
+.recently-viewed__header h2 {
+  margin: 0;
+  font-size: clamp(28px, 4vw, 40px);
+  font-weight: 500;
+  letter-spacing: -0.04em;
 }
 
 @media (max-width: 767px) {
