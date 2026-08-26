@@ -38,7 +38,7 @@ const {
 const itemsPerPage = ref(12)
 const isInitializing = ref(true)
 
-watch([searchQuery, selectedCategory, sortBy], () => {
+watch([searchQuery, selectedCategory, sortBy, minPrice, maxPrice], () => {
   if (isInitializing.value) return
 
   currentPage.value = 1
@@ -55,6 +55,14 @@ watch([searchQuery, selectedCategory, sortBy], () => {
 
   if (sortBy.value) {
     query.sort = sortBy.value
+  }
+
+  if (minPrice.value > 0) {
+    query.minPrice = minPrice.value
+  }
+
+  if (maxPrice.value < priceLimit.value) {
+    query.maxPrice = maxPrice.value
   }
 
   router.replace({ query })
@@ -75,6 +83,8 @@ onMounted(async () => {
   searchQuery.value = route.query.search ?? ''
   selectedCategory.value = route.query.category ?? ''
   sortBy.value = route.query.sort ?? ''
+  minPrice.value = Number(route.query.minPrice) || 0
+  maxPrice.value = Number(route.query.maxPrice) || priceLimit.value
 
   const page = Number(route.query.page) || 1
   goToPage(page)
