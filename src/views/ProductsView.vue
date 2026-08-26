@@ -6,6 +6,7 @@ import ProductSearch from '@/components/ProductSearch.vue'
 import { useProductFilters } from '@/composables/useProductFilters'
 import ProductCategories from '@/components/ProductCategories.vue'
 import ProductSort from '@/components/ProductSort.vue'
+import ProductSkeleton from '@/components/ProductSkeleton.vue'
 import ProductPagination from '@/components/ProductPagination.vue'
 import { usePagination } from '@/composables/usePagination'
 import { useDocumentTitle } from '@/composables/useDocumentTitle'
@@ -127,7 +128,9 @@ watch(itemsPerPage, () => {
 
     <ProductCategories v-model="selectedCategory" :categories="categories" />
 
-    <p v-if="loading">Loading products...</p>
+    <div v-if="loading" class="products-skeleton">
+      <ProductSkeleton v-for="item in 12" :key="item" />
+    </div>
 
     <p v-else-if="error">Something went wrong.</p>
 
@@ -294,10 +297,33 @@ h1 {
   background: var(--color-accent);
 }
 
+.products-skeleton {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 24px;
+  margin-top: 32px;
+}
+
+@media (max-width: 1023px) {
+  .products-skeleton {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+}
+
 @media (max-width: 767px) {
   .products-toolbar {
     align-items: flex-start;
     flex-direction: column;
+  }
+
+  .products-skeleton {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+@media (max-width: 479px) {
+  .products-skeleton {
+    grid-template-columns: 1fr;
   }
 }
 </style>

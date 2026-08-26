@@ -5,6 +5,7 @@ import ProductReviews from '@/components/ProductReviews.vue'
 import ProductGrid from '@/components/ProductGrid.vue'
 import ProductDescription from '@/components/ProductDescription.vue'
 import ProductShipping from '@/components/ProductShipping.vue'
+import ProductDetailsSkeleton from '@/components/ProductDetailsSkeleton.vue'
 import { useProducts } from '@/composables/useProducts'
 import { useCart } from '@/composables/useCart'
 import { useDocumentTitle } from '@/composables/useDocumentTitle'
@@ -158,7 +159,7 @@ watch(
 
 <template>
   <main>
-    <p v-if="loading">Loading product...</p>
+    <ProductDetailsSkeleton v-if="loading" />
 
     <p v-else-if="error">Something went wrong.</p>
 
