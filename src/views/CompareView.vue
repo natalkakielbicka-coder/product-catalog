@@ -60,6 +60,15 @@ onMounted(() => {
 
     <div v-else class="compare-table-wrapper">
       <table class="compare-table">
+        <colgroup>
+          <col class="compare-table__label-column" />
+
+          <col
+            v-for="product in compareProducts"
+            :key="product.id"
+            class="compare-table__product-column"
+          />
+        </colgroup>
         <thead>
           <tr>
             <th>Product</th>
@@ -187,15 +196,25 @@ main {
 }
 
 .compare-table {
-  width: 100%;
-  min-width: 760px;
+  width: auto;
+  min-width: 0;
+
   border-spacing: 0;
   border-collapse: collapse;
+  table-layout: fixed;
+}
+
+.compare-table__label-column {
+  width: 160px;
+}
+
+.compare-table__product-column {
+  width: 280px;
 }
 
 .compare-table th,
 .compare-table td {
-  min-width: 200px;
+  min-width: 0;
   padding: 20px;
   border: 1px solid var(--color-border);
   text-align: left;

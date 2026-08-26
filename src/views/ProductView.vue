@@ -31,7 +31,7 @@ const pageTitle = computed(() => {
 })
 useDocumentTitle(pageTitle)
 const { products: relatedSource, fetchProducts: fetchRelatedProducts } = useProducts()
-const { addToCart } = useCart()
+const { cartItems, addToCart } = useCart()
 const { isFavorite, toggleFavorite } = useFavorites()
 const { isCompared, toggleCompare, compareLimitReached } = useCompare()
 const { recentlyViewedIds, addRecentlyViewed } = useRecentlyViewed()
@@ -63,6 +63,20 @@ onMounted(async () => {
   if (relatedSection.value) {
     observer.observe(relatedSection.value)
   }
+})
+
+const cartQuantity = computed(() => {
+  const cartItem = cartItems.value.find((item) => item.id === product.value?.id)
+
+  return cartItem?.quantity ?? 0
+})
+
+const remainingStock = computed(() => {
+  if (!product.value) {
+    return 0
+  }
+
+  return Math.max(product.value.stock - cartQuantity.value, 0)
 })
 
 const activeTab = ref('description')
@@ -120,7 +134,7 @@ function closeLightbox() {
 }
 
 function increaseQuantity() {
-  if (quantity.value < product.value.stock) {
+  if (quantity.value < remainingStock.value) {
     quantity.value++
   }
 }
@@ -319,7 +333,7 @@ watch(
           </div>
 
           <div class="product__actions">
-            <div v-if="product.stock > 0" class="product__quantity">
+            <div v-if="remainingStock > 0" class="product__quantity">
               <button type="button" aria-label="Decrease quantity" @click="decreaseQuantity">
                 −
               </button>
@@ -329,7 +343,7 @@ watch(
               <button
                 type="button"
                 aria-label="Increase quantity"
-                :disabled="quantity >= product.stock"
+                :disabled="quantity >= remainingStock"
                 @click="increaseQuantity"
               >
                 +
@@ -339,10 +353,10 @@ watch(
             <button
               class="product__button"
               type="button"
-              :disabled="product.stock === 0"
+              :disabled="remainingStock === 0 || quantity > remainingStock"
               @click="addToCart(product, quantity)"
             >
-              {{ product.stock > 0 ? 'Add to cart' : 'Out of stock' }}
+              {{ remainingStock > 0 ? 'Add to cart' : 'Maximum in cart' }}
             </button>
           </div>
         </div>
