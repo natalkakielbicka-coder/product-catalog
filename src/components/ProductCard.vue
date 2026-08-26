@@ -3,6 +3,7 @@ import { computed, ref } from 'vue'
 import { RouterLink, useRoute } from 'vue-router'
 import { formatCurrency } from '@/utils/currency'
 import { useCart } from '@/composables/useCart'
+import { useFavorites } from '@/composables/useFavorites'
 
 const props = defineProps({
   product: {
@@ -14,6 +15,8 @@ const props = defineProps({
 const route = useRoute()
 
 const { addToCart } = useCart()
+
+const { isFavorite, toggleFavorite } = useFavorites()
 
 const quantity = ref(1)
 
@@ -38,6 +41,16 @@ const originalPrice = computed(() => {
 
 <template>
   <article class="product-card">
+    <button
+      class="product-card__favorite"
+      :class="{ active: isFavorite(product.id) }"
+      type="button"
+      :aria-label="isFavorite(product.id) ? 'Remove from favorites' : 'Add to favorites'"
+      @click="toggleFavorite(product.id)"
+    >
+      {{ isFavorite(product.id) ? '♥' : '♡' }}
+    </button>
+
     <RouterLink
       class="product-card__link"
       :to="{
@@ -86,6 +99,7 @@ const originalPrice = computed(() => {
 
 <style scoped>
 .product-card {
+  position: relative;
   display: flex;
   flex-direction: column;
   overflow: hidden;
@@ -231,5 +245,46 @@ const originalPrice = computed(() => {
 .product-card__button:hover {
   transform: translateY(-2px);
   background: var(--color-accent-hover);
+}
+
+.product-card__favorite {
+  position: absolute;
+  top: 20px;
+  right: 20px;
+  z-index: 2;
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  width: 40px;
+  height: 40px;
+
+  border: 1px solid rgba(255, 255, 255, 0.7);
+  border-radius: 50%;
+
+  color: var(--color-text);
+  background: rgba(255, 255, 255, 0.9);
+  backdrop-filter: blur(8px);
+
+  font-size: 21px;
+  line-height: 1;
+
+  cursor: pointer;
+
+  transition:
+    color 0.2s ease,
+    background-color 0.2s ease,
+    transform 0.2s ease;
+}
+
+.product-card__favorite:hover {
+  color: var(--color-accent);
+  transform: scale(1.08);
+}
+
+.product-card__favorite.active {
+  color: var(--color-accent);
+  background: var(--color-accent-light);
 }
 </style>
