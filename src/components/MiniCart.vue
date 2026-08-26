@@ -27,7 +27,7 @@ const { cartItems, cartTotal, removeFromCart, increaseQuantity, decreaseQuantity
       <div v-if="cartItems.length === 0" class="mini-cart__empty">Your cart is empty.</div>
 
       <div v-else class="mini-cart__content">
-        <div class="mini-cart__items">
+        <TransitionGroup name="cart-list" tag="div" class="mini-cart__items">
           <article v-for="item in cartItems" :key="item.id" class="mini-cart__item">
             <RouterLink :to="`/product/${item.id}`" class="mini-cart__image" @click="emit('close')">
               <img :src="item.thumbnail" :alt="item.title" />
@@ -72,7 +72,7 @@ const { cartItems, cartTotal, removeFromCart, increaseQuantity, decreaseQuantity
               </button>
             </div>
           </article>
-        </div>
+        </TransitionGroup>
 
         <div class="mini-cart__footer">
           <div class="mini-cart__total">
@@ -152,6 +152,7 @@ const { cartItems, cartTotal, removeFromCart, increaseQuantity, decreaseQuantity
 }
 
 .mini-cart__items {
+  position: relative;
   flex: 1;
   overflow-y: auto;
 }
@@ -300,5 +301,26 @@ const { cartItems, cartTotal, removeFromCart, increaseQuantity, decreaseQuantity
 
 .mini-cart__checkout:hover {
   background: var(--color-accent-hover);
+}
+
+.cart-list-enter-active,
+.cart-list-leave-active {
+  transition:
+    opacity 0.3s ease,
+    transform 0.3s ease;
+}
+
+.cart-list-enter-from {
+  opacity: 0;
+  transform: translateX(24px);
+}
+
+.cart-list-leave-to {
+  opacity: 0;
+  transform: translateX(-24px);
+}
+
+.cart-list-move {
+  transition: transform 0.3s ease;
 }
 </style>
