@@ -1,5 +1,5 @@
 <script setup>
-import { computed, onMounted, ref, watch } from 'vue'
+import { computed, onMounted, ref, watch, defineAsyncComponent } from 'vue'
 import { RouterLink, useRoute } from 'vue-router'
 import ProductReviews from '@/components/ProductReviews.vue'
 import ProductGrid from '@/components/ProductGrid.vue'
@@ -9,7 +9,7 @@ import { useProducts } from '@/composables/useProducts'
 import { useCart } from '@/composables/useCart'
 import { useDocumentTitle } from '@/composables/useDocumentTitle'
 import { formatCurrency } from '@/utils/currency'
-import VueEasyLightbox from 'vue-easy-lightbox'
+const VueEasyLightbox = defineAsyncComponent(() => import('vue-easy-lightbox'))
 
 const route = useRoute()
 
@@ -361,6 +361,7 @@ watch(
   </main>
 
   <VueEasyLightbox
+    v-if="lightboxVisible"
     :visible="lightboxVisible"
     :imgs="product?.images || []"
     :index="lightboxIndex"
