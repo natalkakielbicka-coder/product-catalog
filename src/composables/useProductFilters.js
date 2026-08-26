@@ -27,17 +27,11 @@ export function useProductFilters(products) {
     { immediate: true },
   )
 
-  watch(selectedCategory, () => {
-    searchInput.value = ''
-    searchQuery.value = ''
-  })
-
   const categories = computed(() => {
     return [...new Set(products.value.map((product) => product.category))]
   })
 
   function applySearch() {
-    selectedCategory.value = ''
     searchQuery.value = searchInput.value
   }
 

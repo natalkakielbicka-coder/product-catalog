@@ -73,6 +73,16 @@ watch([searchQuery, selectedCategory, sortBy, minPrice, maxPrice, inStockOnly], 
   router.replace({ query })
 })
 
+function clearSearchFilter() {
+  searchInput.value = ''
+  searchQuery.value = ''
+}
+
+function clearPriceFilter() {
+  minPrice.value = 0
+  maxPrice.value = priceLimit.value
+}
+
 const { currentPage, totalPages, paginatedItems, goToPage, firstItem, lastItem } = usePagination(
   filteredProducts,
   itemsPerPage,
@@ -169,6 +179,26 @@ watch(itemsPerPage, () => {
 
         <span>In stock only</span>
       </label>
+
+      <div v-if="hasActiveFilters" class="active-filters">
+        <button v-if="selectedCategory" type="button" @click="selectedCategory = ''">
+          {{ selectedCategory }} ×
+        </button>
+
+        <button v-if="searchQuery" type="button" @click="clearSearchFilter">
+          Search: {{ searchQuery }} ×
+        </button>
+
+        <button
+          v-if="minPrice > 0 || maxPrice < priceLimit"
+          type="button"
+          @click="clearPriceFilter"
+        >
+          ${{ minPrice }}–${{ maxPrice }} ×
+        </button>
+
+        <button v-if="inStockOnly" type="button" @click="inStockOnly = false">In stock ×</button>
+      </div>
 
       <div class="products-toolbar">
         <p class="products-count">
@@ -389,6 +419,32 @@ h1 {
 
 .stock-filter input:checked + .stock-filter__switch::after {
   transform: translateX(18px);
+}
+
+.active-filters {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin: 0 0 24px;
+}
+
+.active-filters button {
+  padding: 8px 12px;
+
+  border: 1px solid var(--color-border);
+  border-radius: 999px;
+
+  color: var(--color-accent);
+  background: var(--color-accent-light);
+
+  font-size: 13px;
+  font-weight: 600;
+
+  cursor: pointer;
+}
+
+.active-filters button:hover {
+  border-color: var(--color-accent);
 }
 
 @media (max-width: 1023px) {
