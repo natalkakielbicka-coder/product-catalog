@@ -30,6 +30,17 @@ const router = createRouter({
       component: () => import('../views/NotFoundView.vue'),
     },
   ],
+
+  scrollBehavior(to, from, savedPosition) {
+    if (savedPosition) {
+      return savedPosition
+    }
+
+    return {
+      top: 0,
+      behavior: 'smooth',
+    }
+  },
 })
 
 export default router

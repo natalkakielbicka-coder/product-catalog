@@ -148,11 +148,6 @@ watch(
       quantity.value = 1
       activeTab.value = 'description'
     }
-
-    window.scrollTo({
-      top: 0,
-      behavior: 'smooth',
-    })
   },
 )
 </script>
