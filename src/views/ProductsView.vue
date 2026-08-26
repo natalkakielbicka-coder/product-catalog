@@ -8,6 +8,7 @@ import ProductCategories from '@/components/ProductCategories.vue'
 import ProductSort from '@/components/ProductSort.vue'
 import ProductSkeleton from '@/components/ProductSkeleton.vue'
 import ProductPagination from '@/components/ProductPagination.vue'
+import ErrorState from '@/components/ErrorState.vue'
 import { usePagination } from '@/composables/usePagination'
 import { useDocumentTitle } from '@/composables/useDocumentTitle'
 import { useRoute, useRouter } from 'vue-router'
@@ -124,17 +125,17 @@ watch(itemsPerPage, () => {
   <main>
     <h1>Products</h1>
 
-    <ProductSearch v-model="searchInput" @search="applySearch" />
-
-    <ProductCategories v-model="selectedCategory" :categories="categories" />
-
     <div v-if="loading" class="products-skeleton">
       <ProductSkeleton v-for="item in 12" :key="item" />
     </div>
 
-    <p v-else-if="error">Something went wrong.</p>
+    <ErrorState v-else-if="error" @retry="fetchProducts" />
 
     <template v-else>
+      <ProductSearch v-model="searchInput" @search="applySearch" />
+
+      <ProductCategories v-model="selectedCategory" :categories="categories" />
+
       <div class="products-toolbar">
         <p class="products-count">
           Showing {{ firstItem }}–{{ lastItem }} of

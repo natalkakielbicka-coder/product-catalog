@@ -2,6 +2,7 @@
 import { computed, onMounted, ref } from 'vue'
 import { RouterLink } from 'vue-router'
 import ProductGrid from '@/components/ProductGrid.vue'
+import ErrorState from '@/components/ErrorState.vue'
 import { useProducts } from '@/composables/useProducts'
 import { useFavorites } from '@/composables/useFavorites'
 import { useDocumentTitle } from '@/composables/useDocumentTitle'
@@ -29,7 +30,7 @@ onMounted(() => {
 
     <p v-if="loading">Loading favorites...</p>
 
-    <p v-else-if="error">Something went wrong.</p>
+    <ErrorState v-else-if="error" @retry="fetchProduct(route.params.id)" />
 
     <div v-else-if="favoriteProducts.length === 0" class="favorites-empty">
       <span class="favorites-empty__icon">♡</span>

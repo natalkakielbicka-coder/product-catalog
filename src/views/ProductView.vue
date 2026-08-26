@@ -6,6 +6,7 @@ import ProductGrid from '@/components/ProductGrid.vue'
 import ProductDescription from '@/components/ProductDescription.vue'
 import ProductShipping from '@/components/ProductShipping.vue'
 import ProductDetailsSkeleton from '@/components/ProductDetailsSkeleton.vue'
+import ErrorState from '@/components/ErrorState.vue'
 import { useProducts } from '@/composables/useProducts'
 import { useCart } from '@/composables/useCart'
 import { useDocumentTitle } from '@/composables/useDocumentTitle'
@@ -158,7 +159,7 @@ watch(
   <main>
     <ProductDetailsSkeleton v-if="loading" />
 
-    <p v-else-if="error">Something went wrong.</p>
+    <ErrorState v-else-if="error" @retry="fetchProduct(route.params.id)" />
 
     <div v-else-if="product">
       <nav class="breadcrumbs" aria-label="Breadcrumb">
