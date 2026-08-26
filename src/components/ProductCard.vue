@@ -15,7 +15,7 @@ const props = defineProps({
 
 const route = useRoute()
 
-const { addToCart } = useCart()
+const { cartItems, addToCart } = useCart()
 
 const { isFavorite, toggleFavorite } = useFavorites()
 
@@ -23,8 +23,20 @@ const { isCompared, toggleCompare, compareLimitReached } = useCompare()
 
 const quantity = ref(1)
 
+const cartQuantity = computed(() => {
+  const cartItem = cartItems.value.find((item) => item.id === props.product.id)
+
+  return cartItem?.quantity ?? 0
+})
+
+const remainingStock = computed(() => {
+  return Math.max(props.product.stock - cartQuantity.value, 0)
+})
+
 function increaseQuantity() {
-  quantity.value++
+  if (quantity.value < remainingStock.value) {
+    quantity.value++
+  }
 }
 
 function decreaseQuantity() {
@@ -85,16 +97,28 @@ const originalPrice = computed(() => {
     </RouterLink>
 
     <div class="product-card__actions">
-      <div class="product-card__quantity">
+      <div v-if="product.stock > 0" class="product-card__quantity">
         <button type="button" aria-label="Decrease quantity" @click="decreaseQuantity">−</button>
 
         <span>{{ quantity }}</span>
 
-        <button type="button" aria-label="Increase quantity" @click="increaseQuantity">+</button>
+        <button
+          type="button"
+          aria-label="Increase quantity"
+          :disabled="remainingStock"
+          @click="increaseQuantity"
+        >
+          +
+        </button>
       </div>
 
-      <button class="product-card__button" @click="addToCart(product, quantity)">
-        Add to cart
+      <button
+        class="product-card__button"
+        type="button"
+        :disabled="remainingStock === 0 || quantity > remainingStock"
+        @click="addToCart(product, quantity)"
+      >
+        {{ remainingStock > 0 ? 'Add to cart' : 'Maximum in cart' }}
       </button>
     </div>
 
@@ -235,6 +259,16 @@ const originalPrice = computed(() => {
   background: transparent;
   cursor: pointer;
   transition: background-color 0.2s ease;
+}
+
+.product-card__button:disabled {
+  opacity: 0.45;
+  cursor: not-allowed;
+}
+
+.product-card__quantity button:disabled {
+  opacity: 0.35;
+  cursor: not-allowed;
 }
 
 .product-card__quantity button:hover {
