@@ -9,6 +9,7 @@ import ProductSort from '@/components/ProductSort.vue'
 import ProductSkeleton from '@/components/ProductSkeleton.vue'
 import ProductPagination from '@/components/ProductPagination.vue'
 import ErrorState from '@/components/ErrorState.vue'
+import ProductPriceRange from '@/components/ProductPriceRange.vue'
 import { usePagination } from '@/composables/usePagination'
 import { useDocumentTitle } from '@/composables/useDocumentTitle'
 import { useRoute, useRouter } from 'vue-router'
@@ -29,6 +30,9 @@ const {
   hasActiveFilters,
   applySearch,
   clearFilters,
+  minPrice,
+  maxPrice,
+  priceLimit,
 } = useProductFilters(products)
 
 const itemsPerPage = ref(12)
@@ -135,6 +139,12 @@ watch(itemsPerPage, () => {
       <ProductSearch v-model="searchInput" @search="applySearch" />
 
       <ProductCategories v-model="selectedCategory" :categories="categories" />
+
+      <ProductPriceRange
+        v-model:min-price="minPrice"
+        v-model:max-price="maxPrice"
+        :limit="priceLimit"
+      />
 
       <div class="products-toolbar">
         <p class="products-count">

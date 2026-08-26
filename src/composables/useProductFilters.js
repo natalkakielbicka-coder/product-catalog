@@ -5,6 +5,26 @@ export function useProductFilters(products) {
   const searchQuery = ref('')
   const selectedCategory = ref('')
   const sortBy = ref('')
+  const minPrice = ref(0)
+  const maxPrice = ref(0)
+
+  const priceLimit = computed(() => {
+    if (products.value.length === 0) {
+      return 0
+    }
+
+    return Math.ceil(Math.max(...products.value.map((product) => product.price)))
+  })
+
+  watch(
+    priceLimit,
+    (newLimit) => {
+      if (maxPrice.value === 0) {
+        maxPrice.value = newLimit
+      }
+    },
+    { immediate: true },
+  )
 
   watch(selectedCategory, () => {
     searchInput.value = ''
@@ -28,7 +48,11 @@ export function useProductFilters(products) {
 
       const matchesCategory = !selectedCategory.value || product.category === selectedCategory.value
 
-      return matchesSearch && matchesCategory
+      const matchesMinPrice = minPrice.value === '' || product.price >= minPrice.value
+
+      const matchesMaxPrice = maxPrice.value === '' || product.price <= maxPrice.value
+
+      return matchesSearch && matchesCategory && matchesMinPrice && matchesMaxPrice
     })
 
     if (sortBy.value === 'price-asc') {
@@ -51,7 +75,13 @@ export function useProductFilters(products) {
   })
 
   const hasActiveFilters = computed(() => {
-    return searchQuery.value !== '' || selectedCategory.value !== '' || sortBy.value !== ''
+    return (
+      searchQuery.value !== '' ||
+      selectedCategory.value !== '' ||
+      sortBy.value !== '' ||
+      minPrice.value > 0 ||
+      maxPrice.value < priceLimit.value
+    )
   })
 
   function clearFilters() {
@@ -59,6 +89,8 @@ export function useProductFilters(products) {
     searchQuery.value = ''
     selectedCategory.value = ''
     sortBy.value = ''
+    minPrice.value = 0
+    maxPrice.value = priceLimit.value
   }
 
   return {
@@ -71,5 +103,8 @@ export function useProductFilters(products) {
     sortBy,
     hasActiveFilters,
     clearFilters,
+    minPrice,
+    maxPrice,
+    priceLimit,
   }
 }
