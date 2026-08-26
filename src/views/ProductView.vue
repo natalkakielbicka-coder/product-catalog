@@ -9,6 +9,7 @@ import ProductDetailsSkeleton from '@/components/ProductDetailsSkeleton.vue'
 import { useProducts } from '@/composables/useProducts'
 import { useCart } from '@/composables/useCart'
 import { useDocumentTitle } from '@/composables/useDocumentTitle'
+import { useFavorites } from '@/composables/useFavorites'
 import { formatCurrency } from '@/utils/currency'
 const VueEasyLightbox = defineAsyncComponent(() => import('vue-easy-lightbox'))
 
@@ -28,6 +29,7 @@ const pageTitle = computed(() => {
 useDocumentTitle(pageTitle)
 const { products: relatedSource, fetchProducts: fetchRelatedProducts } = useProducts()
 const { addToCart } = useCart()
+const { isFavorite, toggleFavorite } = useFavorites()
 
 const selectedImage = ref('')
 const quantity = ref(1)
@@ -250,6 +252,17 @@ watch(
           <h1>
             {{ product.title }}
           </h1>
+
+          <button
+            class="product__favorite"
+            type="button"
+            :class="{ 'product__favorite--active': isFavorite(product.id) }"
+            :aria-label="isFavorite(product.id) ? 'Remove from favorites' : 'Add to favorites'"
+            @click="toggleFavorite(product.id)"
+          >
+            {{ isFavorite(product.id) ? '♥' : '♡' }}
+            {{ isFavorite(product.id) ? 'Saved' : 'Add to favorites' }}
+          </button>
 
           <p class="product__description">
             {{ product.description }}
@@ -764,6 +777,38 @@ main {
 
 .product-tabs__content {
   min-height: 120px;
+}
+
+.product__favorite {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 20px;
+
+  padding: 10px 14px;
+
+  border: 1px solid var(--color-border);
+  border-radius: 999px;
+
+  color: var(--color-text);
+  background: var(--color-surface);
+
+  font-size: 14px;
+  font-weight: 600;
+
+  cursor: pointer;
+
+  transition:
+    color 0.2s ease,
+    border-color 0.2s ease,
+    background-color 0.2s ease;
+}
+
+.product__favorite:hover,
+.product__favorite--active {
+  color: var(--color-accent);
+  border-color: var(--color-accent);
+  background: var(--color-accent-light);
 }
 
 @media (max-width: 767px) {
