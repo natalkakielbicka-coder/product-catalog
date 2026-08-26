@@ -4,6 +4,7 @@ import { RouterLink, useRoute } from 'vue-router'
 import { formatCurrency } from '@/utils/currency'
 import { useCart } from '@/composables/useCart'
 import { useFavorites } from '@/composables/useFavorites'
+import { useCompare } from '@/composables/useCompare'
 
 const props = defineProps({
   product: {
@@ -17,6 +18,8 @@ const route = useRoute()
 const { addToCart } = useCart()
 
 const { isFavorite, toggleFavorite } = useFavorites()
+
+const { isCompared, toggleCompare, compareLimitReached } = useCompare()
 
 const quantity = ref(1)
 
@@ -94,6 +97,22 @@ const originalPrice = computed(() => {
         Add to cart
       </button>
     </div>
+
+    <button
+      class="product-card__compare"
+      :class="{ active: isCompared(product.id) }"
+      type="button"
+      :disabled="compareLimitReached && !isCompared(product.id)"
+      @click="toggleCompare(product.id)"
+    >
+      {{
+        isCompared(product.id)
+          ? 'Remove from compare'
+          : compareLimitReached
+            ? 'Compare limit reached'
+            : 'Compare'
+      }}
+    </button>
   </article>
 </template>
 
@@ -286,5 +305,52 @@ const originalPrice = computed(() => {
 .product-card__favorite.active {
   color: var(--color-accent);
   background: var(--color-accent-light);
+}
+
+.product-card__compare {
+  width: calc(100% - 20px);
+  margin: 0 10px 10px;
+  padding: 10px 14px;
+
+  border: 1px solid var(--color-accent);
+  border-radius: 10px;
+
+  color: var(--color-accent);
+  background: transparent;
+
+  font-size: 13px;
+  font-weight: 600;
+
+  cursor: pointer;
+
+  transition:
+    color 0.2s ease,
+    background-color 0.2s ease,
+    border-color 0.2s ease;
+}
+
+.product-card__compare:hover:not(:disabled) {
+  color: #fff;
+  background: var(--color-accent);
+}
+
+.product-card__compare:disabled {
+  color: var(--color-muted);
+  border-color: var(--color-border);
+  background: var(--color-image-bg);
+
+  cursor: not-allowed;
+  opacity: 0.6;
+}
+
+.product-card__compare.active {
+  color: #fff;
+  border-color: var(--color-accent);
+  background: var(--color-accent);
+}
+
+.product-card__compare.active:hover {
+  background: var(--color-accent-hover);
+  border-color: var(--color-accent-hover);
 }
 </style>

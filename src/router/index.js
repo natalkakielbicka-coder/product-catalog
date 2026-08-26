@@ -30,6 +30,11 @@ const router = createRouter({
       component: () => import('../views/FavoritesView.vue'),
     },
     {
+      path: '/compare',
+      name: 'compare',
+      component: () => import('../views/CompareView.vue'),
+    },
+    {
       path: '/:pathMatch(.*)*',
       name: 'not-found',
       component: () => import('../views/NotFoundView.vue'),
