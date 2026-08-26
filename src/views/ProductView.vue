@@ -12,6 +12,7 @@ import { useCart } from '@/composables/useCart'
 import { useDocumentTitle } from '@/composables/useDocumentTitle'
 import { useFavorites } from '@/composables/useFavorites'
 import { useRecentlyViewed } from '@/composables/useRecentlyViewed'
+import { useCompare } from '@/composables/useCompare'
 import { formatCurrency } from '@/utils/currency'
 const VueEasyLightbox = defineAsyncComponent(() => import('vue-easy-lightbox'))
 
@@ -32,6 +33,7 @@ useDocumentTitle(pageTitle)
 const { products: relatedSource, fetchProducts: fetchRelatedProducts } = useProducts()
 const { addToCart } = useCart()
 const { isFavorite, toggleFavorite } = useFavorites()
+const { isCompared, toggleCompare, compareLimitReached } = useCompare()
 const { recentlyViewedIds, addRecentlyViewed } = useRecentlyViewed()
 
 const selectedImage = ref('')
@@ -282,6 +284,22 @@ watch(
             {{ isFavorite(product.id) ? 'Saved' : 'Add to favorites' }}
           </button>
 
+          <button
+            class="product__compare"
+            :class="{ active: isCompared(product.id) }"
+            type="button"
+            :disabled="compareLimitReached && !isCompared(product.id)"
+            @click="toggleCompare(product.id)"
+          >
+            {{
+              isCompared(product.id)
+                ? 'Remove from compare'
+                : compareLimitReached
+                  ? 'Compare limit reached'
+                  : 'Compare product'
+            }}
+          </button>
+
           <p class="product__description">
             {{ product.description }}
           </p>
@@ -446,6 +464,10 @@ main {
   display: grid;
   grid-template-columns: 80px minmax(0, 1fr);
   gap: 16px;
+}
+
+.product__gallery--single {
+  grid-template-columns: 1fr;
 }
 
 .product__thumbnails {
@@ -852,6 +874,51 @@ main {
   letter-spacing: -0.04em;
 }
 
+.product__compare {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+
+  margin-left: 10px;
+  padding: 10px 14px;
+
+  border: 1px solid var(--color-border);
+  border-radius: 999px;
+
+  color: var(--color-text);
+  background: var(--color-surface);
+
+  font-size: 14px;
+  font-weight: 600;
+
+  cursor: pointer;
+
+  transition:
+    color 0.2s ease,
+    background-color 0.2s ease,
+    border-color 0.2s ease,
+    transform 0.2s ease;
+}
+
+.product__compare:hover:not(:disabled) {
+  color: var(--color-accent);
+  border-color: var(--color-accent);
+  background: var(--color-accent-light);
+
+  transform: translateY(-1px);
+}
+
+.product__compare.active {
+  color: var(--color-accent);
+  border-color: var(--color-accent);
+  background: var(--color-accent-light);
+}
+
+.product__compare:disabled {
+  opacity: 0.45;
+  cursor: not-allowed;
+}
+
 @media (max-width: 767px) {
   .product {
     grid-template-columns: 1fr;
@@ -871,10 +938,6 @@ main {
     flex: 0 0 72px;
     width: 72px;
   }
-}
-
-.product__gallery--single {
-  grid-template-columns: 1fr;
 }
 
 @media (max-width: 480px) {
