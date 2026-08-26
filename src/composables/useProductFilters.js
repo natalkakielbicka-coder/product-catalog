@@ -7,6 +7,7 @@ export function useProductFilters(products) {
   const sortBy = ref('')
   const minPrice = ref(0)
   const maxPrice = ref(0)
+  const inStockOnly = ref(false)
 
   const priceLimit = computed(() => {
     if (products.value.length === 0) {
@@ -52,7 +53,9 @@ export function useProductFilters(products) {
 
       const matchesMaxPrice = maxPrice.value === '' || product.price <= maxPrice.value
 
-      return matchesSearch && matchesCategory && matchesMinPrice && matchesMaxPrice
+      const matchesStock = !inStockOnly.value || product.stock > 0
+
+      return matchesSearch && matchesCategory && matchesMinPrice && matchesMaxPrice && matchesStock
     })
 
     if (sortBy.value === 'price-asc') {
@@ -80,7 +83,8 @@ export function useProductFilters(products) {
       selectedCategory.value !== '' ||
       sortBy.value !== '' ||
       minPrice.value > 0 ||
-      maxPrice.value < priceLimit.value
+      maxPrice.value < priceLimit.value ||
+      inStockOnly.value
     )
   })
 
@@ -91,6 +95,7 @@ export function useProductFilters(products) {
     sortBy.value = ''
     minPrice.value = 0
     maxPrice.value = priceLimit.value
+    inStockOnly.value = false
   }
 
   return {
@@ -106,5 +111,6 @@ export function useProductFilters(products) {
     minPrice,
     maxPrice,
     priceLimit,
+    inStockOnly,
   }
 }

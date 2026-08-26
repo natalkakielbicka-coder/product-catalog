@@ -33,12 +33,13 @@ const {
   minPrice,
   maxPrice,
   priceLimit,
+  inStockOnly,
 } = useProductFilters(products)
 
 const itemsPerPage = ref(12)
 const isInitializing = ref(true)
 
-watch([searchQuery, selectedCategory, sortBy, minPrice, maxPrice], () => {
+watch([searchQuery, selectedCategory, sortBy, minPrice, maxPrice, inStockOnly], () => {
   if (isInitializing.value) return
 
   currentPage.value = 1
@@ -65,6 +66,10 @@ watch([searchQuery, selectedCategory, sortBy, minPrice, maxPrice], () => {
     query.maxPrice = maxPrice.value
   }
 
+  if (inStockOnly.value) {
+    query.stock = '1'
+  }
+
   router.replace({ query })
 })
 
@@ -85,6 +90,7 @@ onMounted(async () => {
   sortBy.value = route.query.sort ?? ''
   minPrice.value = Number(route.query.minPrice) || 0
   maxPrice.value = Number(route.query.maxPrice) || priceLimit.value
+  inStockOnly.value = route.query.stock === '1'
 
   const page = Number(route.query.page) || 1
   goToPage(page)
@@ -155,6 +161,14 @@ watch(itemsPerPage, () => {
         v-model:max-price="maxPrice"
         :limit="priceLimit"
       />
+
+      <label class="stock-filter">
+        <input v-model="inStockOnly" type="checkbox" />
+
+        <span class="stock-filter__switch"></span>
+
+        <span>In stock only</span>
+      </label>
 
       <div class="products-toolbar">
         <p class="products-count">
@@ -323,6 +337,58 @@ h1 {
   grid-template-columns: repeat(4, minmax(0, 1fr));
   gap: 24px;
   margin-top: 32px;
+}
+
+.stock-filter {
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  margin: 18px 0 28px;
+  cursor: pointer;
+  font-size: 14px;
+  font-weight: 600;
+}
+
+.stock-filter input {
+  position: absolute;
+  opacity: 0;
+  pointer-events: none;
+}
+
+.stock-filter__switch {
+  position: relative;
+
+  width: 42px;
+  height: 24px;
+
+  border-radius: 999px;
+  background: var(--color-border);
+
+  transition: background-color 0.2s ease;
+}
+
+.stock-filter__switch::after {
+  content: '';
+
+  position: absolute;
+  top: 3px;
+  left: 3px;
+
+  width: 18px;
+  height: 18px;
+
+  border-radius: 50%;
+  background: #fff;
+
+  transition: transform 0.2s ease;
+}
+
+.stock-filter input:checked + .stock-filter__switch {
+  background: var(--color-accent);
+}
+
+.stock-filter input:checked + .stock-filter__switch::after {
+  transform: translateX(18px);
 }
 
 @media (max-width: 1023px) {
