@@ -6,6 +6,7 @@ import { formatCurrency } from '@/utils/currency'
 import { vFocus } from '@/directives/vFocus'
 
 const orderPlaced = ref(false)
+const placedOrder = ref(null)
 
 const selectedDelivery = ref('standard')
 
@@ -214,8 +215,37 @@ function submitForm() {
   const isValid = validateForm()
 
   if (!isValid) return
-
   if (cartItems.value.length === 0) return
+
+  placedOrder.value = {
+    number: `ORD-${Date.now()}`,
+
+    customer: {
+      name: form.name,
+      email: form.email,
+      address: form.address,
+      city: form.city,
+      postalCode: form.postalCode,
+    },
+
+    items: cartItems.value.map((item) => ({
+      id: item.id,
+      title: item.title,
+      price: item.price,
+      quantity: item.quantity,
+    })),
+
+    delivery: {
+      name: selectedDeliveryMethod.value.name,
+      cost: deliveryCost.value,
+    },
+
+    payment: paymentMethods.find((method) => method.id === selectedPayment.value)?.name ?? '',
+
+    paymentFee: paymentFee.value,
+    subtotal: cartTotal.value,
+    total: orderTotal.value,
+  }
 
   orderPlaced.value = true
   clearCart()
@@ -246,12 +276,75 @@ function submitForm() {
       <RouterLink class="checkout-empty__button" to="/"> Continue shopping </RouterLink>
     </div>
 
-    <div v-else-if="orderPlaced" class="order-success">
+    <div v-else-if="orderPlaced && placedOrder" class="order-success">
       <div class="order-success__icon">✓</div>
 
       <h2>Thank you for your order!</h2>
 
-      <p>Your order has been placed successfully.</p>
+      <p>
+        Order
+        <strong>{{ placedOrder.number }}</strong>
+        has been placed successfully.
+      </p>
+
+      <div class="order-success__details">
+        <div class="order-success__section">
+          <h3>Products</h3>
+
+          <div v-for="item in placedOrder.items" :key="item.id" class="order-success__item">
+            <span> {{ item.title }} × {{ item.quantity }} </span>
+
+            <strong>
+              {{ formatCurrency(item.price * item.quantity) }}
+            </strong>
+          </div>
+        </div>
+
+        <div class="order-success__section">
+          <h3>Delivery</h3>
+
+          <div class="order-success__row">
+            <span>{{ placedOrder.delivery.name }}</span>
+
+            <strong>
+              {{
+                placedOrder.delivery.cost === 0 ? 'Free' : formatCurrency(placedOrder.delivery.cost)
+              }}
+            </strong>
+          </div>
+        </div>
+
+        <div class="order-success__section">
+          <h3>Payment</h3>
+
+          <div class="order-success__row">
+            <span>{{ placedOrder.payment }}</span>
+
+            <strong v-if="placedOrder.paymentFee > 0">
+              +{{ formatCurrency(placedOrder.paymentFee) }}
+            </strong>
+          </div>
+        </div>
+
+        <div class="order-success__section">
+          <h3>Shipping address</h3>
+
+          <p class="order-success__address">
+            {{ placedOrder.customer.name }}<br />
+            {{ placedOrder.customer.address }}<br />
+            {{ placedOrder.customer.postalCode }}
+            {{ placedOrder.customer.city }}
+          </p>
+        </div>
+
+        <div class="order-success__total">
+          <span>Total</span>
+
+          <strong>
+            {{ formatCurrency(placedOrder.total) }}
+          </strong>
+        </div>
+      </div>
 
       <RouterLink to="/" class="order-success__button"> Continue shopping </RouterLink>
     </div>
@@ -1015,10 +1108,54 @@ function submitForm() {
   background: var(--color-image-bg);
 }
 
-@media (max-width: 600px) {
-  .card-fields {
-    grid-template-columns: 1fr;
-  }
+.order-success__details {
+  width: 100%;
+  margin: 32px 0;
+  text-align: left;
+}
+
+.order-success__section {
+  padding: 18px 0;
+  border-bottom: 1px solid var(--color-border);
+}
+
+.order-success__section h3 {
+  margin: 0 0 12px;
+  font-size: 14px;
+}
+
+.order-success__item,
+.order-success__row,
+.order-success__total {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 20px;
+}
+
+.order-success__item {
+  padding: 6px 0;
+  font-size: 13px;
+}
+
+.order-success__row {
+  font-size: 13px;
+}
+
+.order-success__address {
+  margin: 0;
+  color: var(--color-muted);
+  font-size: 13px;
+  line-height: 1.7;
+}
+
+.order-success__total {
+  padding-top: 22px;
+  font-size: 20px;
+}
+
+.order-success__total strong {
+  color: var(--color-accent);
 }
 
 @media (max-width: 767px) {
@@ -1053,6 +1190,10 @@ function submitForm() {
 
   .checkout-section__header span {
     white-space: normal;
+  }
+
+  .card-fields {
+    grid-template-columns: 1fr;
   }
 }
 </style>
