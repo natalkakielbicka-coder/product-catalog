@@ -57,6 +57,33 @@ const paymentFee = computed(() => {
   return 0
 })
 
+function formatCardNumber(event) {
+  const digits = event.target.value.replace(/\D/g, '').slice(0, 16)
+
+  form.cardNumber = digits.match(/.{1,4}/g)?.join(' ') ?? ''
+
+  errors.cardNumber = ''
+}
+
+function formatCardExpiry(event) {
+  const digits = event.target.value.replace(/\D/g, '').slice(0, 4)
+
+  if (digits.length <= 2) {
+    form.cardExpiry = digits
+    return
+  }
+
+  form.cardExpiry = `${digits.slice(0, 2)}/${digits.slice(2)}`
+
+  errors.cardExpiry = ''
+}
+
+function formatCardCvc(event) {
+  form.cardCvc = event.target.value.replace(/\D/g, '').slice(0, 4)
+
+  errors.cardCvc = ''
+}
+
 const pageTitle = ref('Checkout | Product Catalog')
 
 useDocumentTitle(pageTitle)
@@ -142,8 +169,28 @@ function validateForm() {
       errors.cardNumber = 'Enter a valid 16-digit card number.'
     }
 
-    if (!/^\d{2}\/\d{2}$/.test(form.cardExpiry)) {
+    const expiryMatch = form.cardExpiry.match(/^(\d{2})\/(\d{2})$/)
+
+    if (!expiryMatch) {
       errors.cardExpiry = 'Use format MM/YY.'
+    } else {
+      const month = Number(expiryMatch[1])
+      const year = Number(expiryMatch[2])
+
+      if (month < 1 || month > 12) {
+        errors.cardExpiry = 'Enter a valid month.'
+      } else {
+        const now = new Date()
+
+        const currentMonth = now.getMonth() + 1
+        const currentYear = now.getFullYear() % 100
+
+        const cardExpired = year < currentYear || (year === currentYear && month < currentMonth)
+
+        if (cardExpired) {
+          errors.cardExpiry = 'This card has expired.'
+        }
+      }
     }
 
     if (!/^\d{3,4}$/.test(form.cardCvc)) {
@@ -365,12 +412,14 @@ function submitForm() {
               <span>Card number</span>
 
               <input
-                v-model="form.cardNumber"
+                :value="form.cardNumber"
                 type="text"
                 inputmode="numeric"
+                autocomplete="cc-number"
                 placeholder="1234 5678 9012 3456"
+                maxlength="19"
                 :class="{ error: errors.cardNumber }"
-                @input="errors.cardNumber = ''"
+                @input="formatCardNumber"
               />
 
               <small v-if="errors.cardNumber" class="form-error">
@@ -382,11 +431,14 @@ function submitForm() {
               <span>Expiry date</span>
 
               <input
-                v-model="form.cardExpiry"
+                :value="form.cardExpiry"
                 type="text"
+                inputmode="numeric"
+                autocomplete="cc-exp"
                 placeholder="MM/YY"
+                maxlength="5"
                 :class="{ error: errors.cardExpiry }"
-                @input="errors.cardExpiry = ''"
+                @input="formatCardExpiry"
               />
 
               <small v-if="errors.cardExpiry" class="form-error">
@@ -398,12 +450,14 @@ function submitForm() {
               <span>CVC</span>
 
               <input
-                v-model="form.cardCvc"
+                :value="form.cardCvc"
                 type="text"
                 inputmode="numeric"
+                autocomplete="cc-csc"
                 placeholder="123"
+                maxlength="4"
                 :class="{ error: errors.cardCvc }"
-                @input="errors.cardCvc = ''"
+                @input="formatCardCvc"
               />
 
               <small v-if="errors.cardCvc" class="form-error">
