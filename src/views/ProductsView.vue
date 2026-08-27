@@ -149,6 +149,11 @@ watch(itemsPerPage, () => {
 
   router.replace({ query })
 })
+
+function selectSearchSuggestion(title) {
+  searchInput.value = title
+  searchQuery.value = title
+}
 </script>
 
 <template>
@@ -162,7 +167,12 @@ watch(itemsPerPage, () => {
     <ErrorState v-else-if="error" @retry="fetchProducts" />
 
     <template v-else>
-      <ProductSearch v-model="searchInput" @search="applySearch" />
+      <ProductSearch
+        v-model="searchInput"
+        :products="products"
+        @search="applySearch"
+        @select="selectSearchSuggestion"
+      />
 
       <ProductCategories v-model="selectedCategory" :categories="categories" />
 

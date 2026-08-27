@@ -1,42 +1,111 @@
 <script setup>
-defineProps({
+import { computed, ref } from 'vue'
+
+const props = defineProps({
   modelValue: {
     type: String,
     required: true,
   },
+
+  products: {
+    type: Array,
+    required: true,
+  },
 })
 
-const emit = defineEmits(['update:modelValue', 'search'])
+const emit = defineEmits(['update:modelValue', 'search', 'select'])
+
+const focused = ref(false)
+
+const suggestions = computed(() => {
+  const query = props.modelValue.trim().toLowerCase()
+
+  if (query.length < 2) {
+    return []
+  }
+
+  return props.products.filter((product) => product.title.toLowerCase().includes(query)).slice(0, 5)
+})
+
+const showSuggestions = computed(() => {
+  return focused.value && suggestions.value.length > 0
+})
+
+function selectSuggestion(product) {
+  emit('update:modelValue', product.title)
+  emit('select', product.title)
+
+  focused.value = false
+}
 </script>
 
 <template>
-  <form class="product-search" @submit.prevent="emit('search')">
-    <input
-      type="search"
-      :value="modelValue"
-      placeholder="Search products..."
-      @input="emit('update:modelValue', $event.target.value)"
-    />
+  <div class="product-search-wrapper">
+    <form class="product-search" @submit.prevent="emit('search')">
+      <input
+        type="search"
+        :value="modelValue"
+        placeholder="Search products..."
+        autocomplete="off"
+        @focus="focused = true"
+        @blur="focused = false"
+        @input="emit('update:modelValue', $event.target.value)"
+      />
 
-    <button type="submit">Search</button>
-  </form>
+      <button type="submit">Search</button>
+    </form>
+
+    <div v-if="showSuggestions" class="search-suggestions">
+      <button
+        v-for="product in suggestions"
+        :key="product.id"
+        class="search-suggestion"
+        type="button"
+        @mousedown.prevent="selectSuggestion(product)"
+      >
+        <img :src="product.thumbnail" :alt="product.title" />
+
+        <span class="search-suggestion__content">
+          <strong>
+            {{ product.title }}
+          </strong>
+
+          <small>
+            {{ product.category }}
+          </small>
+        </span>
+      </button>
+    </div>
+  </div>
 </template>
 
 <style scoped>
+.product-search-wrapper {
+  position: relative;
+
+  margin-bottom: 32px;
+}
+
 .product-search {
   display: grid;
+
   grid-template-columns: 1fr auto;
+
   gap: 10px;
-  margin-bottom: 32px;
 }
 
 .product-search input {
   min-width: 0;
+
   padding: 14px 16px;
+
   border: 1px solid var(--color-border);
   border-radius: 12px;
+
   background: var(--color-surface);
+
   outline: none;
+
   transition: border-color 0.2s ease;
 }
 
@@ -46,11 +115,15 @@ const emit = defineEmits(['update:modelValue', 'search'])
 
 .product-search button {
   padding: 14px 24px;
+
   border: 0;
   border-radius: 12px;
+
   color: #fff;
   background: var(--color-accent);
+
   font-weight: 600;
+
   cursor: pointer;
 }
 
@@ -58,9 +131,97 @@ const emit = defineEmits(['update:modelValue', 'search'])
   background: var(--color-accent-hover);
 }
 
-@media (max-width: 480px) {
+.search-suggestions {
+  position: absolute;
+  z-index: 20;
+  top: calc(100% + 8px);
+  left: 0;
+
+  width: calc(100% - 100px);
+  max-height: 380px;
+
+  overflow-y: auto;
+
+  padding: 8px;
+
+  border: 1px solid var(--color-border);
+  border-radius: 14px;
+
+  background: var(--color-surface);
+
+  box-shadow: 0 18px 50px rgba(33, 28, 36, 0.12);
+}
+
+.search-suggestion {
+  display: grid;
+
+  grid-template-columns: 50px 1fr;
+
+  align-items: center;
+
+  width: 100%;
+
+  gap: 12px;
+  padding: 8px;
+
+  border: 0;
+  border-radius: 10px;
+
+  color: var(--color-text);
+  background: transparent;
+
+  text-align: left;
+
+  cursor: pointer;
+}
+
+.search-suggestion:hover {
+  background: var(--color-accent-light);
+}
+
+.search-suggestion img {
+  width: 50px;
+  height: 50px;
+
+  border-radius: 9px;
+
+  object-fit: contain;
+
+  background: var(--color-image-bg);
+}
+
+.search-suggestion__content {
+  display: flex;
+
+  flex-direction: column;
+
+  gap: 4px;
+
+  min-width: 0;
+}
+
+.search-suggestion__content strong {
+  overflow: hidden;
+
+  font-size: 13px;
+
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.search-suggestion__content small {
+  color: var(--color-muted);
+
+  font-size: 11px;
+}
+
+@media (max-width: 479px) {
   .product-search {
     grid-template-columns: 1fr;
+  }
+
+  .search-suggestions {
+    width: 100%;
   }
 }
 </style>
