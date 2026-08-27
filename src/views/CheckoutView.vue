@@ -1,135 +1,14 @@
 <script setup>
-import { reactive, ref, computed } from 'vue'
+import { reactive, ref } from 'vue'
 import { useCart } from '@/composables/useCart'
 import { useDocumentTitle } from '@/composables/useDocumentTitle'
+import { useCheckoutPricing } from '@/composables/useCheckoutPricing'
 import { formatCurrency } from '@/utils/currency'
 import { vFocus } from '@/directives/vFocus'
 
 const orderPlaced = ref(false)
 const placedOrder = ref(null)
 const currentStep = ref(1)
-
-const couponInput = ref('')
-const appliedCoupon = ref(null)
-const couponError = ref('')
-
-const coupons = {
-  SAVE10: {
-    code: 'SAVE10',
-    type: 'percentage',
-    value: 10,
-    minSubtotal: 100,
-    expiresAt: '2026-12-31',
-  },
-
-  FREESHIPPING: {
-    code: 'FREESHIPPING',
-    type: 'free-delivery',
-    minSubtotal: 50,
-    expiresAt: '2026-12-31',
-  },
-}
-
-function isCouponExpired(coupon) {
-  const expiresAt = new Date(`${coupon.expiresAt}T23:59:59`)
-
-  return new Date() > expiresAt
-}
-
-function applyCoupon() {
-  const code = couponInput.value.trim().toUpperCase()
-
-  couponError.value = ''
-
-  if (!code) {
-    couponError.value = 'Enter a coupon code.'
-    return
-  }
-
-  const coupon = coupons[code]
-
-  if (!coupon) {
-    couponError.value = 'Invalid coupon code.'
-    return
-  }
-
-  if (isCouponExpired(coupon)) {
-    couponError.value = 'This coupon has expired.'
-    return
-  }
-
-  if (cartTotal.value < coupon.minSubtotal) {
-    couponError.value = `Minimum order value is ${formatCurrency(coupon.minSubtotal)}.`
-
-    return
-  }
-
-  appliedCoupon.value = coupon
-  couponInput.value = ''
-}
-
-function removeCoupon() {
-  appliedCoupon.value = null
-  couponError.value = ''
-}
-
-const discount = computed(() => {
-  if (appliedCoupon.value?.type !== 'percentage') {
-    return 0
-  }
-
-  return cartTotal.value * (appliedCoupon.value.value / 100)
-})
-
-const selectedDelivery = ref('standard')
-
-const deliveryMethods = [
-  {
-    id: 'standard',
-    name: 'Standard delivery',
-    description: '3–5 business days',
-    price: 6.99,
-  },
-  {
-    id: 'express',
-    name: 'Express delivery',
-    description: '1–2 business days',
-    price: 14.99,
-  },
-]
-
-const FREE_DELIVERY_THRESHOLD = 100
-
-const selectedPayment = ref('card')
-
-const paymentMethods = [
-  {
-    id: 'card',
-    name: 'Credit / debit card',
-    description: 'Visa, Mastercard',
-  },
-  {
-    id: 'paypal',
-    name: 'PayPal',
-    description: 'Pay with your PayPal account',
-  },
-  {
-    id: 'cash',
-    name: 'Cash on delivery',
-    description: 'Pay when your order arrives',
-    price: 4.99,
-  },
-]
-
-const CASH_ON_DELIVERY_FEE = 4.99
-
-const paymentFee = computed(() => {
-  if (selectedPayment.value === 'cash') {
-    return CASH_ON_DELIVERY_FEE
-  }
-
-  return 0
-})
 
 function formatCardNumber(event) {
   const digits = event.target.value.replace(/\D/g, '').slice(0, 16)
@@ -186,25 +65,28 @@ const errors = reactive({
 
 const { cartItems, cartTotal, clearCart } = useCart()
 
-const selectedDeliveryMethod = computed(() => {
-  return deliveryMethods.find((method) => method.id === selectedDelivery.value)
-})
+const {
+  selectedDelivery,
+  selectedPayment,
+  deliveryMethods,
+  paymentMethods,
+  FREE_DELIVERY_THRESHOLD,
 
-const deliveryCost = computed(() => {
-  if (appliedCoupon.value?.type === 'free-delivery') {
-    return 0
-  }
+  selectedDeliveryMethod,
+  selectedPaymentMethod,
 
-  if (selectedDelivery.value === 'standard' && cartTotal.value >= FREE_DELIVERY_THRESHOLD) {
-    return 0
-  }
+  deliveryCost,
+  paymentFee,
+  discount,
+  orderTotal,
 
-  return selectedDeliveryMethod.value?.price ?? 0
-})
+  couponInput,
+  appliedCoupon,
+  couponError,
 
-const orderTotal = computed(() => {
-  return cartTotal.value - discount.value + deliveryCost.value + paymentFee.value
-})
+  applyCoupon,
+  removeCoupon,
+} = useCheckoutPricing(cartTotal)
 
 function validateCustomerDetails() {
   errors.name = ''
@@ -349,7 +231,7 @@ function submitForm() {
       cost: deliveryCost.value,
     },
 
-    payment: paymentMethods.find((method) => method.id === selectedPayment.value)?.name ?? '',
+    payment: selectedPaymentMethod.value?.name ?? '',
 
     paymentFee: paymentFee.value,
     subtotal: cartTotal.value,
@@ -1382,7 +1264,7 @@ function submitForm() {
 
 .order-success__row {
   font-size: 13px;
-  padding: 18px 0;
+  padding: 18px 0 0 0;
 }
 
 .order-success__address {
