@@ -9,6 +9,78 @@ const orderPlaced = ref(false)
 const placedOrder = ref(null)
 const currentStep = ref(1)
 
+const couponInput = ref('')
+const appliedCoupon = ref(null)
+const couponError = ref('')
+
+const coupons = {
+  SAVE10: {
+    code: 'SAVE10',
+    type: 'percentage',
+    value: 10,
+    minSubtotal: 100,
+    expiresAt: '2026-12-31',
+  },
+
+  FREESHIPPING: {
+    code: 'FREESHIPPING',
+    type: 'free-delivery',
+    minSubtotal: 50,
+    expiresAt: '2026-12-31',
+  },
+}
+
+function isCouponExpired(coupon) {
+  const expiresAt = new Date(`${coupon.expiresAt}T23:59:59`)
+
+  return new Date() > expiresAt
+}
+
+function applyCoupon() {
+  const code = couponInput.value.trim().toUpperCase()
+
+  couponError.value = ''
+
+  if (!code) {
+    couponError.value = 'Enter a coupon code.'
+    return
+  }
+
+  const coupon = coupons[code]
+
+  if (!coupon) {
+    couponError.value = 'Invalid coupon code.'
+    return
+  }
+
+  if (isCouponExpired(coupon)) {
+    couponError.value = 'This coupon has expired.'
+    return
+  }
+
+  if (cartTotal.value < coupon.minSubtotal) {
+    couponError.value = `Minimum order value is ${formatCurrency(coupon.minSubtotal)}.`
+
+    return
+  }
+
+  appliedCoupon.value = coupon
+  couponInput.value = ''
+}
+
+function removeCoupon() {
+  appliedCoupon.value = null
+  couponError.value = ''
+}
+
+const discount = computed(() => {
+  if (appliedCoupon.value?.type !== 'percentage') {
+    return 0
+  }
+
+  return cartTotal.value * (appliedCoupon.value.value / 100)
+})
+
 const selectedDelivery = ref('standard')
 
 const deliveryMethods = [
@@ -119,6 +191,10 @@ const selectedDeliveryMethod = computed(() => {
 })
 
 const deliveryCost = computed(() => {
+  if (appliedCoupon.value?.type === 'free-delivery') {
+    return 0
+  }
+
   if (selectedDelivery.value === 'standard' && cartTotal.value >= FREE_DELIVERY_THRESHOLD) {
     return 0
   }
@@ -127,7 +203,7 @@ const deliveryCost = computed(() => {
 })
 
 const orderTotal = computed(() => {
-  return cartTotal.value + deliveryCost.value + paymentFee.value
+  return cartTotal.value - discount.value + deliveryCost.value + paymentFee.value
 })
 
 function validateCustomerDetails() {
@@ -278,6 +354,9 @@ function submitForm() {
     paymentFee: paymentFee.value,
     subtotal: cartTotal.value,
     total: orderTotal.value,
+
+    coupon: appliedCoupon.value?.code ?? null,
+    discount: discount.value,
   }
 
   orderPlaced.value = true
@@ -368,6 +447,16 @@ function submitForm() {
             {{ placedOrder.customer.postalCode }}
             {{ placedOrder.customer.city }}
           </p>
+        </div>
+
+        <div v-if="placedOrder.coupon" class="order-success__row">
+          <span> Coupon ({{ placedOrder.coupon }}) </span>
+
+          <strong v-if="placedOrder.discount > 0">
+            -{{ formatCurrency(placedOrder.discount) }}
+          </strong>
+
+          <strong v-else> Applied </strong>
         </div>
 
         <div class="order-success__total">
@@ -697,12 +786,40 @@ function submitForm() {
           </div>
         </div>
 
-        <div class="order-summary__total">
-          <span>Total</span>
+        <div class="coupon">
+          <div v-if="!appliedCoupon" class="coupon__form">
+            <input
+              v-model="couponInput"
+              type="text"
+              placeholder="Coupon code"
+              @keyup.enter="applyCoupon"
+            />
 
-          <strong>
-            {{ formatCurrency(orderTotal) }}
-          </strong>
+            <button type="button" @click="applyCoupon">Apply</button>
+          </div>
+
+          <small v-if="couponError" class="form-error">
+            {{ couponError }}
+          </small>
+
+          <div v-if="appliedCoupon" class="coupon__applied">
+            <div>
+              <span>Coupon</span>
+              <strong>{{ appliedCoupon.code }}</strong>
+            </div>
+
+            <button type="button" @click="removeCoupon">Remove</button>
+          </div>
+        </div>
+
+        <p v-if="!appliedCoupon" class="coupon__hint">
+          Try SAVE10 on orders over $100 or FREESHIPPING over $50.
+        </p>
+
+        <div v-if="discount > 0" class="order-summary__row order-summary__row--discount">
+          <span>Discount</span>
+
+          <strong> -{{ formatCurrency(discount) }} </strong>
         </div>
 
         <div class="order-summary__row">
@@ -726,6 +843,14 @@ function submitForm() {
 
           <strong>
             {{ formatCurrency(paymentFee) }}
+          </strong>
+        </div>
+
+        <div class="order-summary__total">
+          <span>Total</span>
+
+          <strong>
+            {{ formatCurrency(orderTotal) }}
           </strong>
         </div>
       </aside>
@@ -1257,6 +1382,7 @@ function submitForm() {
 
 .order-success__row {
   font-size: 13px;
+  padding: 18px 0;
 }
 
 .order-success__address {
@@ -1398,6 +1524,82 @@ function submitForm() {
 
   font-weight: 600;
   cursor: pointer;
+}
+
+.coupon {
+  padding: 20px 0;
+  border-bottom: 1px solid var(--color-border);
+}
+
+.coupon__form {
+  display: grid;
+  grid-template-columns: 1fr auto;
+  gap: 8px;
+}
+
+.coupon__form input {
+  min-width: 0;
+  padding: 11px 12px;
+
+  border: 1px solid var(--color-border);
+  border-radius: 10px;
+
+  background: var(--color-bg);
+  font: inherit;
+  font-size: 13px;
+}
+
+.coupon__form input:focus {
+  border-color: var(--color-accent);
+  outline: none;
+}
+
+.coupon__form button,
+.coupon__applied button {
+  border: 0;
+  color: var(--color-accent);
+  background: transparent;
+
+  font-size: 13px;
+  font-weight: 700;
+
+  cursor: pointer;
+}
+
+.coupon__applied {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+}
+
+.coupon__applied > div {
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+}
+
+.coupon__applied span {
+  color: var(--color-muted);
+  font-size: 11px;
+}
+
+.coupon__applied strong {
+  color: var(--color-accent);
+  font-size: 13px;
+}
+
+.order-summary__row--discount strong {
+  color: var(--color-accent);
+}
+
+.coupon__hint {
+  margin: 8px 0 0;
+
+  color: var(--color-muted);
+
+  font-size: 11px;
+  line-height: 1.5;
 }
 
 @media (max-width: 767px) {
