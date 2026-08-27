@@ -7,6 +7,7 @@ import { vFocus } from '@/directives/vFocus'
 
 const orderPlaced = ref(false)
 const placedOrder = ref(null)
+const currentStep = ref(1)
 
 const selectedDelivery = ref('standard')
 
@@ -129,15 +130,12 @@ const orderTotal = computed(() => {
   return cartTotal.value + deliveryCost.value + paymentFee.value
 })
 
-function validateForm() {
+function validateCustomerDetails() {
   errors.name = ''
   errors.email = ''
   errors.address = ''
   errors.city = ''
   errors.postalCode = ''
-  errors.cardNumber = ''
-  errors.cardExpiry = ''
-  errors.cardCvc = ''
 
   if (!form.name.trim()) {
     errors.name = 'Name is required.'
@@ -163,52 +161,87 @@ function validateForm() {
     errors.postalCode = 'Use format 00-000.'
   }
 
-  if (selectedPayment.value === 'card') {
-    const cardNumber = form.cardNumber.replace(/\s/g, '')
-
-    if (!/^\d{16}$/.test(cardNumber)) {
-      errors.cardNumber = 'Enter a valid 16-digit card number.'
-    }
-
-    const expiryMatch = form.cardExpiry.match(/^(\d{2})\/(\d{2})$/)
-
-    if (!expiryMatch) {
-      errors.cardExpiry = 'Use format MM/YY.'
-    } else {
-      const month = Number(expiryMatch[1])
-      const year = Number(expiryMatch[2])
-
-      if (month < 1 || month > 12) {
-        errors.cardExpiry = 'Enter a valid month.'
-      } else {
-        const now = new Date()
-
-        const currentMonth = now.getMonth() + 1
-        const currentYear = now.getFullYear() % 100
-
-        const cardExpired = year < currentYear || (year === currentYear && month < currentMonth)
-
-        if (cardExpired) {
-          errors.cardExpiry = 'This card has expired.'
-        }
-      }
-    }
-
-    if (!/^\d{3,4}$/.test(form.cardCvc)) {
-      errors.cardCvc = 'Enter a valid CVC.'
-    }
-  }
-
   return (
     errors.name === '' &&
     errors.email === '' &&
     errors.address === '' &&
     errors.city === '' &&
-    errors.postalCode === '' &&
-    errors.cardNumber === '' &&
-    errors.cardExpiry === '' &&
-    errors.cardCvc === ''
+    errors.postalCode === ''
   )
+}
+
+function validatePayment() {
+  errors.cardNumber = ''
+  errors.cardExpiry = ''
+  errors.cardCvc = ''
+
+  if (selectedPayment.value !== 'card') {
+    return true
+  }
+
+  const cardNumber = form.cardNumber.replace(/\s/g, '')
+
+  if (!/^\d{16}$/.test(cardNumber)) {
+    errors.cardNumber = 'Enter a valid 16-digit card number.'
+  }
+
+  const expiryMatch = form.cardExpiry.match(/^(\d{2})\/(\d{2})$/)
+
+  if (!expiryMatch) {
+    errors.cardExpiry = 'Use format MM/YY.'
+  } else {
+    const month = Number(expiryMatch[1])
+    const year = Number(expiryMatch[2])
+
+    if (month < 1 || month > 12) {
+      errors.cardExpiry = 'Enter a valid month.'
+    } else {
+      const now = new Date()
+      const currentMonth = now.getMonth() + 1
+      const currentYear = now.getFullYear() % 100
+
+      const expired = year < currentYear || (year === currentYear && month < currentMonth)
+
+      if (expired) {
+        errors.cardExpiry = 'This card has expired.'
+      }
+    }
+  }
+
+  if (!/^\d{3,4}$/.test(form.cardCvc)) {
+    errors.cardCvc = 'Enter a valid CVC.'
+  }
+
+  return errors.cardNumber === '' && errors.cardExpiry === '' && errors.cardCvc === ''
+}
+
+function goToStep2() {
+  if (!validateCustomerDetails()) {
+    return
+  }
+
+  currentStep.value = 2
+}
+
+function goToStep3() {
+  if (!validatePayment()) {
+    return
+  }
+
+  currentStep.value = 3
+}
+
+function goBack() {
+  if (currentStep.value > 1) {
+    currentStep.value--
+  }
+}
+
+function validateForm() {
+  const customerValid = validateCustomerDetails()
+  const paymentValid = validatePayment()
+
+  return customerValid && paymentValid
 }
 
 function submitForm() {
@@ -349,218 +382,302 @@ function submitForm() {
       <RouterLink to="/" class="order-success__button"> Continue shopping </RouterLink>
     </div>
 
-    <div v-else class="checkout__layout">
+    <div v-if="cartItems.length > 0 && !orderPlaced" class="checkout-steps">
+      <div class="checkout-step" :class="{ active: currentStep >= 1 }">
+        <span>1</span>
+        <strong>Details</strong>
+      </div>
+
+      <div class="checkout-step" :class="{ active: currentStep >= 2 }">
+        <span>2</span>
+        <strong>Delivery & payment</strong>
+      </div>
+
+      <div class="checkout-step" :class="{ active: currentStep >= 3 }">
+        <span>3</span>
+        <strong>Review</strong>
+      </div>
+    </div>
+
+    <div v-if="cartItems.length > 0 && !orderPlaced" class="checkout__layout">
       <form class="checkout-form" novalidate @submit.prevent="submitForm">
-        <div class="checkout-form__grid">
-          <label class="checkout-form__field checkout-form__field--full">
-            <span>Name</span>
-
-            <input
-              v-model="form.name"
-              v-focus
-              type="text"
-              placeholder="Your name"
-              :class="{ error: errors.name }"
-              @input="errors.name = ''"
-            />
-
-            <small v-if="errors.name" class="form-error">
-              {{ errors.name }}
-            </small>
-          </label>
-
-          <label class="checkout-form__field checkout-form__field--full">
-            <span>Email</span>
-
-            <input
-              v-model="form.email"
-              type="email"
-              placeholder="you@example.com"
-              :class="{ error: errors.email }"
-              @input="errors.email = ''"
-            />
-
-            <small v-if="errors.email" class="form-error">
-              {{ errors.email }}
-            </small>
-          </label>
-
-          <label class="checkout-form__field checkout-form__field--full">
-            <span>Address</span>
-
-            <input
-              v-model="form.address"
-              type="text"
-              placeholder="Street and number"
-              :class="{ error: errors.address }"
-              @input="errors.address = ''"
-            />
-
-            <small v-if="errors.address" class="form-error">
-              {{ errors.address }}
-            </small>
-          </label>
-
-          <label class="checkout-form__field">
-            <span>City</span>
-
-            <input
-              v-model="form.city"
-              type="text"
-              placeholder="City"
-              :class="{ error: errors.city }"
-              @input="errors.city = ''"
-            />
-
-            <small v-if="errors.city" class="form-error">
-              {{ errors.city }}
-            </small>
-          </label>
-
-          <label class="checkout-form__field">
-            <span>Postal code</span>
-
-            <input
-              v-model="form.postalCode"
-              type="text"
-              placeholder="00-000"
-              :class="{ error: errors.postalCode }"
-              @input="errors.postalCode = ''"
-            />
-
-            <small v-if="errors.postalCode" class="form-error">
-              {{ errors.postalCode }}
-            </small>
-          </label>
-        </div>
-
-        <div class="checkout-section">
-          <div class="checkout-section__header">
-            <h2>Delivery method</h2>
-
-            <span v-if="cartTotal < FREE_DELIVERY_THRESHOLD">
-              Spend
-              {{ formatCurrency(FREE_DELIVERY_THRESHOLD - cartTotal) }}
-              more for free standard delivery
-            </span>
-
-            <span v-else> Free standard delivery available </span>
-          </div>
-
-          <div class="delivery-methods">
-            <label
-              v-for="method in deliveryMethods"
-              :key="method.id"
-              class="delivery-method"
-              :class="{
-                active: selectedDelivery === method.id,
-              }"
-            >
-              <input v-model="selectedDelivery" type="radio" name="delivery" :value="method.id" />
-
-              <div>
-                <strong>{{ method.name }}</strong>
-
-                <span>{{ method.description }}</span>
-              </div>
-
-              <strong class="delivery-method__price">
-                {{
-                  method.id === 'standard' && cartTotal >= FREE_DELIVERY_THRESHOLD
-                    ? 'Free'
-                    : formatCurrency(method.price)
-                }}
-              </strong>
-            </label>
-          </div>
-        </div>
-
-        <div class="checkout-section">
-          <div class="checkout-section__header">
-            <h2>Payment method</h2>
-          </div>
-
-          <div class="payment-methods">
-            <label
-              v-for="method in paymentMethods"
-              :key="method.id"
-              class="payment-method"
-              :class="{ active: selectedPayment === method.id }"
-            >
-              <input v-model="selectedPayment" type="radio" name="payment" :value="method.id" />
-
-              <div>
-                <strong>{{ method.name }}</strong>
-                <span>{{ method.description }}</span>
-              </div>
-
-              <strong v-if="method.price" class="payment-method__price">
-                +{{ formatCurrency(method.price) }}
-              </strong>
-            </label>
-          </div>
-
-          <div v-if="selectedPayment === 'card'" class="card-fields">
+        <template v-if="currentStep === 1">
+          <div class="checkout-form__grid">
             <label class="checkout-form__field checkout-form__field--full">
-              <span>Card number</span>
+              <span>Name</span>
 
               <input
-                :value="form.cardNumber"
+                v-model="form.name"
+                v-focus
                 type="text"
-                inputmode="numeric"
-                autocomplete="cc-number"
-                placeholder="1234 5678 9012 3456"
-                maxlength="19"
-                :class="{ error: errors.cardNumber }"
-                @input="formatCardNumber"
+                placeholder="Your name"
+                :class="{ error: errors.name }"
+                @input="errors.name = ''"
               />
 
-              <small v-if="errors.cardNumber" class="form-error">
-                {{ errors.cardNumber }}
+              <small v-if="errors.name" class="form-error">
+                {{ errors.name }}
+              </small>
+            </label>
+
+            <label class="checkout-form__field checkout-form__field--full">
+              <span>Email</span>
+
+              <input
+                v-model="form.email"
+                type="email"
+                placeholder="you@example.com"
+                :class="{ error: errors.email }"
+                @input="errors.email = ''"
+              />
+
+              <small v-if="errors.email" class="form-error">
+                {{ errors.email }}
+              </small>
+            </label>
+
+            <label class="checkout-form__field checkout-form__field--full">
+              <span>Address</span>
+
+              <input
+                v-model="form.address"
+                type="text"
+                placeholder="Street and number"
+                :class="{ error: errors.address }"
+                @input="errors.address = ''"
+              />
+
+              <small v-if="errors.address" class="form-error">
+                {{ errors.address }}
               </small>
             </label>
 
             <label class="checkout-form__field">
-              <span>Expiry date</span>
+              <span>City</span>
 
               <input
-                :value="form.cardExpiry"
+                v-model="form.city"
                 type="text"
-                inputmode="numeric"
-                autocomplete="cc-exp"
-                placeholder="MM/YY"
-                maxlength="5"
-                :class="{ error: errors.cardExpiry }"
-                @input="formatCardExpiry"
+                placeholder="City"
+                :class="{ error: errors.city }"
+                @input="errors.city = ''"
               />
 
-              <small v-if="errors.cardExpiry" class="form-error">
-                {{ errors.cardExpiry }}
+              <small v-if="errors.city" class="form-error">
+                {{ errors.city }}
               </small>
             </label>
 
             <label class="checkout-form__field">
-              <span>CVC</span>
+              <span>Postal code</span>
 
               <input
-                :value="form.cardCvc"
+                v-model="form.postalCode"
                 type="text"
-                inputmode="numeric"
-                autocomplete="cc-csc"
-                placeholder="123"
-                maxlength="4"
-                :class="{ error: errors.cardCvc }"
-                @input="formatCardCvc"
+                placeholder="00-000"
+                :class="{ error: errors.postalCode }"
+                @input="errors.postalCode = ''"
               />
 
-              <small v-if="errors.cardCvc" class="form-error">
-                {{ errors.cardCvc }}
+              <small v-if="errors.postalCode" class="form-error">
+                {{ errors.postalCode }}
               </small>
             </label>
           </div>
-        </div>
 
-        <button class="checkout-form__button" type="submit">Place order</button>
+          <button class="checkout-form__button" type="button" @click="goToStep2">
+            Continue to delivery
+          </button>
+        </template>
+
+        <template v-else-if="currentStep === 2">
+          <div class="checkout-section">
+            <div class="checkout-section__header">
+              <h2>Delivery method</h2>
+
+              <span v-if="cartTotal < FREE_DELIVERY_THRESHOLD">
+                Spend
+                {{ formatCurrency(FREE_DELIVERY_THRESHOLD - cartTotal) }}
+                more for free standard delivery
+              </span>
+
+              <span v-else> Free standard delivery available </span>
+            </div>
+
+            <div class="delivery-methods">
+              <label
+                v-for="method in deliveryMethods"
+                :key="method.id"
+                class="delivery-method"
+                :class="{
+                  active: selectedDelivery === method.id,
+                }"
+              >
+                <input v-model="selectedDelivery" type="radio" name="delivery" :value="method.id" />
+
+                <div>
+                  <strong>{{ method.name }}</strong>
+
+                  <span>{{ method.description }}</span>
+                </div>
+
+                <strong class="delivery-method__price">
+                  {{
+                    method.id === 'standard' && cartTotal >= FREE_DELIVERY_THRESHOLD
+                      ? 'Free'
+                      : formatCurrency(method.price)
+                  }}
+                </strong>
+              </label>
+            </div>
+          </div>
+
+          <div class="checkout-section">
+            <div class="checkout-section__header">
+              <h2>Payment method</h2>
+            </div>
+
+            <div class="payment-methods">
+              <label
+                v-for="method in paymentMethods"
+                :key="method.id"
+                class="payment-method"
+                :class="{ active: selectedPayment === method.id }"
+              >
+                <input v-model="selectedPayment" type="radio" name="payment" :value="method.id" />
+
+                <div>
+                  <strong>{{ method.name }}</strong>
+                  <span>{{ method.description }}</span>
+                </div>
+
+                <strong v-if="method.price" class="payment-method__price">
+                  +{{ formatCurrency(method.price) }}
+                </strong>
+              </label>
+            </div>
+
+            <div v-if="selectedPayment === 'card'" class="card-fields">
+              <label class="checkout-form__field checkout-form__field--full">
+                <span>Card number</span>
+
+                <input
+                  :value="form.cardNumber"
+                  type="text"
+                  inputmode="numeric"
+                  autocomplete="cc-number"
+                  placeholder="1234 5678 9012 3456"
+                  maxlength="19"
+                  :class="{ error: errors.cardNumber }"
+                  @input="formatCardNumber"
+                />
+
+                <small v-if="errors.cardNumber" class="form-error">
+                  {{ errors.cardNumber }}
+                </small>
+              </label>
+
+              <label class="checkout-form__field">
+                <span>Expiry date</span>
+
+                <input
+                  :value="form.cardExpiry"
+                  type="text"
+                  inputmode="numeric"
+                  autocomplete="cc-exp"
+                  placeholder="MM/YY"
+                  maxlength="5"
+                  :class="{ error: errors.cardExpiry }"
+                  @input="formatCardExpiry"
+                />
+
+                <small v-if="errors.cardExpiry" class="form-error">
+                  {{ errors.cardExpiry }}
+                </small>
+              </label>
+
+              <label class="checkout-form__field">
+                <span>CVC</span>
+
+                <input
+                  :value="form.cardCvc"
+                  type="text"
+                  inputmode="numeric"
+                  autocomplete="cc-csc"
+                  placeholder="123"
+                  maxlength="4"
+                  :class="{ error: errors.cardCvc }"
+                  @input="formatCardCvc"
+                />
+
+                <small v-if="errors.cardCvc" class="form-error">
+                  {{ errors.cardCvc }}
+                </small>
+              </label>
+            </div>
+
+            <div class="checkout-form__navigation">
+              <button class="checkout-form__back" type="button" @click="goBack">Back</button>
+
+              <button class="checkout-form__button" type="button" @click="goToStep3">
+                Review order
+              </button>
+            </div>
+          </div>
+        </template>
+
+        <template v-else>
+          <div class="checkout-review">
+            <section>
+              <div class="checkout-review__header">
+                <h2>Delivery details</h2>
+
+                <button type="button" @click="currentStep = 1">Edit</button>
+              </div>
+
+              <p>
+                {{ form.name }}<br />
+                {{ form.address }}<br />
+                {{ form.postalCode }} {{ form.city }}<br />
+                {{ form.email }}
+              </p>
+            </section>
+
+            <section>
+              <div class="checkout-review__header">
+                <h2>Delivery</h2>
+
+                <button type="button" @click="currentStep = 2">Edit</button>
+              </div>
+
+              <p>
+                {{ selectedDeliveryMethod.name }}
+                —
+                {{ deliveryCost === 0 ? 'Free' : formatCurrency(deliveryCost) }}
+              </p>
+            </section>
+
+            <section>
+              <div class="checkout-review__header">
+                <h2>Payment</h2>
+
+                <button type="button" @click="currentStep = 2">Edit</button>
+              </div>
+
+              <p>
+                {{ paymentMethods.find((method) => method.id === selectedPayment)?.name }}
+              </p>
+            </section>
+          </div>
+
+          <div class="checkout-form__navigation">
+            <button class="checkout-form__back" type="button" @click="goBack">Back</button>
+
+            <button class="checkout-form__button" type="submit">
+              Place order · {{ formatCurrency(orderTotal) }}
+            </button>
+          </div>
+        </template>
       </form>
 
       <aside class="order-summary">
@@ -1156,6 +1273,131 @@ function submitForm() {
 
 .order-success__total strong {
   color: var(--color-accent);
+}
+
+.checkout-steps {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 10px;
+  margin-bottom: 28px;
+}
+
+.checkout-step {
+  display: flex;
+  align-items: center;
+  gap: 9px;
+
+  padding: 12px 14px;
+
+  border: 1px solid var(--color-border);
+  border-radius: 12px;
+
+  color: var(--color-muted);
+  background: var(--color-surface);
+}
+
+.checkout-step span {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+
+  width: 26px;
+  height: 26px;
+
+  border-radius: 50%;
+  background: var(--color-image-bg);
+
+  font-size: 12px;
+  font-weight: 700;
+}
+
+.checkout-step strong {
+  font-size: 13px;
+}
+
+.checkout-step.active {
+  color: var(--color-accent);
+  border-color: var(--color-accent);
+  background: var(--color-accent-light);
+}
+
+.checkout-step.active span {
+  color: #fff;
+  background: var(--color-accent);
+}
+
+.checkout-review {
+  display: grid;
+  gap: 16px;
+}
+
+.checkout-review section {
+  padding: 20px;
+
+  border: 1px solid var(--color-border);
+  border-radius: 14px;
+
+  background: var(--color-bg);
+}
+
+.checkout-review__header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+
+  margin-bottom: 12px;
+}
+
+.checkout-review h2 {
+  margin: 0;
+  font-size: 16px;
+}
+
+.checkout-review p {
+  margin: 0;
+
+  color: var(--color-muted);
+
+  font-size: 14px;
+  line-height: 1.7;
+}
+
+.checkout-review__header button {
+  padding: 0;
+
+  border: 0;
+
+  color: var(--color-accent);
+  background: transparent;
+
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.checkout-form__navigation {
+  display: grid;
+  grid-template-columns: auto 1fr;
+  gap: 12px;
+
+  margin-top: 28px;
+}
+
+.checkout-form__navigation .checkout-form__button {
+  margin-top: 0;
+}
+
+.checkout-form__back {
+  padding: 14px 20px;
+
+  border: 1px solid var(--color-border);
+  border-radius: 12px;
+
+  color: var(--color-text);
+  background: var(--color-surface);
+
+  font-weight: 600;
+  cursor: pointer;
 }
 
 @media (max-width: 767px) {
