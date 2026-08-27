@@ -1,11 +1,30 @@
 <script setup>
-import { reactive, ref } from 'vue'
+import { reactive, ref, computed } from 'vue'
 import { useCart } from '@/composables/useCart'
 import { useDocumentTitle } from '@/composables/useDocumentTitle'
 import { formatCurrency } from '@/utils/currency'
 import { vFocus } from '@/directives/vFocus'
 
 const orderPlaced = ref(false)
+
+const selectedDelivery = ref('standard')
+
+const deliveryMethods = [
+  {
+    id: 'standard',
+    name: 'Standard delivery',
+    description: '3–5 business days',
+    price: 6.99,
+  },
+  {
+    id: 'express',
+    name: 'Express delivery',
+    description: '1–2 business days',
+    price: 14.99,
+  },
+]
+
+const FREE_DELIVERY_THRESHOLD = 100
 
 const pageTitle = ref('Checkout | Product Catalog')
 
@@ -28,6 +47,22 @@ const errors = reactive({
 })
 
 const { cartItems, cartTotal, clearCart } = useCart()
+
+const selectedDeliveryMethod = computed(() => {
+  return deliveryMethods.find((method) => method.id === selectedDelivery.value)
+})
+
+const deliveryCost = computed(() => {
+  if (selectedDelivery.value === 'standard' && cartTotal.value >= FREE_DELIVERY_THRESHOLD) {
+    return 0
+  }
+
+  return selectedDeliveryMethod.value?.price ?? 0
+})
+
+const orderTotal = computed(() => {
+  return cartTotal.value + deliveryCost.value
+})
 
 function validateForm() {
   errors.name = ''
@@ -200,6 +235,47 @@ function submitForm() {
           </label>
         </div>
 
+        <div class="checkout-section">
+          <div class="checkout-section__header">
+            <h2>Delivery method</h2>
+
+            <span v-if="cartTotal < FREE_DELIVERY_THRESHOLD">
+              Spend
+              {{ formatCurrency(FREE_DELIVERY_THRESHOLD - cartTotal) }}
+              more for free standard delivery
+            </span>
+
+            <span v-else> Free standard delivery available </span>
+          </div>
+
+          <div class="delivery-methods">
+            <label
+              v-for="method in deliveryMethods"
+              :key="method.id"
+              class="delivery-method"
+              :class="{
+                active: selectedDelivery === method.id,
+              }"
+            >
+              <input v-model="selectedDelivery" type="radio" name="delivery" :value="method.id" />
+
+              <div>
+                <strong>{{ method.name }}</strong>
+
+                <span>{{ method.description }}</span>
+              </div>
+
+              <strong class="delivery-method__price">
+                {{
+                  method.id === 'standard' && cartTotal >= FREE_DELIVERY_THRESHOLD
+                    ? 'Free'
+                    : formatCurrency(method.price)
+                }}
+              </strong>
+            </label>
+          </div>
+        </div>
+
         <button class="checkout-form__button" type="submit">Place order</button>
       </form>
 
@@ -224,7 +300,23 @@ function submitForm() {
           <span>Total</span>
 
           <strong>
+            {{ formatCurrency(orderTotal) }}
+          </strong>
+        </div>
+
+        <div class="order-summary__row">
+          <span>Subtotal</span>
+
+          <strong>
             {{ formatCurrency(cartTotal) }}
+          </strong>
+        </div>
+
+        <div class="order-summary__row">
+          <span>Delivery</span>
+
+          <strong>
+            {{ deliveryCost === 0 ? 'Free' : formatCurrency(deliveryCost) }}
           </strong>
         </div>
       </aside>
@@ -545,6 +637,113 @@ function submitForm() {
   text-decoration: none;
 }
 
+.checkout-section {
+  margin-top: 32px;
+  padding-top: 28px;
+  border-top: 1px solid var(--color-border);
+}
+
+.checkout-section__header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  margin-bottom: 18px;
+}
+
+.checkout-section__header h2 {
+  margin: 0;
+  font-size: 18px;
+}
+
+.checkout-section__header span {
+  display: inline-flex;
+  align-items: center;
+
+  max-width: none;
+  padding: 7px 10px;
+
+  border-radius: 999px;
+
+  color: var(--color-accent);
+  background: var(--color-accent-light);
+
+  font-size: 12px;
+  font-weight: 600;
+  line-height: 1.2;
+
+  white-space: nowrap;
+  text-align: left;
+}
+
+.delivery-methods {
+  display: grid;
+  gap: 10px;
+}
+
+.delivery-method {
+  display: grid;
+  grid-template-columns: auto 1fr auto;
+  align-items: center;
+  gap: 14px;
+
+  padding: 16px;
+
+  border: 1px solid var(--color-border);
+  border-radius: 12px;
+
+  cursor: pointer;
+
+  transition:
+    border-color 0.2s ease,
+    background-color 0.2s ease;
+}
+
+.delivery-method:hover {
+  border-color: var(--color-accent);
+}
+
+.delivery-method.active {
+  border-color: var(--color-accent);
+  background: var(--color-accent-light);
+}
+
+.delivery-method input {
+  width: auto;
+  accent-color: var(--color-accent);
+}
+
+.delivery-method > div {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.delivery-method > div strong {
+  font-size: 14px;
+}
+
+.delivery-method > div span {
+  color: var(--color-muted);
+  font-size: 12px;
+}
+
+.delivery-method__price {
+  font-size: 14px;
+}
+
+.order-summary__row {
+  display: flex;
+  justify-content: space-between;
+  gap: 20px;
+  padding-top: 16px;
+  font-size: 14px;
+}
+
+.order-summary__row span {
+  color: var(--color-muted);
+}
+
 @media (max-width: 767px) {
   .checkout {
     padding: 48px 0 72px;
@@ -568,6 +767,15 @@ function submitForm() {
 
   .order-summary {
     position: static;
+  }
+
+  .checkout-section__header {
+    align-items: flex-start;
+    flex-direction: column;
+  }
+
+  .checkout-section__header span {
+    white-space: normal;
   }
 }
 </style>
