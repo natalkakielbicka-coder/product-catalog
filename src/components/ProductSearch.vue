@@ -16,6 +16,7 @@ const props = defineProps({
 const emit = defineEmits(['update:modelValue', 'search', 'select'])
 
 const focused = ref(false)
+const activeIndex = ref(-1)
 
 const suggestions = computed(() => {
   const query = props.modelValue.trim().toLowerCase()
@@ -36,6 +37,44 @@ function selectSuggestion(product) {
   emit('select', product.title)
 
   focused.value = false
+  activeIndex.value = -1
+}
+
+function handleKeydown(event) {
+  if (suggestions.value.length === 0) {
+    return
+  }
+
+  if (event.key === 'ArrowDown') {
+    event.preventDefault()
+
+    activeIndex.value++
+
+    if (activeIndex.value >= suggestions.value.length) {
+      activeIndex.value = 0
+    }
+  }
+
+  if (event.key === 'ArrowUp') {
+    event.preventDefault()
+
+    activeIndex.value--
+
+    if (activeIndex.value < 0) {
+      activeIndex.value = suggestions.value.length - 1
+    }
+  }
+
+  if (event.key === 'Enter' && activeIndex.value >= 0) {
+    event.preventDefault()
+
+    selectSuggestion(suggestions.value[activeIndex.value])
+  }
+
+  if (event.key === 'Escape') {
+    focused.value = false
+    activeIndex.value = -1
+  }
 }
 </script>
 
@@ -50,6 +89,7 @@ function selectSuggestion(product) {
         @focus="focused = true"
         @blur="focused = false"
         @input="emit('update:modelValue', $event.target.value)"
+        @keydown="handleKeydown"
       />
 
       <button type="submit">Search</button>
@@ -57,9 +97,10 @@ function selectSuggestion(product) {
 
     <div v-if="showSuggestions" class="search-suggestions">
       <button
-        v-for="product in suggestions"
+        v-for="(product, index) in suggestions"
         :key="product.id"
         class="search-suggestion"
+        :class="{ active: activeIndex === index }"
         type="button"
         @mousedown.prevent="selectSuggestion(product)"
       >
@@ -175,7 +216,8 @@ function selectSuggestion(product) {
   cursor: pointer;
 }
 
-.search-suggestion:hover {
+.search-suggestion:hover,
+.search-suggestion.active {
   background: var(--color-accent-light);
 }
 
