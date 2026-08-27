@@ -26,6 +26,37 @@ const deliveryMethods = [
 
 const FREE_DELIVERY_THRESHOLD = 100
 
+const selectedPayment = ref('card')
+
+const paymentMethods = [
+  {
+    id: 'card',
+    name: 'Credit / debit card',
+    description: 'Visa, Mastercard',
+  },
+  {
+    id: 'paypal',
+    name: 'PayPal',
+    description: 'Pay with your PayPal account',
+  },
+  {
+    id: 'cash',
+    name: 'Cash on delivery',
+    description: 'Pay when your order arrives',
+    price: 4.99,
+  },
+]
+
+const CASH_ON_DELIVERY_FEE = 4.99
+
+const paymentFee = computed(() => {
+  if (selectedPayment.value === 'cash') {
+    return CASH_ON_DELIVERY_FEE
+  }
+
+  return 0
+})
+
 const pageTitle = ref('Checkout | Product Catalog')
 
 useDocumentTitle(pageTitle)
@@ -36,6 +67,9 @@ const form = reactive({
   address: '',
   city: '',
   postalCode: '',
+  cardNumber: '',
+  cardExpiry: '',
+  cardCvc: '',
 })
 
 const errors = reactive({
@@ -44,6 +78,9 @@ const errors = reactive({
   address: '',
   city: '',
   postalCode: '',
+  cardNumber: '',
+  cardExpiry: '',
+  cardCvc: '',
 })
 
 const { cartItems, cartTotal, clearCart } = useCart()
@@ -61,7 +98,7 @@ const deliveryCost = computed(() => {
 })
 
 const orderTotal = computed(() => {
-  return cartTotal.value + deliveryCost.value
+  return cartTotal.value + deliveryCost.value + paymentFee.value
 })
 
 function validateForm() {
@@ -70,6 +107,9 @@ function validateForm() {
   errors.address = ''
   errors.city = ''
   errors.postalCode = ''
+  errors.cardNumber = ''
+  errors.cardExpiry = ''
+  errors.cardCvc = ''
 
   if (!form.name.trim()) {
     errors.name = 'Name is required.'
@@ -95,12 +135,31 @@ function validateForm() {
     errors.postalCode = 'Use format 00-000.'
   }
 
+  if (selectedPayment.value === 'card') {
+    const cardNumber = form.cardNumber.replace(/\s/g, '')
+
+    if (!/^\d{16}$/.test(cardNumber)) {
+      errors.cardNumber = 'Enter a valid 16-digit card number.'
+    }
+
+    if (!/^\d{2}\/\d{2}$/.test(form.cardExpiry)) {
+      errors.cardExpiry = 'Use format MM/YY.'
+    }
+
+    if (!/^\d{3,4}$/.test(form.cardCvc)) {
+      errors.cardCvc = 'Enter a valid CVC.'
+    }
+  }
+
   return (
     errors.name === '' &&
     errors.email === '' &&
     errors.address === '' &&
     errors.city === '' &&
-    errors.postalCode === ''
+    errors.postalCode === '' &&
+    errors.cardNumber === '' &&
+    errors.cardExpiry === '' &&
+    errors.cardCvc === ''
   )
 }
 
@@ -276,6 +335,84 @@ function submitForm() {
           </div>
         </div>
 
+        <div class="checkout-section">
+          <div class="checkout-section__header">
+            <h2>Payment method</h2>
+          </div>
+
+          <div class="payment-methods">
+            <label
+              v-for="method in paymentMethods"
+              :key="method.id"
+              class="payment-method"
+              :class="{ active: selectedPayment === method.id }"
+            >
+              <input v-model="selectedPayment" type="radio" name="payment" :value="method.id" />
+
+              <div>
+                <strong>{{ method.name }}</strong>
+                <span>{{ method.description }}</span>
+              </div>
+
+              <strong v-if="method.price" class="payment-method__price">
+                +{{ formatCurrency(method.price) }}
+              </strong>
+            </label>
+          </div>
+
+          <div v-if="selectedPayment === 'card'" class="card-fields">
+            <label class="checkout-form__field checkout-form__field--full">
+              <span>Card number</span>
+
+              <input
+                v-model="form.cardNumber"
+                type="text"
+                inputmode="numeric"
+                placeholder="1234 5678 9012 3456"
+                :class="{ error: errors.cardNumber }"
+                @input="errors.cardNumber = ''"
+              />
+
+              <small v-if="errors.cardNumber" class="form-error">
+                {{ errors.cardNumber }}
+              </small>
+            </label>
+
+            <label class="checkout-form__field">
+              <span>Expiry date</span>
+
+              <input
+                v-model="form.cardExpiry"
+                type="text"
+                placeholder="MM/YY"
+                :class="{ error: errors.cardExpiry }"
+                @input="errors.cardExpiry = ''"
+              />
+
+              <small v-if="errors.cardExpiry" class="form-error">
+                {{ errors.cardExpiry }}
+              </small>
+            </label>
+
+            <label class="checkout-form__field">
+              <span>CVC</span>
+
+              <input
+                v-model="form.cardCvc"
+                type="text"
+                inputmode="numeric"
+                placeholder="123"
+                :class="{ error: errors.cardCvc }"
+                @input="errors.cardCvc = ''"
+              />
+
+              <small v-if="errors.cardCvc" class="form-error">
+                {{ errors.cardCvc }}
+              </small>
+            </label>
+          </div>
+        </div>
+
         <button class="checkout-form__button" type="submit">Place order</button>
       </form>
 
@@ -317,6 +454,14 @@ function submitForm() {
 
           <strong>
             {{ deliveryCost === 0 ? 'Free' : formatCurrency(deliveryCost) }}
+          </strong>
+        </div>
+
+        <div v-if="paymentFee > 0" class="order-summary__row">
+          <span>Payment fee</span>
+
+          <strong>
+            {{ formatCurrency(paymentFee) }}
           </strong>
         </div>
       </aside>
@@ -742,6 +887,84 @@ function submitForm() {
 
 .order-summary__row span {
   color: var(--color-muted);
+}
+
+.payment-methods {
+  display: grid;
+  gap: 10px;
+}
+
+.payment-method {
+  display: grid;
+  grid-template-columns: auto 1fr auto;
+  align-items: center;
+  gap: 14px;
+
+  padding: 16px;
+
+  border: 1px solid var(--color-border);
+  border-radius: 12px;
+
+  cursor: pointer;
+
+  transition:
+    border-color 0.2s ease,
+    background-color 0.2s ease;
+}
+
+.payment-method:hover {
+  border-color: var(--color-accent);
+}
+
+.payment-method.active {
+  border-color: var(--color-accent);
+  background: var(--color-accent-light);
+}
+
+.payment-method input {
+  width: auto;
+  accent-color: var(--color-accent);
+}
+
+.payment-method > div {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.payment-method strong {
+  font-size: 14px;
+}
+
+.payment-method span {
+  color: var(--color-muted);
+  font-size: 12px;
+}
+
+.payment-method__price {
+  color: var(--color-accent);
+  font-size: 13px;
+  white-space: nowrap;
+}
+
+.card-fields {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 18px 16px;
+
+  margin-top: 18px;
+  padding: 20px;
+
+  border: 1px solid var(--color-border);
+  border-radius: 12px;
+
+  background: var(--color-image-bg);
+}
+
+@media (max-width: 600px) {
+  .card-fields {
+    grid-template-columns: 1fr;
+  }
 }
 
 @media (max-width: 767px) {
