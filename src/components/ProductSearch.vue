@@ -1,5 +1,5 @@
 <script setup>
-import { computed, ref } from 'vue'
+import { computed, ref, onMounted, onUnmounted } from 'vue'
 import { useLocalStorage } from '@/composables/useLocalStorage'
 
 const props = defineProps({
@@ -165,10 +165,46 @@ function handleKeydown(event) {
     selectSuggestion(suggestions.value[activeIndex.value])
   }
 }
+
+function highlightMatch(title) {
+  const query = props.modelValue.trim()
+
+  if (!query) {
+    return title
+  }
+
+  const escapedQuery = query.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')
+
+  const regex = new RegExp(`(${escapedQuery})`, 'gi')
+
+  return title.replace(regex, '<mark>$1</mark>')
+}
+
+const searchWrapper = ref(null)
+
+function handleClickOutside(event) {
+  if (!searchWrapper.value) {
+    return
+  }
+
+  if (!searchWrapper.value.contains(event.target)) {
+    focused.value = false
+    activeIndex.value = -1
+    activeRecentIndex.value = -1
+  }
+}
+
+onMounted(() => {
+  document.addEventListener('mousedown', handleClickOutside)
+})
+
+onUnmounted(() => {
+  document.removeEventListener('mousedown', handleClickOutside)
+})
 </script>
 
 <template>
-  <div class="product-search-wrapper">
+  <div ref="searchWrapper" class="product-search-wrapper">
     <form class="product-search" @submit.prevent="submitSearch">
       <input
         type="search"
@@ -217,7 +253,7 @@ function handleKeydown(event) {
 
         <span class="search-suggestion__content">
           <strong>
-            {{ product.title }}
+            <strong v-html="highlightMatch(product.title)"></strong>
           </strong>
 
           <small>
@@ -499,6 +535,15 @@ function handleKeydown(event) {
 
 .recent-search span {
   color: var(--color-muted);
+}
+
+.search-suggestion__content strong :deep(mark) {
+  padding: 0;
+
+  color: var(--color-accent);
+  background: transparent;
+
+  font-weight: 700;
 }
 
 @media (max-width: 479px) {
