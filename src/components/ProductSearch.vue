@@ -40,6 +40,12 @@ function selectSuggestion(product) {
   activeIndex.value = -1
 }
 
+function handleInput(event) {
+  activeIndex.value = -1
+
+  emit('update:modelValue', event.target.value)
+}
+
 function handleKeydown(event) {
   if (suggestions.value.length === 0) {
     return
@@ -86,23 +92,39 @@ function handleKeydown(event) {
         :value="modelValue"
         placeholder="Search products..."
         autocomplete="off"
+        role="combobox"
+        aria-autocomplete="list"
+        aria-controls="product-search-suggestions"
+        :aria-expanded="showSuggestions"
+        :aria-activedescendant="
+          activeIndex >= 0 ? `search-suggestion-${suggestions[activeIndex]?.id}` : undefined
+        "
         @focus="focused = true"
         @blur="focused = false"
-        @input="emit('update:modelValue', $event.target.value)"
+        @input="handleInput"
         @keydown="handleKeydown"
       />
 
       <button type="submit">Search</button>
     </form>
 
-    <div v-if="showSuggestions" class="search-suggestions">
+    <div
+      v-if="showSuggestions"
+      id="product-search-suggestions"
+      class="search-suggestions"
+      role="listbox"
+    >
       <button
         v-for="(product, index) in suggestions"
+        :id="`search-suggestion-${product.id}`"
         :key="product.id"
         class="search-suggestion"
         :class="{ active: activeIndex === index }"
         type="button"
+        role="option"
+        :aria-selected="activeIndex === index"
         @mousedown.prevent="selectSuggestion(product)"
+        @mouseenter="activeIndex = index"
       >
         <img :src="product.thumbnail" :alt="product.title" />
 
