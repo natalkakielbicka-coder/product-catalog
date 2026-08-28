@@ -18,19 +18,30 @@ const emit = defineEmits(['update:modelValue', 'search', 'select'])
 const focused = ref(false)
 const activeIndex = ref(-1)
 
-const suggestions = computed(() => {
+const matchingProducts = computed(() => {
   const query = props.modelValue.trim().toLowerCase()
 
   if (query.length < 2) {
     return []
   }
 
-  return props.products.filter((product) => product.title.toLowerCase().includes(query)).slice(0, 5)
+  return props.products.filter((product) => product.title.toLowerCase().includes(query))
+})
+
+const suggestions = computed(() => {
+  return matchingProducts.value.slice(0, 5)
 })
 
 const showSuggestions = computed(() => {
-  return focused.value && suggestions.value.length > 0
+  return focused.value && props.modelValue.trim().length >= 2
 })
+
+function showAllResults() {
+  emit('search')
+
+  focused.value = false
+  activeIndex.value = -1
+}
 
 function selectSuggestion(product) {
   emit('update:modelValue', product.title)
@@ -47,6 +58,11 @@ function handleInput(event) {
 }
 
 function handleKeydown(event) {
+  if (event.key === 'Escape') {
+    focused.value = false
+    activeIndex.value = -1
+  }
+
   if (suggestions.value.length === 0) {
     return
   }
@@ -75,11 +91,6 @@ function handleKeydown(event) {
     event.preventDefault()
 
     selectSuggestion(suggestions.value[activeIndex.value])
-  }
-
-  if (event.key === 'Escape') {
-    focused.value = false
-    activeIndex.value = -1
   }
 }
 </script>
@@ -137,6 +148,22 @@ function handleKeydown(event) {
             {{ product.category }}
           </small>
         </span>
+      </button>
+
+      <div v-if="matchingProducts.length === 0" class="search-suggestions__empty">
+        No products found for
+        <strong>"{{ modelValue }}"</strong>
+      </div>
+
+      <button
+        v-if="matchingProducts.length > 0"
+        class="search-suggestions__all"
+        type="button"
+        @mousedown.prevent="showAllResults"
+      >
+        See all {{ matchingProducts.length }}
+        {{ matchingProducts.length === 1 ? 'result' : 'results' }}
+        →
       </button>
     </div>
   </div>
@@ -277,6 +304,41 @@ function handleKeydown(event) {
   color: var(--color-muted);
 
   font-size: 11px;
+}
+
+.search-suggestions__empty {
+  padding: 18px 14px;
+
+  color: var(--color-muted);
+
+  font-size: 13px;
+  text-align: center;
+}
+
+.search-suggestions__empty strong {
+  color: var(--color-text);
+}
+
+.search-suggestions__all {
+  width: 100%;
+  margin-top: 6px;
+  padding: 12px;
+
+  border: 0;
+  border-top: 1px solid var(--color-border);
+
+  color: var(--color-accent);
+  background: transparent;
+
+  font-size: 12px;
+  font-weight: 700;
+  text-align: left;
+
+  cursor: pointer;
+}
+
+.search-suggestions__all:hover {
+  background: var(--color-accent-light);
 }
 
 @media (max-width: 479px) {
