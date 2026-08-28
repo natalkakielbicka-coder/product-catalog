@@ -1,5 +1,6 @@
 <script setup>
 import { computed, ref } from 'vue'
+import { useLocalStorage } from '@/composables/useLocalStorage'
 
 const props = defineProps({
   modelValue: {
@@ -17,6 +18,30 @@ const emit = defineEmits(['update:modelValue', 'search', 'select'])
 
 const focused = ref(false)
 const activeIndex = ref(-1)
+
+const recentSearches = useLocalStorage('recent-searches', [])
+
+function saveSearch(query) {
+  const value = query.trim()
+
+  if (value.length < 2) {
+    return
+  }
+
+  recentSearches.value = [
+    value,
+    ...recentSearches.value.filter((item) => item.toLowerCase() !== value.toLowerCase()),
+  ].slice(0, 5)
+}
+
+function submitSearch() {
+  saveSearch(props.modelValue)
+
+  emit('search')
+
+  focused.value = false
+  activeIndex.value = -1
+}
 
 const matchingProducts = computed(() => {
   const query = props.modelValue.trim().toLowerCase()
@@ -36,7 +61,21 @@ const showSuggestions = computed(() => {
   return focused.value && props.modelValue.trim().length >= 2
 })
 
+const showRecentSearches = computed(() => {
+  return focused.value && props.modelValue.trim() === '' && recentSearches.value.length > 0
+})
+
 function showAllResults() {
+  saveSearch(props.modelValue)
+
+  emit('search')
+
+  focused.value = false
+  activeIndex.value = -1
+}
+
+function selectRecentSearch(query) {
+  emit('update:modelValue', query)
   emit('search')
 
   focused.value = false
@@ -96,7 +135,7 @@ function handleKeydown(event) {
 
 <template>
   <div class="product-search-wrapper">
-    <form class="product-search" @submit.prevent="emit('search')">
+    <form class="product-search" @submit.prevent="submitSearch">
       <input
         type="search"
         :value="modelValue"
@@ -105,7 +144,7 @@ function handleKeydown(event) {
         role="combobox"
         aria-autocomplete="list"
         aria-controls="product-search-suggestions"
-        :aria-expanded="showSuggestions"
+        :aria-expanded="showSuggestions || showRecentSearches"
         :aria-activedescendant="
           activeIndex >= 0 ? `search-suggestion-${suggestions[activeIndex]?.id}` : undefined
         "
@@ -163,6 +202,26 @@ function handleKeydown(event) {
         See all {{ matchingProducts.length }}
         {{ matchingProducts.length === 1 ? 'result' : 'results' }}
         →
+      </button>
+    </div>
+
+    <div v-if="showRecentSearches" class="search-suggestions recent-searches">
+      <div class="recent-searches__header">
+        <span>Recent searches</span>
+
+        <button type="button" @mousedown.prevent="recentSearches = []">Clear</button>
+      </div>
+
+      <button
+        v-for="query in recentSearches"
+        :key="query"
+        class="recent-search"
+        type="button"
+        @mousedown.prevent="selectRecentSearch(query)"
+      >
+        <span>↻</span>
+
+        {{ query }}
       </button>
     </div>
   </div>
@@ -338,6 +397,66 @@ function handleKeydown(event) {
 
 .search-suggestions__all:hover {
   background: var(--color-accent-light);
+}
+
+.recent-searches__header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+
+  padding: 8px 10px 10px;
+}
+
+.recent-searches__header span {
+  color: var(--color-muted);
+
+  font-size: 11px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+}
+
+.recent-searches__header button {
+  padding: 0;
+
+  border: 0;
+
+  color: var(--color-accent);
+  background: transparent;
+
+  font-size: 11px;
+  font-weight: 600;
+
+  cursor: pointer;
+}
+
+.recent-search {
+  display: flex;
+  align-items: center;
+  gap: 9px;
+
+  width: 100%;
+
+  padding: 10px;
+
+  border: 0;
+  border-radius: 9px;
+
+  color: var(--color-text);
+  background: transparent;
+
+  font-size: 13px;
+  text-align: left;
+
+  cursor: pointer;
+}
+
+.recent-search:hover {
+  background: var(--color-accent-light);
+}
+
+.recent-search span {
+  color: var(--color-muted);
 }
 
 @media (max-width: 479px) {
