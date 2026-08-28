@@ -18,6 +18,7 @@ const emit = defineEmits(['update:modelValue', 'search', 'select'])
 
 const focused = ref(false)
 const activeIndex = ref(-1)
+const activeRecentIndex = ref(-1)
 
 const recentSearches = useLocalStorage('recent-searches', [])
 
@@ -80,6 +81,7 @@ function selectRecentSearch(query) {
 
   focused.value = false
   activeIndex.value = -1
+  activeRecentIndex.value = -1
 }
 
 function selectSuggestion(product) {
@@ -91,14 +93,46 @@ function selectSuggestion(product) {
 
 function handleInput(event) {
   activeIndex.value = -1
+  activeRecentIndex.value = -1
 
   emit('update:modelValue', event.target.value)
 }
-
 function handleKeydown(event) {
   if (event.key === 'Escape') {
     focused.value = false
     activeIndex.value = -1
+    activeRecentIndex.value = -1
+    return
+  }
+
+  if (showRecentSearches.value) {
+    if (event.key === 'ArrowDown') {
+      event.preventDefault()
+
+      activeRecentIndex.value++
+
+      if (activeRecentIndex.value >= recentSearches.value.length) {
+        activeRecentIndex.value = 0
+      }
+    }
+
+    if (event.key === 'ArrowUp') {
+      event.preventDefault()
+
+      activeRecentIndex.value--
+
+      if (activeRecentIndex.value < 0) {
+        activeRecentIndex.value = recentSearches.value.length - 1
+      }
+    }
+
+    if (event.key === 'Enter' && activeRecentIndex.value >= 0) {
+      event.preventDefault()
+
+      selectRecentSearch(recentSearches.value[activeRecentIndex.value])
+    }
+
+    return
   }
 
   if (suggestions.value.length === 0) {
@@ -146,7 +180,11 @@ function handleKeydown(event) {
         aria-controls="product-search-suggestions"
         :aria-expanded="showSuggestions || showRecentSearches"
         :aria-activedescendant="
-          activeIndex >= 0 ? `search-suggestion-${suggestions[activeIndex]?.id}` : undefined
+          activeIndex >= 0
+            ? `search-suggestion-${suggestions[activeIndex]?.id}`
+            : activeRecentIndex >= 0
+              ? `recent-search-${activeRecentIndex}`
+              : undefined
         "
         @focus="focused = true"
         @blur="focused = false"
@@ -213,10 +251,13 @@ function handleKeydown(event) {
       </div>
 
       <button
-        v-for="query in recentSearches"
+        v-for="(query, index) in recentSearches"
+        :id="`recent-search-${index}`"
         :key="query"
         class="recent-search"
+        :class="{ active: activeRecentIndex === index }"
         type="button"
+        @mouseenter="activeRecentIndex = index"
         @mousedown.prevent="selectRecentSearch(query)"
       >
         <span>↻</span>
@@ -451,7 +492,8 @@ function handleKeydown(event) {
   cursor: pointer;
 }
 
-.recent-search:hover {
+.recent-search:hover,
+.recent-search.active {
   background: var(--color-accent-light);
 }
 
