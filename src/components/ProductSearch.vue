@@ -44,8 +44,7 @@ function showAllResults() {
 }
 
 function selectSuggestion(product) {
-  emit('update:modelValue', product.title)
-  emit('select', product.title)
+  emit('select', product)
 
   focused.value = false
   activeIndex.value = -1

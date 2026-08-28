@@ -150,9 +150,13 @@ watch(itemsPerPage, () => {
   router.replace({ query })
 })
 
-function selectSearchSuggestion(title) {
-  searchInput.value = title
-  searchQuery.value = title
+function selectSearchSuggestion(product) {
+  router.push({
+    name: 'product',
+    params: {
+      id: product.id,
+    },
+  })
 }
 </script>
 
