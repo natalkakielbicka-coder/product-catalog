@@ -10,7 +10,7 @@ export function useLocalStorage(key, defaultValue) {
     (newValue) => {
       localStorage.setItem(key, JSON.stringify(newValue))
     },
-    { deep: true },
+    { deep: true, flush: 'sync' },
   )
 
   return value

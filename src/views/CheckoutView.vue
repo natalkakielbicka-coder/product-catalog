@@ -3,6 +3,7 @@ import { reactive, ref } from 'vue'
 import { useCart } from '@/composables/useCart'
 import { useDocumentTitle } from '@/composables/useDocumentTitle'
 import { useCheckoutPricing } from '@/composables/useCheckoutPricing'
+import { useOrders } from '@/composables/useOrders'
 import { formatCurrency } from '@/utils/currency'
 import { vFocus } from '@/directives/vFocus'
 
@@ -64,6 +65,8 @@ const errors = reactive({
 })
 
 const { cartItems, cartTotal, clearCart } = useCart()
+
+const { addOrder } = useOrders()
 
 const {
   selectedDelivery,
@@ -210,6 +213,7 @@ function submitForm() {
 
   placedOrder.value = {
     number: `ORD-${Date.now()}`,
+    createdAt: new Date().toISOString(),
 
     customer: {
       name: form.name,
@@ -224,6 +228,7 @@ function submitForm() {
       title: item.title,
       price: item.price,
       quantity: item.quantity,
+      thumbnail: item.thumbnail,
     })),
 
     delivery: {
@@ -240,6 +245,8 @@ function submitForm() {
     coupon: appliedCoupon.value?.code ?? null,
     discount: discount.value,
   }
+
+  addOrder(placedOrder.value)
 
   orderPlaced.value = true
   clearCart()
