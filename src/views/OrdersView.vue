@@ -112,6 +112,18 @@ function getItemsCount(items) {
             </strong>
           </div>
         </div>
+
+        <RouterLink
+          class="order-card__link"
+          :to="{
+            name: 'order-details',
+            params: {
+              number: order.number,
+            },
+          }"
+        >
+          View order →
+        </RouterLink>
       </article>
     </div>
   </main>
@@ -321,6 +333,23 @@ function getItemsCount(items) {
 
   font-weight: 700;
   text-decoration: none;
+}
+
+.order-card__link {
+  display: flex;
+  justify-content: flex-end;
+
+  padding: 0 24px 20px;
+
+  color: var(--color-accent);
+
+  font-size: 13px;
+  font-weight: 700;
+  text-decoration: none;
+}
+
+.order-card__link:hover {
+  text-decoration: underline;
 }
 
 @media (max-width: 767px) {
