@@ -214,6 +214,7 @@ function submitForm() {
   placedOrder.value = {
     number: `ORD-${Date.now()}`,
     createdAt: new Date().toISOString(),
+    status: 'Processing',
 
     customer: {
       name: form.name,

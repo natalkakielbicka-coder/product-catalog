@@ -51,6 +51,10 @@ function formatOrderDate(date) {
           </h1>
         </div>
 
+        <span class="order-details__status">
+          {{ order.status ?? 'Processing' }}
+        </span>
+
         <time :datetime="order.createdAt">
           {{ formatOrderDate(order.createdAt) }}
         </time>
@@ -304,6 +308,21 @@ function formatOrderDate(date) {
 
 .order-details__total strong {
   color: var(--color-accent);
+}
+
+.order-details__status {
+  display: inline-flex;
+
+  margin-top: 10px;
+  padding: 6px 10px;
+
+  border-radius: 999px;
+
+  color: var(--color-accent);
+  background: var(--color-accent-light);
+
+  font-size: 11px;
+  font-weight: 700;
 }
 
 @media (max-width: 767px) {

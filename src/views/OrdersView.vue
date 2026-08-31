@@ -51,9 +51,15 @@ function getItemsCount(items) {
             </strong>
           </div>
 
-          <time :datetime="order.createdAt">
-            {{ formatOrderDate(order.createdAt) }}
-          </time>
+          <div class="order-card__meta">
+            <span class="order-status">
+              {{ order.status ?? 'Processing' }}
+            </span>
+
+            <time :datetime="order.createdAt">
+              {{ formatOrderDate(order.createdAt) }}
+            </time>
+          </div>
         </div>
 
         <div class="order-card__products">
@@ -350,6 +356,28 @@ function getItemsCount(items) {
 
 .order-card__link:hover {
   text-decoration: underline;
+}
+
+.order-card__meta {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.order-status {
+  display: inline-flex;
+  align-items: center;
+
+  padding: 6px 10px;
+
+  border-radius: 999px;
+
+  color: var(--color-accent);
+  background: var(--color-accent-light);
+
+  font-size: 11px;
+  font-weight: 700;
+  margin-bottom: 5px;
 }
 
 @media (max-width: 767px) {
