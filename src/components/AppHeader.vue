@@ -3,10 +3,12 @@ import { onBeforeUnmount, ref, watch } from 'vue'
 import { RouterLink } from 'vue-router'
 import { useCart } from '@/composables/useCart'
 import { useFavorites } from '@/composables/useFavorites'
+import { useOrders } from '@/composables/useOrders'
 import MiniCart from '@/components/MiniCart.vue'
 
 const { cartCount } = useCart()
 const { favoritesCount } = useFavorites()
+const { orders } = useOrders()
 const miniCartOpen = ref(false)
 
 watch(miniCartOpen, (isOpen) => {
@@ -21,6 +23,8 @@ onBeforeUnmount(() => {
 <template>
   <header class="header">
     <RouterLink to="/" class="header__logo"> Product Catalog </RouterLink>
+
+    <RouterLink to="/orders" class="header-orders"> Orders ({{ orders.length }}) </RouterLink>
 
     <div class="header__actions">
       <RouterLink to="/favorites" class="header-favorites">
@@ -114,6 +118,7 @@ onBeforeUnmount(() => {
   gap: 10px;
 }
 
+.header-orders,
 .header-favorites {
   display: inline-flex;
   align-items: center;
@@ -137,6 +142,7 @@ onBeforeUnmount(() => {
     background-color 0.2s ease;
 }
 
+.header-orders:hover,
 .header-favorites:hover {
   border-color: var(--color-accent);
   background: var(--color-accent-light);
