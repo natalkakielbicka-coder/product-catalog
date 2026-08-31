@@ -357,7 +357,23 @@ function submitForm() {
         </div>
       </div>
 
-      <RouterLink to="/" class="order-success__button"> Continue shopping </RouterLink>
+      <div class="order-success__actions">
+        <RouterLink
+          :to="{
+            name: 'order-details',
+            params: {
+              number: placedOrder.number,
+            },
+          }"
+          class="order-success__button"
+        >
+          View order
+        </RouterLink>
+
+        <RouterLink to="/" class="order-success__button order-success__button--secondary">
+          Continue shopping
+        </RouterLink>
+      </div>
     </div>
 
     <div v-if="cartItems.length > 0 && !orderPlaced" class="checkout-steps">
@@ -1060,6 +1076,23 @@ function submitForm() {
   text-decoration: none;
 }
 
+.order-success__actions {
+  display: flex;
+  justify-content: center;
+  gap: 12px;
+
+  width: 100%;
+}
+
+.order-success__button--secondary {
+  color: var(--color-accent);
+  background: var(--color-accent-light);
+}
+
+.order-success__button--secondary:hover {
+  background: var(--color-lilac);
+}
+
 .checkout-section {
   margin-top: 32px;
   padding-top: 28px;
@@ -1527,6 +1560,14 @@ function submitForm() {
 
   .card-fields {
     grid-template-columns: 1fr;
+  }
+
+  .order-success__actions {
+    flex-direction: column;
+  }
+
+  .order-success__button {
+    justify-content: center;
   }
 }
 </style>
