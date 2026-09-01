@@ -7,7 +7,9 @@ import { formatCurrency } from '@/utils/currency'
 
 const route = useRoute()
 
-const { getOrderByNumber } = useOrders()
+const { getOrderByNumber, updateOrderStatus } = useOrders()
+
+const orderStatuses = ['Processing', 'Shipped', 'Delivered', 'Cancelled']
 
 const order = computed(() => {
   return getOrderByNumber(route.params.number)
@@ -51,9 +53,18 @@ function formatOrderDate(date) {
           </h1>
         </div>
 
-        <span class="order-details__status">
-          {{ order.status ?? 'Processing' }}
-        </span>
+        <label class="order-status-control">
+          <span>Status</span>
+
+          <select
+            :value="order.status ?? 'Processing'"
+            @change="updateOrderStatus(order.number, $event.target.value)"
+          >
+            <option v-for="status in orderStatuses" :key="status" :value="status">
+              {{ status }}
+            </option>
+          </select>
+        </label>
 
         <time :datetime="order.createdAt">
           {{ formatOrderDate(order.createdAt) }}
@@ -310,19 +321,33 @@ function formatOrderDate(date) {
   color: var(--color-accent);
 }
 
-.order-details__status {
-  display: inline-flex;
+.order-status-control {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
 
-  margin-top: 10px;
-  padding: 6px 10px;
+.order-status-control > span {
+  color: var(--color-muted);
 
+  font-size: 11px;
+  font-weight: 600;
+}
+
+.order-status-control select {
+  padding: 7px 10px;
+
+  border: 1px solid var(--color-border);
   border-radius: 999px;
 
   color: var(--color-accent);
   background: var(--color-accent-light);
 
+  font: inherit;
   font-size: 11px;
   font-weight: 700;
+
+  cursor: pointer;
 }
 
 @media (max-width: 767px) {
