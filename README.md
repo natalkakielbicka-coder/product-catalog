@@ -4,6 +4,10 @@ A responsive e-commerce application built with Vue 3 and Vite.
 
 The project includes a complete shopping flow: product browsing, filtering, favorites, comparison, cart management, checkout and local order history.
 
+## Live Demo
+
+https://natalkakielbicka-coder.github.io/product-catalog/
+
 ## Features
 
 - Product catalog loaded from DummyJSON API
