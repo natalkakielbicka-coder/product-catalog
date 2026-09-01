@@ -1,6 +1,6 @@
 import { computed, ref } from 'vue'
 
-const FREE_DELIVERY_THRESHOLD = 100
+export const FREE_DELIVERY_THRESHOLD = 100
 const CASH_ON_DELIVERY_FEE = 4.99
 
 export function useCheckoutPricing(cartTotal) {

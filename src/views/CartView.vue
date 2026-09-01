@@ -1,12 +1,22 @@
 <script setup>
-import { ref } from 'vue'
+import { ref, computed } from 'vue'
 import { useCart } from '@/composables/useCart'
 import { useDocumentTitle } from '@/composables/useDocumentTitle'
 import CartItem from '@/components/CartItem.vue'
 import CartSummary from '@/components/CartSummary.vue'
 import BaseModal from '@/components/BaseModal.vue'
+import { FREE_DELIVERY_THRESHOLD } from '@/composables/useCheckoutPricing'
+import { formatCurrency } from '@/utils/currency'
 
 const { cartItems, cartCount, cartTotal, clearCart } = useCart()
+
+const freeShippingRemaining = computed(() => {
+  return Math.max(FREE_DELIVERY_THRESHOLD - cartTotal.value, 0)
+})
+
+const freeShippingProgress = computed(() => {
+  return Math.min((cartTotal.value / FREE_DELIVERY_THRESHOLD) * 100, 100)
+})
 
 const pageTitle = ref('Cart | Product Catalog')
 
@@ -46,6 +56,36 @@ function confirmClearCart() {
     </div>
 
     <div v-else>
+      <div class="shipping-progress">
+        <p v-if="freeShippingRemaining > 0">
+          Add
+          <strong>
+            {{ formatCurrency(freeShippingRemaining) }}
+          </strong>
+          more for free standard shipping.
+        </p>
+
+        <p v-else>
+          <strong>You've unlocked free standard shipping!</strong>
+        </p>
+
+        <div
+          class="shipping-progress__track"
+          role="progressbar"
+          aria-label="Free shipping progress"
+          :aria-valuenow="freeShippingProgress"
+          aria-valuemin="0"
+          aria-valuemax="100"
+        >
+          <div
+            class="shipping-progress__bar"
+            :style="{
+              width: `${freeShippingProgress}%`,
+            }"
+          ></div>
+        </div>
+      </div>
+
       <TransitionGroup name="cart-list" tag="div" class="cart-items">
         <CartItem v-for="item in cartItems" :key="item.id" :item="item" />
       </TransitionGroup>
@@ -256,6 +296,49 @@ h1 {
 
 .cart-list-move {
   transition: transform 0.3s ease;
+}
+
+.shipping-progress {
+  margin-bottom: 28px;
+  padding: 18px 20px;
+
+  border: 1px solid var(--color-border);
+  border-radius: 14px;
+
+  background: var(--color-surface);
+}
+
+.shipping-progress p {
+  margin: 0 0 12px;
+
+  color: var(--color-muted);
+
+  font-size: 13px;
+}
+
+.shipping-progress strong {
+  color: var(--color-accent);
+}
+
+.shipping-progress__track {
+  overflow: hidden;
+
+  width: 100%;
+  height: 8px;
+
+  border-radius: 999px;
+
+  background: var(--color-accent-light);
+}
+
+.shipping-progress__bar {
+  height: 100%;
+
+  border-radius: inherit;
+
+  background: var(--color-accent);
+
+  transition: width 0.3s ease;
 }
 
 @media (max-width: 767px) {
