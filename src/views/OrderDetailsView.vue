@@ -1,5 +1,5 @@
 <script setup>
-import { computed, ref } from 'vue'
+import { computed } from 'vue'
 import { useRoute } from 'vue-router'
 import { useOrders } from '@/composables/useOrders'
 import { useDocumentTitle } from '@/composables/useDocumentTitle'

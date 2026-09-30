@@ -8,7 +8,7 @@ import BaseModal from '@/components/BaseModal.vue'
 import { FREE_DELIVERY_THRESHOLD } from '@/composables/useCheckoutPricing'
 import { formatCurrency } from '@/utils/currency'
 
-const { cartItems, cartCount, cartTotal, clearCart } = useCart()
+const { cartItems, cartTotal, clearCart } = useCart()
 
 const freeShippingRemaining = computed(() => {
   return Math.max(FREE_DELIVERY_THRESHOLD - cartTotal.value, 0)

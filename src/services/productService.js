@@ -1,33 +1,35 @@
-const API_URL = 'https://dummyjson.com/products'
-
-function formatCategory(category) {
-  return category
-    .split('-')
-    .map((word) => word.charAt(0).toUpperCase() + word.slice(1))
-    .join(' ')
-}
+const API_URL = '/wp-json/wc/store/v1/products'
 
 function normalizeProduct(product) {
+  const price = Number(product.prices?.price ?? 0)
+  const regularPrice = Number(product.prices?.regular_price ?? price)
+  const salePrice = Number(product.prices?.sale_price ?? price)
+
+  const discountPercentage =
+    regularPrice > 0 && salePrice < regularPrice
+      ? Math.round(((regularPrice - salePrice) / regularPrice) * 100)
+      : 0
+
   return {
     id: product.id,
-    title: product.title,
+    title: product.name,
     description: product.description,
-    price: product.price,
-    discountPercentage: product.discountPercentage ?? 0,
-    category: formatCategory(product.category),
-    categoryId: null,
-    categorySlug: product.category,
-    thumbnail: product.thumbnail,
-    images: product.images ?? [],
-    brand: product.brand ?? '',
-    rating: product.rating ?? 0,
-    stock: product.stock ?? 0,
-    reviews: product.reviews ?? [],
+    price: price / 100,
+    discountPercentage,
+    category: product.categories?.[0]?.name ?? '',
+    categoryId: product.categories?.[0]?.id ?? null,
+    categorySlug: product.categories?.[0]?.slug ?? '',
+    thumbnail: product.images?.[0]?.src ?? '',
+    images: product.images?.map((image) => image.src) ?? [],
+    brand: '',
+    rating: product.average_rating ? Number(product.average_rating) : 0,
+    stock: product.is_in_stock ? 1 : 0,
+    reviews: [],
   }
 }
 
 export async function getProducts() {
-  const response = await fetch(`${API_URL}?limit=0`)
+  const response = await fetch(`${API_URL}?per_page=100`)
 
   if (!response.ok) {
     throw new Error('Failed to fetch products')
@@ -35,7 +37,7 @@ export async function getProducts() {
 
   const data = await response.json()
 
-  return data.products.map(normalizeProduct)
+  return data.map(normalizeProduct)
 }
 
 export async function getProduct(id) {
