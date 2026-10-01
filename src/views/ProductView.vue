@@ -70,7 +70,9 @@ onMounted(async () => {
 })
 
 const cartQuantity = computed(() => {
-  const cartItem = cartItems.value.find((item) => item.id === product.value?.id)
+  const currentId = selectedVariation.value?.id ?? product.value?.id
+
+  const cartItem = cartItems.value.find((item) => item.id === currentId)
 
   return cartItem?.quantity ?? 0
 })
@@ -80,9 +82,11 @@ const remainingStock = computed(() => {
     return 0
   }
 
-  const stock = Number(selectedVariation.value?.stock ?? product.value.stock ?? 0)
+  if (selectedVariation.value) {
+    return 99
+  }
 
-  return Math.max(stock - cartQuantity.value, 0)
+  return Math.max(product.value.stock - cartQuantity.value, 0)
 })
 
 const isCurrentProductInStock = computed(() => {
@@ -172,6 +176,30 @@ function decreaseQuantity() {
   }
 }
 
+function handleAddToCart() {
+  if (!product.value || !isCurrentProductInStock.value) {
+    return
+  }
+
+  if (selectedVariation.value) {
+    addToCart(
+      {
+        ...product.value,
+        id: selectedVariation.value.id,
+        parentId: product.value.id,
+        title: `${product.value.title} – ${selectedVariation.value.label}`,
+        price: selectedVariation.value.price,
+        variation: selectedVariation.value,
+      },
+      quantity.value,
+    )
+
+    return
+  }
+
+  addToCart(product.value, quantity.value)
+}
+
 const originalPrice = computed(() => {
   if (!product.value) return 0
 
@@ -184,6 +212,21 @@ const currentOriginalPrice = computed(() => {
   }
 
   return originalPrice.value
+})
+
+const currentDiscountPercentage = computed(() => {
+  if (selectedVariation.value) {
+    const regularPrice = selectedVariation.value.regularPrice
+    const price = selectedVariation.value.price
+
+    if (regularPrice <= 0 || price >= regularPrice) {
+      return 0
+    }
+
+    return Math.round(((regularPrice - price) / regularPrice) * 100)
+  }
+
+  return product.value?.discountPercentage ?? 0
 })
 
 const relatedProducts = computed(() => {
@@ -376,12 +419,12 @@ watch(
               {{ formatCurrency(selectedVariation?.price ?? product.price) }}
             </span>
 
-            <span v-if="product.discountPercentage > 0" class="product__old-price">
+            <span v-if="currentDiscountPercentage > 0" class="product__old-price">
               {{ formatCurrency(currentOriginalPrice) }}
             </span>
 
-            <span v-if="product.discountPercentage > 0" class="product__discount">
-              -{{ product.discountPercentage.toFixed(0) }}%
+            <span v-if="currentDiscountPercentage > 0" class="product__discount">
+              -{{ currentDiscountPercentage }}%
             </span>
           </div>
 
@@ -407,7 +450,7 @@ watch(
               class="product__button"
               type="button"
               :disabled="!isCurrentProductInStock"
-              @click="addToCart(product, quantity)"
+              @click="handleAddToCart"
             >
               {{ isCurrentProductInStock ? 'Add to cart' : 'Out of stock' }}
             </button>

@@ -20,7 +20,7 @@ export function useCart() {
     const existingItem = cartItems.value.find((item) => item.id === product.id)
 
     if (existingItem) {
-      existingItem.quantity = Math.min(existingItem.quantity + quantity, product.stock)
+      existingItem.quantity += quantity
 
       return
     }
@@ -36,9 +36,7 @@ export function useCart() {
 
     if (!item) return
 
-    if (item.quantity < item.stock) {
-      item.quantity++
-    }
+    item.quantity++
   }
 
   function decreaseQuantity(id) {
