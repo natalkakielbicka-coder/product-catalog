@@ -961,6 +961,42 @@ main {
   cursor: not-allowed;
 }
 
+.product__variations {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  margin-bottom: 24px;
+}
+
+.product__variation {
+  padding: 10px 14px;
+  border: 1px solid var(--color-border);
+  border-radius: 10px;
+  color: var(--color-text);
+  background: var(--color-surface);
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+  transition:
+    color 0.2s ease,
+    border-color 0.2s ease,
+    background-color 0.2s ease,
+    transform 0.2s ease;
+}
+
+.product__variation:hover {
+  color: var(--color-accent);
+  border-color: var(--color-accent);
+  background: var(--color-accent-light);
+  transform: translateY(-1px);
+}
+
+.product__variation--active {
+  color: #fff;
+  border-color: var(--color-accent);
+  background: var(--color-accent);
+}
+
 @media (max-width: 767px) {
   .product {
     grid-template-columns: 1fr;
