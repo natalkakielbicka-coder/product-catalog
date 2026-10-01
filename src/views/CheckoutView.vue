@@ -226,7 +226,9 @@ function submitForm() {
 
     items: cartItems.value.map((item) => ({
       id: item.id,
+      parentId: item.parentId ?? null,
       title: item.title,
+      variationLabel: item.variationLabel ?? '',
       price: item.price,
       quantity: item.quantity,
       thumbnail: item.thumbnail,
@@ -294,7 +296,11 @@ function submitForm() {
           <h3>Products</h3>
 
           <div v-for="item in placedOrder.items" :key="item.id" class="order-success__item">
-            <span> {{ item.title }} × {{ item.quantity }} </span>
+            <span>
+              {{ item.title }}
+              <template v-if="item.variationLabel"> — {{ item.variationLabel }} </template>
+              × {{ item.quantity }}
+            </span>
 
             <strong>
               {{ formatCurrency(item.price * item.quantity) }}

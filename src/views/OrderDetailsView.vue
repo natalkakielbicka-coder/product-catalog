@@ -82,6 +82,10 @@ function formatOrderDate(date) {
               {{ item.title }}
             </strong>
 
+            <span v-if="item.variationLabel" class="order-item__variation">
+              {{ item.variationLabel }}
+            </span>
+
             <span>
               {{ item.quantity }}
               ×

@@ -71,6 +71,10 @@ function getItemsCount(items) {
                 {{ item.title }}
               </strong>
 
+              <span v-if="item.variationLabel">
+                {{ item.variationLabel }}
+              </span>
+
               <span>
                 {{ item.quantity }}
                 ×
