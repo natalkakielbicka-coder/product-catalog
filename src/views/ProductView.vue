@@ -79,7 +79,21 @@ const remainingStock = computed(() => {
     return 0
   }
 
-  return Math.max(product.value.stock - cartQuantity.value, 0)
+  const stock = selectedVariation.value?.stock ?? product.value.stock
+
+  return Math.max(stock - cartQuantity.value, 0)
+})
+
+const isCurrentProductInStock = computed(() => {
+  if (!product.value) {
+    return false
+  }
+
+  if (selectedVariation.value) {
+    return selectedVariation.value.isInStock
+  }
+
+  return product.value.stock > 0
 })
 
 const activeTab = ref('description')
@@ -288,11 +302,11 @@ watch(
 
             <span
               :class="{
-                'product__stock--available': product.stock > 0,
-                'product__stock--unavailable': product.stock === 0,
+                'product__stock--available': isCurrentProductInStock,
+                'product__stock--unavailable': !isCurrentProductInStock,
               }"
             >
-              {{ product.stock > 0 ? `${product.stock} in stock` : 'Out of stock' }}
+              {{ isCurrentProductInStock ? 'In stock' : 'Out of stock' }}
             </span>
           </div>
 
@@ -381,10 +395,10 @@ watch(
             <button
               class="product__button"
               type="button"
-              :disabled="remainingStock === 0 || quantity > remainingStock"
+              :disabled="!isCurrentProductInStock"
               @click="addToCart(product, quantity)"
             >
-              {{ remainingStock > 0 ? 'Add to cart' : 'Maximum in cart' }}
+              {{ isCurrentProductInStock ? 'Add to cart' : 'Out of stock' }}
             </button>
           </div>
         </div>

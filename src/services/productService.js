@@ -36,7 +36,7 @@ function normalizeVariation(variation) {
     regularPrice: Number(variation.prices?.regular_price ?? 0) / 100,
     salePrice: Number(variation.prices?.sale_price ?? 0) / 100,
     attributes: variation.attributes ?? [],
-    stock: variation.is_in_stock ? 1 : 0,
+    isInStock: variation.is_in_stock ?? false,
     image: variation.images?.[0]?.src ?? '',
   }
 }
