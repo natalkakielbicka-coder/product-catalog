@@ -45,7 +45,8 @@ onMounted(async () => {
 
   if (product.value) {
     await fetchProductVariations(product.value.id)
-    selectedVariation.value = variations.value[0] ?? null
+    selectedVariation.value =
+      variations.value.find((variation) => variation.isInStock) ?? variations.value[0] ?? null
     selectedImage.value = product.value.images[0] || product.value.thumbnail
 
     addRecentlyViewed(product.value.id)
@@ -75,11 +76,11 @@ const cartQuantity = computed(() => {
 })
 
 const remainingStock = computed(() => {
-  if (!product.value) {
+  if (!product.value || !isCurrentProductInStock.value) {
     return 0
   }
 
-  const stock = selectedVariation.value?.stock ?? product.value.stock
+  const stock = Number(selectedVariation.value?.stock ?? product.value.stock ?? 0)
 
   return Math.max(stock - cartQuantity.value, 0)
 })
@@ -134,6 +135,15 @@ const activeTabProps = computed(() => {
 
 function selectImage(image) {
   selectedImage.value = image
+}
+
+function selectVariation(variation) {
+  if (!variation.isInStock) {
+    return
+  }
+
+  selectedVariation.value = variation
+  quantity.value = 1
 }
 
 const lightboxVisible = ref(false)
@@ -203,7 +213,8 @@ watch(
   async (newId) => {
     await fetchProduct(newId)
     await fetchProductVariations(product.value.id)
-    selectedVariation.value = variations.value[0] ?? null
+    selectedVariation.value =
+      variations.value.find((variation) => variation.isInStock) ?? variations.value[0] ?? null
 
     if (product.value) {
       selectedImage.value = product.value.images[0] || product.value.thumbnail
@@ -353,8 +364,10 @@ watch(
               class="product__variation"
               :class="{
                 'product__variation--active': selectedVariation?.id === variation.id,
+                'product__variation--unavailable': !variation.isInStock,
               }"
-              @click="selectedVariation = variation"
+              :disabled="!variation.isInStock"
+              @click="selectVariation(variation)"
             >
               {{ variation.label }}
             </button>
@@ -1009,6 +1022,22 @@ main {
   color: #fff;
   border-color: var(--color-accent);
   background: var(--color-accent);
+}
+
+.product__variation--unavailable,
+.product__variation:disabled {
+  opacity: 0.4;
+  cursor: not-allowed;
+  text-decoration: line-through;
+  transform: none;
+}
+
+.product__variation--unavailable:hover,
+.product__variation:disabled:hover {
+  color: var(--color-text);
+  border-color: var(--color-border);
+  background: var(--color-surface);
+  transform: none;
 }
 
 @media (max-width: 767px) {
