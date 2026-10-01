@@ -28,6 +28,19 @@ function normalizeProduct(product) {
   }
 }
 
+function normalizeVariation(variation) {
+  return {
+    id: variation.id,
+    label: variation.variation ?? '',
+    price: Number(variation.prices?.price ?? 0) / 100,
+    regularPrice: Number(variation.prices?.regular_price ?? 0) / 100,
+    salePrice: Number(variation.prices?.sale_price ?? 0) / 100,
+    attributes: variation.attributes ?? [],
+    stock: variation.is_in_stock ? 1 : 0,
+    image: variation.images?.[0]?.src ?? '',
+  }
+}
+
 export async function getProducts() {
   const response = await fetch(`${API_URL}?per_page=100`)
 
@@ -38,6 +51,19 @@ export async function getProducts() {
   const data = await response.json()
 
   return data.map(normalizeProduct)
+}
+
+export async function getProductVariations(productId) {
+  const url = `${API_URL}?type=variation&parent=${productId}`
+
+  const response = await fetch(url)
+
+  if (!response.ok) {
+    throw new Error('Failed to fetch product variations')
+  }
+
+  const data = await response.json()
+  return data.map(normalizeVariation)
 }
 
 export async function getProduct(id) {

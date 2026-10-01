@@ -1,8 +1,9 @@
 import { ref } from 'vue'
-import { getProduct, getProducts } from '@/services/productService'
+import { getProduct, getProducts, getProductVariations } from '@/services/productService'
 
 export function useProducts() {
   const products = ref([])
+  const variations = ref([])
   const product = ref(null)
   const loading = ref(false)
   const error = ref(null)
@@ -20,6 +21,20 @@ export function useProducts() {
     }
   }
 
+  async function fetchProductVariations(productId) {
+    loading.value = true
+    error.value = null
+
+    try {
+      const data = await getProductVariations(productId)
+
+      variations.value = data
+    } catch (err) {
+      error.value = err
+    } finally {
+      loading.value = false
+    }
+  }
   async function fetchProduct(id) {
     loading.value = true
     error.value = null
@@ -40,5 +55,7 @@ export function useProducts() {
     error,
     fetchProducts,
     fetchProduct,
+    variations,
+    fetchProductVariations,
   }
 }

@@ -21,7 +21,7 @@ const route = useRoute()
 const relatedSection = ref(null)
 const relatedVisible = ref(false)
 
-const { product, loading, error, fetchProduct } = useProducts()
+const { product, variations, loading, error, fetchProduct, fetchProductVariations } = useProducts()
 const pageTitle = computed(() => {
   if (!product.value) {
     return 'Product | Product Catalog'
@@ -43,6 +43,7 @@ onMounted(async () => {
   await fetchProduct(route.params.id)
 
   if (product.value) {
+    await fetchProductVariations(product.value.id)
     selectedImage.value = product.value.images[0] || product.value.thumbnail
 
     addRecentlyViewed(product.value.id)
