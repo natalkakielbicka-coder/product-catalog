@@ -352,9 +352,7 @@ watch(
             }}
           </button>
 
-          <p class="product__description">
-            {{ product.description }}
-          </p>
+          <div class="product__description" v-html="product.description"></div>
 
           <div v-if="variations.length" class="product__variations">
             <button

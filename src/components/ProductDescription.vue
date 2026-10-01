@@ -9,6 +9,6 @@ defineProps({
 
 <template>
   <div class="product-tab-content">
-    <p>{{ description }}</p>
+    <div v-html="description"></div>
   </div>
 </template>
