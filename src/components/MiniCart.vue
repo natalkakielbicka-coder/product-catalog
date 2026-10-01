@@ -29,18 +29,26 @@ const { cartItems, cartTotal, removeFromCart, increaseQuantity, decreaseQuantity
       <div v-else class="mini-cart__content">
         <TransitionGroup name="cart-list" tag="div" class="mini-cart__items">
           <article v-for="item in cartItems" :key="item.id" class="mini-cart__item">
-            <RouterLink :to="`/product/${item.id}`" class="mini-cart__image" @click="emit('close')">
+            <RouterLink
+              :to="`/product/${item.parentId ?? item.id}`"
+              class="mini-cart__image"
+              @click="emit('close')"
+            >
               <img :src="item.thumbnail" :alt="item.title" />
             </RouterLink>
 
             <div class="mini-cart__item-content">
               <RouterLink
-                :to="`/product/${item.id}`"
+                :to="`/product/${item.parentId ?? item.id}`"
                 class="mini-cart__title"
                 @click="emit('close')"
               >
                 {{ item.title }}
               </RouterLink>
+
+              <p v-if="item.variationLabel" class="mini-cart__details">
+                {{ item.variationLabel }}
+              </p>
 
               <p class="mini-cart__price">
                 {{ formatCurrency(item.price) }}
@@ -60,7 +68,6 @@ const { cartItems, cartTotal, removeFromCart, increaseQuantity, decreaseQuantity
                 <button
                   type="button"
                   aria-label="Increase quantity"
-                  :disabled="item.quantity >= item.stock"
                   @click="increaseQuantity(item.id)"
                 >
                   +

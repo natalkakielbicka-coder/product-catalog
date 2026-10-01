@@ -15,14 +15,18 @@ defineProps({
 
 <template>
   <article class="cart-item">
-    <RouterLink class="cart-item__image-link" :to="`/product/${item.id}`">
+    <RouterLink class="cart-item__image-link" :to="`/product/${item.parentId ?? item.id}`">
       <img :src="item.thumbnail" :alt="item.title" />
     </RouterLink>
 
     <div>
-      <RouterLink class="cart-item__title" :to="`/product/${item.id}`">
+      <RouterLink class="cart-item__title" :to="`/product/${item.parentId ?? item.id}`">
         <h2>{{ item.title }}</h2>
       </RouterLink>
+
+      <p v-if="item.variationLabel" class="cart-item__variation">
+        {{ item.variationLabel }}
+      </p>
 
       <p>{{ formatCurrency(item.price) }}</p>
 
@@ -31,9 +35,7 @@ defineProps({
 
         <span>{{ item.quantity }}</span>
 
-        <button @click="increaseQuantity(item.id)" :disabled="item.quantity >= item.stock">
-          +
-        </button>
+        <button @click="increaseQuantity(item.id)">+</button>
       </div>
 
       <button class="cart-item__remove" @click="removeFromCart(item.id)">Remove</button>
@@ -123,6 +125,12 @@ defineProps({
 
 .cart-item__title h2 {
   transition: color 0.2s ease;
+}
+
+.cart-item__variation {
+  margin: 2px 0 6px;
+  color: var(--color-muted);
+  font-size: 13px;
 }
 
 @media (max-width: 640px) {
