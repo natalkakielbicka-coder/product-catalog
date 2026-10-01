@@ -38,12 +38,14 @@ const { recentlyViewedIds, addRecentlyViewed } = useRecentlyViewed()
 
 const selectedImage = ref('')
 const quantity = ref(1)
+const selectedVariation = ref(null)
 
 onMounted(async () => {
   await fetchProduct(route.params.id)
 
   if (product.value) {
     await fetchProductVariations(product.value.id)
+    selectedVariation.value = variations.value[0] ?? null
     selectedImage.value = product.value.images[0] || product.value.thumbnail
 
     addRecentlyViewed(product.value.id)
@@ -152,6 +154,14 @@ const originalPrice = computed(() => {
   return product.value.price / (1 - product.value.discountPercentage / 100)
 })
 
+const currentOriginalPrice = computed(() => {
+  if (selectedVariation.value) {
+    return selectedVariation.value.regularPrice
+  }
+
+  return originalPrice.value
+})
+
 const relatedProducts = computed(() => {
   if (!product.value) return []
 
@@ -178,6 +188,8 @@ watch(
   () => route.params.id,
   async (newId) => {
     await fetchProduct(newId)
+    await fetchProductVariations(product.value.id)
+    selectedVariation.value = variations.value[0] ?? null
 
     if (product.value) {
       selectedImage.value = product.value.images[0] || product.value.thumbnail
@@ -319,13 +331,28 @@ watch(
             {{ product.description }}
           </p>
 
+          <div v-if="variations.length" class="product__variations">
+            <button
+              v-for="variation in variations"
+              :key="variation.id"
+              type="button"
+              class="product__variation"
+              :class="{
+                'product__variation--active': selectedVariation?.id === variation.id,
+              }"
+              @click="selectedVariation = variation"
+            >
+              {{ variation.label }}
+            </button>
+          </div>
+
           <div class="product__prices">
             <span class="product__price">
-              {{ formatCurrency(product.price) }}
+              {{ formatCurrency(selectedVariation?.price ?? product.price) }}
             </span>
 
             <span v-if="product.discountPercentage > 0" class="product__old-price">
-              {{ formatCurrency(originalPrice) }}
+              {{ formatCurrency(currentOriginalPrice) }}
             </span>
 
             <span v-if="product.discountPercentage > 0" class="product__discount">
