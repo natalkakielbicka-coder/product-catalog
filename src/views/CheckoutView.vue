@@ -263,17 +263,17 @@ async function submitForm() {
 
       delivery: {
         name: wooOrder.shippingMethod || selectedDeliveryMethod.value.name,
-        cost: Number(wooOrder.shippingTotal),
+        cost: Number(wooOrder.shippingTotal ?? deliveryCost.value),
       },
 
       payment: wooOrder.paymentMethodTitle || selectedPaymentMethod.value?.name || '',
 
-      paymentFee: Number(wooOrder.feeTotal),
-      subtotal: Number(wooOrder.subtotal),
-      total: Number(wooOrder.total),
+      paymentFee: Number(wooOrder.feeTotal ?? paymentFee.value),
+      subtotal: Number(wooOrder.subtotal ?? cartTotal.value),
+      total: Number(wooOrder.total ?? orderTotal.value),
 
       coupon: appliedCoupon.value?.code ?? null,
-      discount: Number(wooOrder.discountTotal),
+      discount: Number(wooOrder.discountTotal ?? discount.value),
     }
 
     addOrder(placedOrder.value)
