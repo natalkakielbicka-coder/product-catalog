@@ -31,6 +31,9 @@ function normalizeProduct(product) {
     brand: '',
     rating: product.average_rating ? Number(product.average_rating) : 0,
     isInStock: product.is_in_stock ?? false,
+    stockQuantity: product.extensions?.product_catalog?.stock_quantity ?? null,
+    manageStock: product.extensions?.product_catalog?.manage_stock ?? false,
+    backordersAllowed: product.extensions?.product_catalog?.backorders_allowed ?? false,
     reviews: [],
     currency: {
       code: product.prices?.currency_code ?? 'PLN',
@@ -53,6 +56,9 @@ function normalizeVariation(variation) {
     salePrice: Number(variation.prices?.sale_price ?? 0) / 100,
     attributes: variation.attributes ?? [],
     isInStock: variation.is_in_stock ?? false,
+    stockQuantity: variation.extensions?.product_catalog?.stock_quantity ?? null,
+    manageStock: variation.extensions?.product_catalog?.manage_stock ?? false,
+    backordersAllowed: variation.extensions?.product_catalog?.backorders_allowed ?? false,
     image: variation.images?.[0]?.src ?? '',
     currency: {
       code: variation.prices?.currency_code ?? 'PLN',
