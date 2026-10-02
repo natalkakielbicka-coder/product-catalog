@@ -2,15 +2,19 @@
 
 A responsive e-commerce application built with Vue 3 and Vite.
 
-The project includes a complete shopping flow: product browsing, filtering, favorites, comparison, cart management, checkout and local order history.
+The project focuses on a complete shopping flow and integration with WooCommerce Store API, including variable products, product availability, cart management, checkout and local order history.
 
-## Live Demo
+## Preview
 
-https://natalkakielbicka-coder.github.io/product-catalog/
+![Product Catalog preview](./docs/product-catalog-preview.png)
 
 ## Features
 
-- Product catalog loaded from DummyJSON API
+- Product catalog loaded from WooCommerce Store API
+- Variable WooCommerce products
+- Variation price handling
+- Variation stock status
+- Variation-specific images
 - Product search with suggestions and recent searches
 - Category filtering
 - Price range filtering
@@ -24,8 +28,9 @@ https://natalkakielbicka-coder.github.io/product-catalog/
 - Favorites
 - Product comparison
 - Shopping cart
-- Quantity and stock limits
 - Mini cart
+- Separate cart items for product variations
+- Persistent cart with localStorage
 - Free shipping progress indicator
 - Multi-step checkout
 - Delivery method selection
@@ -35,11 +40,33 @@ https://natalkakielbicka-coder.github.io/product-catalog/
 - Order history
 - Order details
 - Order status management
-- Persistent data with localStorage
 - Loading skeletons
 - Error states
 - Custom 404 page
 - Responsive layout
+
+## WooCommerce Integration
+
+The application is connected locally to a WordPress installation with WooCommerce.
+
+Product data is loaded through the WooCommerce Store API:
+
+```text
+/wp-json/wc/store/v1/products
+```
+
+The service layer normalizes WooCommerce data before it is used by Vue components.
+
+Variable products are supported, including:
+
+- variation-specific prices
+- regular and sale prices
+- stock availability
+- variation images
+- variation labels
+- separate cart items for each variation
+
+The local Vite development server proxies WooCommerce API requests to the WordPress installation.
 
 ## Tech Stack
 
@@ -49,7 +76,8 @@ https://natalkakielbicka-coder.github.io/product-catalog/
 - Vite
 - JavaScript
 - CSS
-- DummyJSON API
+- WordPress
+- WooCommerce Store API
 - Local Storage
 - vue-easy-lightbox
 - ESLint
@@ -94,14 +122,6 @@ Shared application state includes:
 
 Selected data is persisted in `localStorage`, allowing it to survive page refreshes.
 
-## API
-
-Product data is loaded from:
-
-[DummyJSON](https://dummyjson.com/products)
-
-API responses are normalized in the service layer before being used by the application.
-
 ## Getting Started
 
 Install dependencies:
@@ -144,4 +164,6 @@ npm run format
 
 ## Purpose
 
-This project was created to practice building a larger Vue application with reusable components, composables, routing, asynchronous API communication and persistent client-side state.
+This project was created to practice building a larger Vue application and integrating a Vue frontend with WooCommerce.
+
+The main focus is on reusable components, composables, routing, API normalization, variable products, persistent client-side state and a complete e-commerce flow.
