@@ -4,13 +4,10 @@ import { RouterLink } from 'vue-router'
 import { useCompare } from '@/composables/useCompare'
 import { useProducts } from '@/composables/useProducts'
 import { useDocumentTitle } from '@/composables/useDocumentTitle'
-import { useCart } from '@/composables/useCart'
 import { formatCurrency } from '@/utils/currency'
 import ErrorState from '@/components/ErrorState.vue'
 
 const { compareIds, toggleCompare } = useCompare()
-
-const { addToCart } = useCart()
 
 const { products, loading, error, fetchProducts } = useProducts()
 
@@ -91,14 +88,9 @@ onMounted(() => {
                   Remove
                 </button>
 
-                <button
-                  class="compare-product__cart"
-                  type="button"
-                  :disabled="product.stock === 0"
-                  @click="addToCart(product)"
-                >
-                  {{ product.stock > 0 ? 'Add to cart' : 'Out of stock' }}
-                </button>
+                <RouterLink :to="`/product/${product.id}`" class="compare-product__cart">
+                  View product
+                </RouterLink>
               </div>
             </th>
           </tr>
@@ -147,7 +139,7 @@ onMounted(() => {
                   unavailable: product.stock === 0,
                 }"
               >
-                {{ product.stock > 0 ? `${product.stock} in stock` : 'Out of stock' }}
+                {{ product.stock > 0 ? 'In stock' : 'Out of stock' }}
               </span>
             </td>
           </tr>
@@ -258,6 +250,10 @@ main {
   text-decoration: none;
 }
 
+.compare-product__title:hover {
+  color: var(--color-accent);
+}
+
 .available {
   color: #34834a;
 }
@@ -294,6 +290,7 @@ main {
 }
 
 .compare-product__cart {
+  display: block;
   width: 100%;
   padding: 11px 16px;
 
@@ -304,25 +301,13 @@ main {
   background: var(--color-accent);
 
   font-weight: 600;
+  text-align: center;
+  text-decoration: none;
   cursor: pointer;
 }
 
-.compare-product__cart:hover:not(:disabled) {
+.compare-product__cart:hover {
   background: var(--color-accent-hover);
-}
-
-.compare-product__cart:disabled {
-  opacity: 0.45;
-  cursor: not-allowed;
-}
-
-.compare-product__remove {
-  padding: 0;
-  border: 0;
-  color: var(--color-accent);
-  background: transparent;
-  font-weight: 600;
-  cursor: pointer;
 }
 
 .compare-product__remove {
