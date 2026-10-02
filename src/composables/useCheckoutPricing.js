@@ -1,4 +1,4 @@
-import { computed, ref } from 'vue'
+import { computed, ref, watch } from 'vue'
 import { validateCoupon } from '@/services/orderService'
 
 export const FREE_DELIVERY_THRESHOLD = 100
@@ -101,6 +101,24 @@ export function useCheckoutPricing(cartTotal) {
       couponError.value = error.message
     }
   }
+
+  async function revalidateAppliedCoupon() {
+    if (!appliedCoupon.value?.code) {
+      return
+    }
+
+    try {
+      appliedCoupon.value = await validateCoupon(appliedCoupon.value.code, cartTotal.value)
+      couponError.value = ''
+    } catch {
+      appliedCoupon.value = null
+      couponError.value = 'Coupon is no longer valid for the current cart.'
+    }
+  }
+
+  watch(cartTotal, async () => {
+    await revalidateAppliedCoupon()
+  })
 
   function removeCoupon() {
     appliedCoupon.value = null
