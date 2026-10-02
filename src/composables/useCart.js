@@ -91,5 +91,6 @@ export function useCart() {
     decreaseQuantity,
     removeFromCart,
     clearCart,
+    getMaximumQuantity,
   }
 }

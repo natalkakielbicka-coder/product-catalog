@@ -3,7 +3,7 @@ import { useCart } from '@/composables/useCart'
 import { formatCurrency } from '@/utils/currency'
 import { RouterLink } from 'vue-router'
 
-const { increaseQuantity, decreaseQuantity, removeFromCart } = useCart()
+const { increaseQuantity, decreaseQuantity, removeFromCart, getMaximumQuantity } = useCart()
 
 defineProps({
   item: {
@@ -55,7 +55,12 @@ defineProps({
 
         <span>{{ item.quantity }}</span>
 
-        <button @click="increaseQuantity(item.id)">+</button>
+        <button
+          :disabled="item.quantity >= getMaximumQuantity(item)"
+          @click="increaseQuantity(item.id)"
+        >
+          +
+        </button>
       </div>
 
       <button class="cart-item__remove" @click="removeFromCart(item.id)">Remove</button>

@@ -5,7 +5,14 @@ import { formatCurrency } from '@/utils/currency'
 
 const emit = defineEmits(['close'])
 
-const { cartItems, cartTotal, removeFromCart, increaseQuantity, decreaseQuantity } = useCart()
+const {
+  cartItems,
+  cartTotal,
+  removeFromCart,
+  increaseQuantity,
+  decreaseQuantity,
+  getMaximumQuantity,
+} = useCart()
 </script>
 
 <template>
@@ -82,6 +89,7 @@ const { cartItems, cartTotal, removeFromCart, increaseQuantity, decreaseQuantity
                 <button
                   type="button"
                   aria-label="Increase quantity"
+                  :disabled="item.quantity >= getMaximumQuantity(item)"
                   @click="increaseQuantity(item.id)"
                 >
                   +

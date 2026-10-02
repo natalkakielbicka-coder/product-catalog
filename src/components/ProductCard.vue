@@ -29,8 +29,20 @@ const cartQuantity = computed(() => {
   return cartItem?.quantity ?? 0
 })
 
+const maximumQuantity = computed(() => {
+  if (!props.product.manageStock || props.product.backordersAllowed) {
+    return Infinity
+  }
+
+  return props.product.stockQuantity ?? 0
+})
+
 const remainingStock = computed(() => {
-  return Math.max(props.product.stock - cartQuantity.value, 0)
+  if (!props.product.isInStock) {
+    return 0
+  }
+
+  return Math.max(maximumQuantity.value - cartQuantity.value, 0)
 })
 
 function increaseQuantity() {
@@ -97,7 +109,7 @@ const originalPrice = computed(() => {
     </RouterLink>
 
     <div class="product-card__actions">
-      <div v-if="product.stock > 0" class="product-card__quantity">
+      <div v-if="product.isInStock" class="product-card__quantity">
         <button type="button" aria-label="Decrease quantity" @click="decreaseQuantity">−</button>
 
         <span>{{ quantity }}</span>
@@ -105,7 +117,7 @@ const originalPrice = computed(() => {
         <button
           type="button"
           aria-label="Increase quantity"
-          :disabled="remainingStock"
+          :disabled="quantity >= remainingStock"
           @click="increaseQuantity"
         >
           +
