@@ -290,7 +290,6 @@ watch(
     setInitialVariation()
 
     if (product.value) {
-      selectedImage.value = product.value.images[0] || product.value.thumbnail
       quantity.value = 1
       activeTab.value = 'description'
       addRecentlyViewed(product.value.id)
