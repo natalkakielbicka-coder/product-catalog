@@ -80,8 +80,32 @@ onMounted(async () => {
   }
 })
 
+const currentStockQuantity = computed(() => {
+  if (!product.value) {
+    return 0
+  }
+
+  if (selectedVariation.value) {
+    if (!selectedVariation.value.manageStock) {
+      return Infinity
+    }
+
+    return selectedVariation.value.stockQuantity ?? 0
+  }
+
+  if (!product.value.manageStock) {
+    return Infinity
+  }
+
+  return product.value.stockQuantity ?? 0
+})
+
 const remainingStock = computed(() => {
-  return isCurrentProductInStock.value ? Infinity : 0
+  if (!isCurrentProductInStock.value) {
+    return 0
+  }
+
+  return currentStockQuantity.value
 })
 
 const isCurrentProductInStock = computed(() => {
@@ -205,6 +229,10 @@ function handleAddToCart() {
         price: selectedVariation.value.price,
         variation: selectedVariation.value,
         thumbnail: selectedVariation.value.image || product.value.thumbnail,
+        isInStock: selectedVariation.value.isInStock,
+        stockQuantity: selectedVariation.value.stockQuantity,
+        manageStock: selectedVariation.value.manageStock,
+        backordersAllowed: selectedVariation.value.backordersAllowed,
       },
       quantity.value,
     )

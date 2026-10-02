@@ -16,25 +16,48 @@ export function useCart() {
     }, 0)
   })
 
+  function getMaximumQuantity(item) {
+    if (!item.manageStock || item.backordersAllowed) {
+      return Infinity
+    }
+
+    return item.stockQuantity ?? 0
+  }
+
   function addToCart(product, quantity = 1) {
     const existingItem = cartItems.value.find((item) => item.id === product.id)
+    const maximumQuantity = getMaximumQuantity(product)
 
     if (existingItem) {
-      existingItem.quantity += quantity
+      existingItem.quantity = Math.min(existingItem.quantity + quantity, maximumQuantity)
 
+      return
+    }
+
+    const initialQuantity = Math.min(quantity, maximumQuantity)
+
+    if (initialQuantity <= 0) {
       return
     }
 
     cartItems.value.push({
       ...product,
-      quantity,
+      quantity: initialQuantity,
     })
   }
 
   function increaseQuantity(id) {
     const item = cartItems.value.find((item) => item.id === id)
 
-    if (!item) return
+    if (!item) {
+      return
+    }
+
+    const maximumQuantity = getMaximumQuantity(item)
+
+    if (item.quantity >= maximumQuantity) {
+      return
+    }
 
     item.quantity++
   }
