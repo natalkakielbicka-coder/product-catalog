@@ -148,13 +148,31 @@ function selectVariation(variation) {
 
   selectedVariation.value = variation
   quantity.value = 1
+
+  if (variation.image) {
+    selectedImage.value = variation.image
+  }
 }
+
+const lightboxImages = computed(() => {
+  if (!product.value) {
+    return []
+  }
+
+  const images = [...product.value.images]
+
+  if (selectedVariation.value?.image && !images.includes(selectedVariation.value.image)) {
+    images.unshift(selectedVariation.value.image)
+  }
+
+  return images
+})
 
 const lightboxVisible = ref(false)
 const lightboxIndex = ref(0)
 
 function openLightbox() {
-  const index = product.value.images.indexOf(selectedImage.value)
+  const index = lightboxImages.value.indexOf(selectedImage.value)
 
   lightboxIndex.value = index >= 0 ? index : 0
   lightboxVisible.value = true
@@ -527,7 +545,7 @@ watch(
   <VueEasyLightbox
     v-if="lightboxVisible"
     :visible="lightboxVisible"
-    :imgs="product?.images || []"
+    :imgs="lightboxImages"
     :index="lightboxIndex"
     loop
     @hide="closeLightbox"
