@@ -14,7 +14,8 @@ import { usePagination } from '@/composables/usePagination'
 import { useDocumentTitle } from '@/composables/useDocumentTitle'
 import { useRoute, useRouter } from 'vue-router'
 
-const { products, loading, error, fetchProducts } = useProducts()
+const { products, featuredProducts, loading, error, fetchProducts, fetchFeaturedProducts } =
+  useProducts()
 
 const pageTitle = ref('Products | Product Catalog')
 
@@ -92,7 +93,7 @@ const route = useRoute()
 const router = useRouter()
 
 onMounted(async () => {
-  await fetchProducts()
+  await Promise.all([fetchProducts(), fetchFeaturedProducts()])
 
   searchInput.value = route.query.search ?? ''
   searchQuery.value = route.query.search ?? ''
@@ -163,6 +164,15 @@ function selectSearchSuggestion(product) {
 <template>
   <main>
     <h1>Products</h1>
+
+    <section v-if="featuredProducts.length" class="featured-products">
+      <div class="featured-products__header">
+        <p>Selected for you</p>
+        <h2>Featured products</h2>
+      </div>
+
+      <ProductGrid :products="featuredProducts" />
+    </section>
 
     <div v-if="loading" class="products-skeleton">
       <ProductSkeleton v-for="item in 12" :key="item" />
@@ -459,6 +469,27 @@ h1 {
 
 .active-filters button:hover {
   border-color: var(--color-accent);
+}
+
+.featured-products {
+  margin-bottom: 64px;
+}
+
+.featured-products__header {
+  margin-bottom: 24px;
+}
+
+.featured-products__header p {
+  margin: 0 0 6px;
+  color: var(--color-accent);
+  font-size: 12px;
+  font-weight: 700;
+  text-transform: uppercase;
+}
+
+.featured-products__header h2 {
+  margin: 0;
+  font-size: clamp(28px, 4vw, 40px);
 }
 
 @media (max-width: 1023px) {

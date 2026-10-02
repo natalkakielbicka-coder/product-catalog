@@ -110,3 +110,15 @@ export async function getProduct(id) {
 
   return normalizeProduct(data)
 }
+
+export async function getFeaturedProducts() {
+  const response = await fetch(`${API_URL}?featured=true&per_page=8`)
+
+  if (!response.ok) {
+    throw new Error('Failed to fetch featured products')
+  }
+
+  const data = await response.json()
+
+  return data.map(normalizeProduct)
+}

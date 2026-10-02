@@ -1,5 +1,10 @@
 import { ref } from 'vue'
-import { getProduct, getProducts, getProductVariations } from '@/services/productService'
+import {
+  getProduct,
+  getProducts,
+  getProductVariations,
+  getFeaturedProducts,
+} from '@/services/productService'
 
 export function useProducts() {
   const products = ref([])
@@ -7,6 +12,7 @@ export function useProducts() {
   const product = ref(null)
   const loading = ref(false)
   const error = ref(null)
+  const featuredProducts = ref([])
 
   async function fetchProducts() {
     loading.value = true
@@ -35,12 +41,26 @@ export function useProducts() {
       loading.value = false
     }
   }
+
   async function fetchProduct(id) {
     loading.value = true
     error.value = null
 
     try {
       product.value = await getProduct(id)
+    } catch (err) {
+      error.value = err
+    } finally {
+      loading.value = false
+    }
+  }
+
+  async function fetchFeaturedProducts() {
+    loading.value = true
+    error.value = null
+
+    try {
+      featuredProducts.value = await getFeaturedProducts()
     } catch (err) {
       error.value = err
     } finally {
@@ -57,5 +77,7 @@ export function useProducts() {
     fetchProduct,
     variations,
     fetchProductVariations,
+    featuredProducts,
+    fetchFeaturedProducts,
   }
 }
