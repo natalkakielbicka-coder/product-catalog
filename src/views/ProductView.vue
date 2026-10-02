@@ -34,7 +34,7 @@ const pageTitle = computed(() => {
 })
 useDocumentTitle(pageTitle)
 const { products: relatedSource, fetchProducts: fetchRelatedProducts } = useProducts()
-const { addToCart } = useCart()
+const { cartItems, addToCart } = useCart()
 const { isFavorite, toggleFavorite } = useFavorites()
 const { isCompared, toggleCompare, compareLimitReached } = useCompare()
 const { recentlyViewedIds, addRecentlyViewed } = useRecentlyViewed()
@@ -103,12 +103,32 @@ const currentStockQuantity = computed(() => {
   return product.value.stockQuantity ?? 0
 })
 
+const currentCartQuantity = computed(() => {
+  const currentId = selectedVariation.value?.id ?? product.value?.id
+
+  if (!currentId) {
+    return 0
+  }
+
+  const cartItem = cartItems.value.find((item) => item.id === currentId)
+
+  return cartItem?.quantity ?? 0
+})
+
 const remainingStock = computed(() => {
   if (!isCurrentProductInStock.value) {
     return 0
   }
 
-  return currentStockQuantity.value
+  if (currentStockQuantity.value === Infinity) {
+    return Infinity
+  }
+
+  return Math.max(currentStockQuantity.value - currentCartQuantity.value, 0)
+})
+
+const canAddToCart = computed(() => {
+  return isCurrentProductInStock.value && remainingStock.value > 0
 })
 
 const isCurrentProductInStock = computed(() => {
@@ -217,7 +237,7 @@ function decreaseQuantity() {
 }
 
 function handleAddToCart() {
-  if (!product.value || !isCurrentProductInStock.value) {
+  if (!product.value || !canAddToCart.value) {
     return
   }
 
@@ -518,10 +538,16 @@ watch(
             <button
               class="product__button"
               type="button"
-              :disabled="!isCurrentProductInStock"
+              :disabled="!canAddToCart"
               @click="handleAddToCart"
             >
-              {{ isCurrentProductInStock ? 'Add to cart' : 'Out of stock' }}
+              {{
+                !isCurrentProductInStock
+                  ? 'Out of stock'
+                  : remainingStock === 0
+                    ? 'Maximum in cart'
+                    : 'Add to cart'
+              }}
             </button>
           </div>
         </div>
