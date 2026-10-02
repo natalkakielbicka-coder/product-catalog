@@ -116,7 +116,13 @@ export function useCheckoutPricing(cartTotal) {
     }
   }
 
-  watch(cartTotal, async () => {
+  watch(cartTotal, async (newTotal) => {
+    if (newTotal <= 0) {
+      appliedCoupon.value = null
+      couponError.value = ''
+      return
+    }
+
     await revalidateAppliedCoupon()
   })
 
