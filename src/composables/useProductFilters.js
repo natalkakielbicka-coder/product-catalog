@@ -47,7 +47,7 @@ export function useProductFilters(products) {
 
       const matchesMaxPrice = maxPrice.value === '' || product.price <= maxPrice.value
 
-      const matchesStock = !inStockOnly.value || product.stock > 0
+      const matchesStock = !inStockOnly.value || product.isInStock
 
       return matchesSearch && matchesCategory && matchesMinPrice && matchesMaxPrice && matchesStock
     })
