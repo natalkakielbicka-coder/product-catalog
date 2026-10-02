@@ -32,6 +32,15 @@ function normalizeProduct(product) {
     rating: product.average_rating ? Number(product.average_rating) : 0,
     stock: product.is_in_stock ? 1 : 0,
     reviews: [],
+    currency: {
+      code: product.prices?.currency_code ?? 'PLN',
+      symbol: product.prices?.currency_symbol ?? 'zł',
+      minorUnit: product.prices?.currency_minor_unit ?? 2,
+      decimalSeparator: product.prices?.currency_decimal_separator ?? ',',
+      thousandSeparator: product.prices?.currency_thousand_separator ?? ' ',
+      prefix: product.prices?.currency_prefix ?? '',
+      suffix: product.prices?.currency_suffix ?? '',
+    },
   }
 }
 
@@ -45,6 +54,15 @@ function normalizeVariation(variation) {
     attributes: variation.attributes ?? [],
     isInStock: variation.is_in_stock ?? false,
     image: variation.images?.[0]?.src ?? '',
+    currency: {
+      code: variation.prices?.currency_code ?? 'PLN',
+      symbol: variation.prices?.currency_symbol ?? 'zł',
+      minorUnit: variation.prices?.currency_minor_unit ?? 2,
+      decimalSeparator: variation.prices?.currency_decimal_separator ?? ',',
+      thousandSeparator: variation.prices?.currency_thousand_separator ?? ' ',
+      prefix: variation.prices?.currency_prefix ?? '',
+      suffix: variation.prices?.currency_suffix ?? '',
+    },
   }
 }
 

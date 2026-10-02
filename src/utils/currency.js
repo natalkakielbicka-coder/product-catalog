@@ -1,6 +1,6 @@
-export function formatCurrency(value) {
-  return new Intl.NumberFormat('en-US', {
+export function formatCurrency(value, currencyCode = 'PLN') {
+  return new Intl.NumberFormat('pl-PL', {
     style: 'currency',
-    currency: 'USD',
+    currency: currencyCode,
   }).format(value)
 }
