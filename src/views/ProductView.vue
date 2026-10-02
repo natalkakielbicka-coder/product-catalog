@@ -209,6 +209,7 @@ function handleAddToCart() {
         variationLabel: selectedVariation.value.label,
         price: selectedVariation.value.price,
         variation: selectedVariation.value,
+        thumbnail: selectedVariation.value.image || product.value.thumbnail,
       },
       quantity.value,
     )
