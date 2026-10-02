@@ -6,6 +6,7 @@ import { useCheckoutPricing } from '@/composables/useCheckoutPricing'
 import { useOrders } from '@/composables/useOrders'
 import { formatCurrency } from '@/utils/currency'
 import { vFocus } from '@/directives/vFocus'
+import { createOrder } from '@/services/orderService'
 
 const orderPlaced = ref(false)
 const placedOrder = ref(null)
@@ -205,16 +206,32 @@ function validateForm() {
   return customerValid && paymentValid
 }
 
-function submitForm() {
+async function submitForm() {
   const isValid = validateForm()
 
   if (!isValid) return
   if (cartItems.value.length === 0) return
 
+  const wooOrder = await createOrder({
+    items: cartItems.value.map((item) => ({
+      id: item.id,
+      quantity: item.quantity,
+    })),
+
+    customer: {
+      name: form.name,
+      email: form.email,
+      address: form.address,
+      city: form.city,
+      postalCode: form.postalCode,
+    },
+  })
+
   placedOrder.value = {
-    number: `ORD-${Date.now()}`,
+    id: wooOrder.id,
+    number: wooOrder.number,
     createdAt: new Date().toISOString(),
-    status: 'Processing',
+    status: wooOrder.status,
 
     customer: {
       name: form.name,
