@@ -262,18 +262,18 @@ async function submitForm() {
       })),
 
       delivery: {
-        name: selectedDeliveryMethod.value.name,
-        cost: deliveryCost.value,
+        name: wooOrder.shippingMethod || selectedDeliveryMethod.value.name,
+        cost: Number(wooOrder.shippingTotal),
       },
 
-      payment: selectedPaymentMethod.value?.name ?? '',
+      payment: wooOrder.paymentMethodTitle || selectedPaymentMethod.value?.name || '',
 
-      paymentFee: paymentFee.value,
-      subtotal: cartTotal.value,
+      paymentFee: Number(wooOrder.feeTotal),
+      subtotal: Number(wooOrder.subtotal),
       total: Number(wooOrder.total),
 
       coupon: appliedCoupon.value?.code ?? null,
-      discount: discount.value,
+      discount: Number(wooOrder.discountTotal),
     }
 
     addOrder(placedOrder.value)
