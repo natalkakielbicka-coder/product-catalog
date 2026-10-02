@@ -23,6 +23,7 @@ const {
   error,
   fetchProducts,
   fetchFeaturedProducts,
+  featuredError,
 } = useProducts()
 
 const pageTitle = ref('Products | Product Catalog')
@@ -182,6 +183,8 @@ function selectSearchSuggestion(product) {
       <div v-if="featuredLoading" class="products-skeleton">
         <ProductSkeleton v-for="item in 4" :key="item" />
       </div>
+
+      <p v-else-if="featuredError">Could not load featured products.</p>
 
       <ProductGrid v-else-if="featuredProducts.length" :products="featuredProducts" />
     </section>

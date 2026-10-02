@@ -14,6 +14,7 @@ export function useProducts() {
   const error = ref(null)
   const featuredProducts = ref([])
   const featuredLoading = ref(false)
+  const featuredError = ref(null)
 
   async function fetchProducts() {
     loading.value = true
@@ -58,11 +59,12 @@ export function useProducts() {
 
   async function fetchFeaturedProducts() {
     featuredLoading.value = true
+    featuredError.value = null
 
     try {
       featuredProducts.value = await getFeaturedProducts()
     } catch (err) {
-      error.value = err
+      featuredError.value = err
     } finally {
       featuredLoading.value = false
     }
@@ -80,5 +82,6 @@ export function useProducts() {
     featuredProducts,
     fetchFeaturedProducts,
     featuredLoading,
+    featuredError,
   }
 }
