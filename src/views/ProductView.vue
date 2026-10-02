@@ -40,20 +40,25 @@ const selectedImage = ref('')
 const quantity = ref(1)
 const selectedVariation = ref(null)
 
+function setInitialVariation() {
+  const variationId = Number(route.query.variation)
+
+  selectedVariation.value =
+    variations.value.find((variation) => variation.id === variationId && variation.isInStock) ??
+    variations.value.find((variation) => variation.isInStock) ??
+    variations.value[0] ??
+    null
+
+  selectedImage.value =
+    selectedVariation.value?.image || product.value?.images[0] || product.value?.thumbnail || ''
+}
+
 onMounted(async () => {
   await fetchProduct(route.params.id)
 
   if (product.value) {
     await fetchProductVariations(product.value.id)
-    const variationId = Number(route.query.variation)
-    selectedVariation.value =
-      variations.value.find((variation) => variation.id === variationId && variation.isInStock) ??
-      variations.value.find((variation) => variation.isInStock) ??
-      variations.value[0] ??
-      null
-
-    selectedImage.value =
-      selectedVariation.value?.image || product.value.images[0] || product.value.thumbnail
+    setInitialVariation()
 
     addRecentlyViewed(product.value.id)
   }
@@ -282,8 +287,7 @@ watch(
   async (newId) => {
     await fetchProduct(newId)
     await fetchProductVariations(product.value.id)
-    selectedVariation.value =
-      variations.value.find((variation) => variation.isInStock) ?? variations.value[0] ?? null
+    setInitialVariation()
 
     if (product.value) {
       selectedImage.value = product.value.images[0] || product.value.thumbnail
