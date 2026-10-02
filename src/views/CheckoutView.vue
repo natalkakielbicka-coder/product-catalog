@@ -270,7 +270,7 @@ async function submitForm() {
 
       paymentFee: paymentFee.value,
       subtotal: cartTotal.value,
-      total: orderTotal.value,
+      total: Number(wooOrder.total),
 
       coupon: appliedCoupon.value?.code ?? null,
       discount: discount.value,
