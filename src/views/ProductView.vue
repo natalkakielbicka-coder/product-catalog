@@ -89,7 +89,7 @@ const remainingStock = computed(() => {
   }
 
   if (selectedVariation.value) {
-    return 99
+    return Infinity
   }
 
   return Math.max(product.value.stock - cartQuantity.value, 0)
