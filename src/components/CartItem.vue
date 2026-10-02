@@ -15,12 +15,32 @@ defineProps({
 
 <template>
   <article class="cart-item">
-    <RouterLink class="cart-item__image-link" :to="`/product/${item.parentId ?? item.id}`">
+    <RouterLink
+      class="cart-item__image-link"
+      :to="{
+        path: `/product/${item.parentId ?? item.id}`,
+        query: item.parentId
+          ? {
+              variation: item.id,
+            }
+          : {},
+      }"
+    >
       <img :src="item.thumbnail" :alt="item.title" />
     </RouterLink>
 
     <div>
-      <RouterLink class="cart-item__title" :to="`/product/${item.parentId ?? item.id}`">
+      <RouterLink
+        class="cart-item__title"
+        :to="{
+          path: `/product/${item.parentId ?? item.id}`,
+          query: item.parentId
+            ? {
+                variation: item.id,
+              }
+            : {},
+        }"
+      >
         <h2>{{ item.title }}</h2>
       </RouterLink>
 

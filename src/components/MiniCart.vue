@@ -30,7 +30,14 @@ const { cartItems, cartTotal, removeFromCart, increaseQuantity, decreaseQuantity
         <TransitionGroup name="cart-list" tag="div" class="mini-cart__items">
           <article v-for="item in cartItems" :key="item.id" class="mini-cart__item">
             <RouterLink
-              :to="`/product/${item.parentId ?? item.id}`"
+              :to="{
+                path: `/product/${item.parentId ?? item.id}`,
+                query: item.parentId
+                  ? {
+                      variation: item.id,
+                    }
+                  : {},
+              }"
               class="mini-cart__image"
               @click="emit('close')"
             >
@@ -39,7 +46,14 @@ const { cartItems, cartTotal, removeFromCart, increaseQuantity, decreaseQuantity
 
             <div class="mini-cart__item-content">
               <RouterLink
-                :to="`/product/${item.parentId ?? item.id}`"
+                :to="{
+                  path: `/product/${item.parentId ?? item.id}`,
+                  query: item.parentId
+                    ? {
+                        variation: item.id,
+                      }
+                    : {},
+                }"
                 class="mini-cart__title"
                 @click="emit('close')"
               >

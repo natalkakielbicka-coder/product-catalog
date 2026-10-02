@@ -45,9 +45,15 @@ onMounted(async () => {
 
   if (product.value) {
     await fetchProductVariations(product.value.id)
+    const variationId = Number(route.query.variation)
     selectedVariation.value =
-      variations.value.find((variation) => variation.isInStock) ?? variations.value[0] ?? null
-    selectedImage.value = product.value.images[0] || product.value.thumbnail
+      variations.value.find((variation) => variation.id === variationId && variation.isInStock) ??
+      variations.value.find((variation) => variation.isInStock) ??
+      variations.value[0] ??
+      null
+
+    selectedImage.value =
+      selectedVariation.value?.image || product.value.images[0] || product.value.thumbnail
 
     addRecentlyViewed(product.value.id)
   }
@@ -285,6 +291,29 @@ watch(
       activeTab.value = 'description'
       addRecentlyViewed(product.value.id)
     }
+  },
+)
+
+watch(
+  () => route.query.variation,
+  (newVariationId) => {
+    if (!variations.value.length) {
+      return
+    }
+
+    const variationId = Number(newVariationId)
+
+    const variation = variations.value.find((item) => item.id === variationId && item.isInStock)
+
+    if (!variation) {
+      return
+    }
+
+    selectedVariation.value = variation
+    quantity.value = 1
+
+    selectedImage.value =
+      variation.image || product.value?.images[0] || product.value?.thumbnail || ''
   },
 )
 </script>
