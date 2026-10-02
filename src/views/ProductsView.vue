@@ -14,8 +14,15 @@ import { usePagination } from '@/composables/usePagination'
 import { useDocumentTitle } from '@/composables/useDocumentTitle'
 import { useRoute, useRouter } from 'vue-router'
 
-const { products, featuredProducts, loading, error, fetchProducts, fetchFeaturedProducts } =
-  useProducts()
+const {
+  products,
+  featuredProducts,
+  featuredLoading,
+  loading,
+  error,
+  fetchProducts,
+  fetchFeaturedProducts,
+} = useProducts()
 
 const pageTitle = ref('Products | Product Catalog')
 
@@ -165,13 +172,17 @@ function selectSearchSuggestion(product) {
   <main>
     <h1>Products</h1>
 
-    <section v-if="featuredProducts.length" class="featured-products">
+    <section class="featured-products">
       <div class="featured-products__header">
         <p>Selected for you</p>
         <h2>Featured products</h2>
       </div>
 
-      <ProductGrid :products="featuredProducts" />
+      <div v-if="featuredLoading" class="products-skeleton">
+        <ProductSkeleton v-for="item in 4" :key="item" />
+      </div>
+
+      <ProductGrid v-else-if="featuredProducts.length" :products="featuredProducts" />
     </section>
 
     <div v-if="loading" class="products-skeleton">
