@@ -30,7 +30,7 @@ onMounted(() => {
 
     <p v-if="loading">Loading favorites...</p>
 
-    <ErrorState v-else-if="error" @retry="fetchProduct(route.params.id)" />
+    <ErrorState v-else-if="error" @retry="fetchProducts" />
 
     <div v-else-if="favoriteProducts.length === 0" class="favorites-empty">
       <span class="favorites-empty__icon">♡</span>

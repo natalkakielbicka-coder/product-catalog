@@ -135,11 +135,11 @@ onMounted(() => {
             <td v-for="product in compareProducts" :key="product.id">
               <span
                 :class="{
-                  available: product.stock > 0,
-                  unavailable: product.stock === 0,
+                  available: product.isInStock,
+                  unavailable: !product.isInStock,
                 }"
               >
-                {{ product.stock > 0 ? 'In stock' : 'Out of stock' }}
+                {{ product.isInStock ? 'In stock' : 'Out of stock' }}
               </span>
             </td>
           </tr>
