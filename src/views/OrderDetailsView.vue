@@ -4,6 +4,7 @@ import { useRoute } from 'vue-router'
 import { useOrders } from '@/composables/useOrders'
 import { useDocumentTitle } from '@/composables/useDocumentTitle'
 import { formatCurrency } from '@/utils/currency'
+import { getOrderStatusLabel } from '@/utils/orderStatus'
 
 const route = useRoute()
 
@@ -28,20 +29,6 @@ function formatOrderDate(date) {
     dateStyle: 'medium',
     timeStyle: 'short',
   }).format(new Date(date))
-}
-
-function getOrderStatusLabel(status) {
-  const statuses = {
-    pending: 'Oczekujące na płatność',
-    'on-hold': 'Wstrzymane',
-    processing: 'W realizacji',
-    completed: 'Zrealizowane',
-    cancelled: 'Anulowane',
-    refunded: 'Zwrócone',
-    failed: 'Nieudane',
-  }
-
-  return statuses[status] ?? status
 }
 </script>
 

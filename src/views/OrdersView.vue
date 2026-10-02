@@ -3,6 +3,7 @@ import { ref } from 'vue'
 import { useOrders } from '@/composables/useOrders'
 import { useDocumentTitle } from '@/composables/useDocumentTitle'
 import { formatCurrency } from '@/utils/currency'
+import { getOrderStatusLabel } from '@/utils/orderStatus'
 
 const { orders } = useOrders()
 
@@ -19,20 +20,6 @@ function formatOrderDate(date) {
 
 function getItemsCount(items) {
   return items.reduce((total, item) => total + item.quantity, 0)
-}
-
-function getOrderStatusLabel(status) {
-  const statuses = {
-    pending: 'Oczekujące na płatność',
-    'on-hold': 'Wstrzymane',
-    processing: 'W realizacji',
-    completed: 'Zrealizowane',
-    cancelled: 'Anulowane',
-    refunded: 'Zwrócone',
-    failed: 'Nieudane',
-  }
-
-  return statuses[status] ?? status
 }
 </script>
 
