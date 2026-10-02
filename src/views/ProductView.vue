@@ -136,7 +136,7 @@ const activeTabProps = computed(() => {
 
   if (activeTab.value === 'shipping') {
     return {
-      stock: product.value.stock,
+      isInStock: isCurrentProductInStock.value,
     }
   }
 
