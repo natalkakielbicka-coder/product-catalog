@@ -109,7 +109,7 @@ const originalPrice = computed(() => {
     </RouterLink>
 
     <div class="product-card__actions">
-      <div v-if="product.isInStock" class="product-card__quantity">
+      <div v-if="product.isInStock && !product.hasOptions" class="product-card__quantity">
         <button type="button" aria-label="Decrease quantity" @click="decreaseQuantity">−</button>
 
         <span>{{ quantity }}</span>
@@ -124,7 +124,16 @@ const originalPrice = computed(() => {
         </button>
       </div>
 
+      <RouterLink
+        v-if="product.hasOptions"
+        class="product-card__button product-card__button--full"
+        :to="`/product/${product.id}`"
+      >
+        Choose options
+      </RouterLink>
+
       <button
+        v-else
         class="product-card__button"
         type="button"
         :disabled="remainingStock === 0 || quantity > remainingStock"
@@ -305,11 +314,18 @@ const originalPrice = computed(() => {
   transition:
     transform 0.2s ease,
     background-color 0.2s ease;
+  text-align: center;
+  text-decoration: none;
 }
 
 .product-card__button:hover {
   transform: translateY(-2px);
   background: var(--color-accent-hover);
+}
+
+.product-card__button--full {
+  grid-column: 1 / -1;
+  width: 100%;
 }
 
 .product-card__favorite {

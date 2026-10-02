@@ -35,6 +35,8 @@ function normalizeProduct(product) {
     manageStock: product.extensions?.product_catalog?.manage_stock ?? false,
     backordersAllowed: product.extensions?.product_catalog?.backorders_allowed ?? false,
     reviews: [],
+    type: product.type,
+    hasOptions: product.has_options ?? false,
     currency: {
       code: product.prices?.currency_code ?? 'PLN',
       symbol: product.prices?.currency_symbol ?? 'zł',
