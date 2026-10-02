@@ -48,16 +48,17 @@ defineProps({
   display: grid;
   grid-template-columns: 120px 1fr;
   gap: 24px;
-  align-items: center;
+  align-items: start;
   padding: 24px 0;
   border-bottom: 1px solid var(--color-border);
 }
 
 .cart-item img {
+  display: block;
   width: 120px;
-  aspect-ratio: 1 / 1;
+  height: 120px;
   border-radius: 14px;
-  background: var(--color-image-bg);
+  background: transparent;
   object-fit: cover;
 }
 
@@ -112,6 +113,10 @@ defineProps({
 
 .cart-item__image-link {
   display: block;
+  width: 120px;
+  height: 120px;
+  overflow: hidden;
+  border-radius: 14px;
 }
 
 .cart-item__title {
@@ -138,8 +143,10 @@ defineProps({
     grid-template-columns: 90px 1fr;
   }
 
+  .cart-item__image-link,
   .cart-item img {
     width: 90px;
+    height: 90px;
   }
 }
 </style>
