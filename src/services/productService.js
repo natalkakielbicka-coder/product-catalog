@@ -30,7 +30,7 @@ function normalizeProduct(product) {
     images: product.images?.map((image) => image.src) ?? [],
     brand: '',
     rating: product.average_rating ? Number(product.average_rating) : 0,
-    stock: product.is_in_stock ? 1 : 0,
+    isInStock: product.is_in_stock ?? false,
     reviews: [],
     currency: {
       code: product.prices?.currency_code ?? 'PLN',

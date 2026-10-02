@@ -31,7 +31,7 @@ const pageTitle = computed(() => {
 })
 useDocumentTitle(pageTitle)
 const { products: relatedSource, fetchProducts: fetchRelatedProducts } = useProducts()
-const { cartItems, addToCart } = useCart()
+const { addToCart } = useCart()
 const { isFavorite, toggleFavorite } = useFavorites()
 const { isCompared, toggleCompare, compareLimitReached } = useCompare()
 const { recentlyViewedIds, addRecentlyViewed } = useRecentlyViewed()
@@ -80,24 +80,8 @@ onMounted(async () => {
   }
 })
 
-const cartQuantity = computed(() => {
-  const currentId = selectedVariation.value?.id ?? product.value?.id
-
-  const cartItem = cartItems.value.find((item) => item.id === currentId)
-
-  return cartItem?.quantity ?? 0
-})
-
 const remainingStock = computed(() => {
-  if (!product.value || !isCurrentProductInStock.value) {
-    return 0
-  }
-
-  if (selectedVariation.value) {
-    return Infinity
-  }
-
-  return Math.max(product.value.stock - cartQuantity.value, 0)
+  return isCurrentProductInStock.value ? Infinity : 0
 })
 
 const isCurrentProductInStock = computed(() => {
@@ -109,7 +93,7 @@ const isCurrentProductInStock = computed(() => {
     return selectedVariation.value.isInStock
   }
 
-  return product.value.stock > 0
+  return product.value.isInStock
 })
 
 const activeTab = ref('description')
