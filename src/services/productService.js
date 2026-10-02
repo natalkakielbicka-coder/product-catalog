@@ -1,5 +1,12 @@
 const API_URL = '/wp-json/wc/store/v1/products'
 
+function decodeHtmlEntities(value = '') {
+  const textarea = document.createElement('textarea')
+  textarea.innerHTML = value
+
+  return textarea.value
+}
+
 function normalizeProduct(product) {
   const price = Number(product.prices?.price ?? 0)
   const regularPrice = Number(product.prices?.regular_price ?? price)
@@ -31,7 +38,7 @@ function normalizeProduct(product) {
 function normalizeVariation(variation) {
   return {
     id: variation.id,
-    label: variation.variation ?? '',
+    label: decodeHtmlEntities(variation.variation ?? ''),
     price: Number(variation.prices?.price ?? 0) / 100,
     regularPrice: Number(variation.prices?.regular_price ?? 0) / 100,
     salePrice: Number(variation.prices?.sale_price ?? 0) / 100,

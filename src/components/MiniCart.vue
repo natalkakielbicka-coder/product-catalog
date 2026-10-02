@@ -167,23 +167,25 @@ const { cartItems, cartTotal, removeFromCart, increaseQuantity, decreaseQuantity
 .mini-cart__item {
   display: grid;
   grid-template-columns: 80px 1fr;
+  align-items: start;
   gap: 14px;
   padding: 18px 0;
   border-bottom: 1px solid var(--color-border);
 }
 
 .mini-cart__image {
+  display: block;
+  width: 80px;
+  height: 80px;
   overflow: hidden;
   border-radius: 10px;
-  background: var(--color-image-bg);
-  display: flex;
-  align-items: center;
+  background: transparent;
 }
 
 .mini-cart__image img {
   display: block;
   width: 100%;
-  aspect-ratio: 1 / 1;
+  height: 100%;
   object-fit: cover;
 }
 
