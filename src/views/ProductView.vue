@@ -13,6 +13,7 @@ import { useDocumentTitle } from '@/composables/useDocumentTitle'
 import { useFavorites } from '@/composables/useFavorites'
 import { useRecentlyViewed } from '@/composables/useRecentlyViewed'
 import { useCompare } from '@/composables/useCompare'
+import { useToast } from '@/composables/useToast'
 import { formatCurrency } from '@/utils/currency'
 const VueEasyLightbox = defineAsyncComponent(() => import('vue-easy-lightbox'))
 
@@ -22,6 +23,8 @@ const relatedSection = ref(null)
 const relatedVisible = ref(false)
 
 const { product, variations, loading, error, fetchProduct, fetchProductVariations } = useProducts()
+const { showToast } = useToast()
+
 const pageTitle = computed(() => {
   if (!product.value) {
     return 'Product | Product Catalog'
@@ -236,11 +239,13 @@ function handleAddToCart() {
       },
       quantity.value,
     )
+    showToast(`${product.value.title} — ${selectedVariation.value.label} added to cart`)
 
     return
   }
 
   addToCart(product.value, quantity.value)
+  showToast(`${product.value.title} added to cart`)
 }
 
 const originalPrice = computed(() => {

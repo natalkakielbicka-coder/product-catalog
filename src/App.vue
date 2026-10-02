@@ -2,6 +2,7 @@
 import { RouterView } from 'vue-router'
 import AppHeader from '@/components/AppHeader.vue'
 import CompareBar from '@/components/CompareBar.vue'
+import AppToast from '@/components/AppToast.vue'
 </script>
 
 <template>
@@ -16,6 +17,7 @@ import CompareBar from '@/components/CompareBar.vue'
   </RouterView>
 
   <CompareBar />
+  <AppToast />
 </template>
 
 <style scoped>

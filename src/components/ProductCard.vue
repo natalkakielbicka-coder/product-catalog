@@ -3,6 +3,7 @@ import { computed, ref } from 'vue'
 import { RouterLink, useRoute } from 'vue-router'
 import { formatCurrency } from '@/utils/currency'
 import { useCart } from '@/composables/useCart'
+import { useToast } from '@/composables/useToast'
 import { useFavorites } from '@/composables/useFavorites'
 import { useCompare } from '@/composables/useCompare'
 
@@ -18,6 +19,8 @@ const route = useRoute()
 const { cartItems, addToCart } = useCart()
 
 const { isFavorite, toggleFavorite } = useFavorites()
+
+const { showToast } = useToast()
 
 const { isCompared, toggleCompare, compareLimitReached } = useCompare()
 
@@ -64,6 +67,12 @@ const originalPrice = computed(() => {
 
   return props.product.price / (1 - props.product.discountPercentage / 100)
 })
+
+function handleAddToCart() {
+  addToCart(props.product, quantity.value)
+
+  showToast(`${props.product.title} added to cart`)
+}
 </script>
 
 <template>
@@ -137,7 +146,7 @@ const originalPrice = computed(() => {
         class="product-card__button"
         type="button"
         :disabled="remainingStock === 0 || quantity > remainingStock"
-        @click="addToCart(product, quantity)"
+        @click="handleAddToCart"
       >
         {{ remainingStock > 0 ? 'Add to cart' : 'Maximum in cart' }}
       </button>
