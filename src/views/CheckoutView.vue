@@ -699,15 +699,17 @@ async function submitForm() {
             </section>
           </div>
 
+          <p v-if="orderError" class="checkout-order-error">
+            {{ orderError }}
+          </p>
+
           <div class="checkout-form__navigation">
             <button class="checkout-form__back" type="button" @click="goBack">Back</button>
 
-            <p v-if="orderError" class="checkout-order-error">
-              {{ orderError }}
-            </p>
-
-            <button class="checkout-form__button" type="submit">
-              Place order · {{ formatCurrency(orderTotal) }}
+            <button class="checkout-form__button" type="submit" :disabled="orderSubmitting">
+              {{
+                orderSubmitting ? 'Placing order...' : `Place order · ${formatCurrency(orderTotal)}`
+              }}
             </button>
           </div>
         </template>
@@ -928,6 +930,11 @@ async function submitForm() {
 .checkout-form__button:hover {
   background: var(--color-accent-hover);
   transform: translateY(-1px);
+}
+
+.checkout-form__button:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
 }
 
 .checkout-empty {
@@ -1465,8 +1472,7 @@ async function submitForm() {
   display: grid;
   grid-template-columns: auto 1fr;
   gap: 12px;
-
-  margin-top: 28px;
+  margin-top: 20px;
 }
 
 .checkout-form__navigation .checkout-form__button {
@@ -1563,7 +1569,7 @@ async function submitForm() {
 }
 
 .checkout-order-error {
-  margin: 0 0 10px;
+  margin: 15px 0 10px;
   color: #b33f3f;
   font-size: 13px;
 }
