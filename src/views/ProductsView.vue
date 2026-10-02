@@ -12,6 +12,7 @@ import ErrorState from '@/components/ErrorState.vue'
 import ProductPriceRange from '@/components/ProductPriceRange.vue'
 import { usePagination } from '@/composables/usePagination'
 import { useDocumentTitle } from '@/composables/useDocumentTitle'
+import { formatCurrency } from '@/utils/currency'
 import { useRoute, useRouter } from 'vue-router'
 
 const {
@@ -229,7 +230,7 @@ function selectSearchSuggestion(product) {
           type="button"
           @click="clearPriceFilter"
         >
-          ${{ minPrice }}–${{ maxPrice }} ×
+          {{ formatCurrency(minPrice) }}–{{ formatCurrency(maxPrice) }} ×
         </button>
 
         <button v-if="inStockOnly" type="button" @click="inStockOnly = false">In stock ×</button>
