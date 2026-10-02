@@ -17,3 +17,26 @@ export async function createOrder(orderData) {
 
   return data
 }
+
+const COUPON_API_URL = '/wp-json/product-catalog/v1/coupon'
+
+export async function validateCoupon(code, subtotal) {
+  const response = await fetch(COUPON_API_URL, {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+    },
+    body: JSON.stringify({
+      code,
+      subtotal,
+    }),
+  })
+
+  const data = await response.json()
+
+  if (!response.ok) {
+    throw new Error(data.message || 'Invalid coupon code')
+  }
+
+  return data
+}

@@ -231,6 +231,10 @@ async function submitForm() {
         city: form.city,
         postalCode: form.postalCode,
       },
+
+      deliveryMethod: selectedDelivery.value,
+      paymentMethod: selectedPayment.value,
+      couponCode: appliedCoupon.value?.code ?? null,
     })
 
     placedOrder.value = {

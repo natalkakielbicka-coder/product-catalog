@@ -1,4 +1,5 @@
 import { computed, ref } from 'vue'
+import { validateCoupon } from '@/services/orderService'
 
 export const FREE_DELIVERY_THRESHOLD = 100
 const CASH_ON_DELIVERY_FEE = 4.99
@@ -45,23 +46,6 @@ export function useCheckoutPricing(cartTotal) {
     },
   ]
 
-  const coupons = {
-    SAVE10: {
-      code: 'SAVE10',
-      type: 'percentage',
-      value: 10,
-      minSubtotal: 100,
-      expiresAt: '2026-12-31',
-    },
-
-    FREESHIPPING: {
-      code: 'FREESHIPPING',
-      type: 'free-delivery',
-      minSubtotal: 50,
-      expiresAt: '2026-12-31',
-    },
-  }
-
   const selectedDeliveryMethod = computed(() => {
     return deliveryMethods.find((method) => method.id === selectedDelivery.value)
   })
@@ -71,15 +55,11 @@ export function useCheckoutPricing(cartTotal) {
   })
 
   const discount = computed(() => {
-    if (appliedCoupon.value?.type !== 'percentage') {
-      return 0
-    }
-
-    return cartTotal.value * (appliedCoupon.value.value / 100)
+    return appliedCoupon.value?.discount ?? 0
   })
 
   const deliveryCost = computed(() => {
-    if (appliedCoupon.value?.type === 'free-delivery') {
+    if (appliedCoupon.value?.freeShipping) {
       return 0
     }
 
@@ -102,13 +82,7 @@ export function useCheckoutPricing(cartTotal) {
     return cartTotal.value - discount.value + deliveryCost.value + paymentFee.value
   })
 
-  function isCouponExpired(coupon) {
-    const expiresAt = new Date(`${coupon.expiresAt}T23:59:59`)
-
-    return new Date() > expiresAt
-  }
-
-  function applyCoupon() {
+  async function applyCoupon() {
     const code = couponInput.value.trim().toUpperCase()
 
     couponError.value = ''
@@ -118,26 +92,14 @@ export function useCheckoutPricing(cartTotal) {
       return
     }
 
-    const coupon = coupons[code]
+    try {
+      appliedCoupon.value = await validateCoupon(code, cartTotal.value)
 
-    if (!coupon) {
-      couponError.value = 'Invalid coupon code.'
-      return
+      couponInput.value = ''
+    } catch (error) {
+      appliedCoupon.value = null
+      couponError.value = error.message
     }
-
-    if (isCouponExpired(coupon)) {
-      couponError.value = 'This coupon has expired.'
-      return
-    }
-
-    if (cartTotal.value < coupon.minSubtotal) {
-      couponError.value = `Minimum order value is $${coupon.minSubtotal.toFixed(2)}.`
-
-      return
-    }
-
-    appliedCoupon.value = coupon
-    couponInput.value = ''
   }
 
   function removeCoupon() {
