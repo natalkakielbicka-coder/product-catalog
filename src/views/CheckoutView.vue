@@ -11,6 +11,8 @@ import { createOrder } from '@/services/orderService'
 const orderPlaced = ref(false)
 const placedOrder = ref(null)
 const currentStep = ref(1)
+const orderSubmitting = ref(false)
+const orderError = ref('')
 
 function formatCardNumber(event) {
   const digits = event.target.value.replace(/\D/g, '').slice(0, 16)
@@ -212,64 +214,73 @@ async function submitForm() {
   if (!isValid) return
   if (cartItems.value.length === 0) return
 
-  const wooOrder = await createOrder({
-    items: cartItems.value.map((item) => ({
-      id: item.id,
-      quantity: item.quantity,
-    })),
+  orderSubmitting.value = true
+  orderError.value = ''
 
-    customer: {
-      name: form.name,
-      email: form.email,
-      address: form.address,
-      city: form.city,
-      postalCode: form.postalCode,
-    },
-  })
+  try {
+    const wooOrder = await createOrder({
+      items: cartItems.value.map((item) => ({
+        id: item.id,
+        quantity: item.quantity,
+      })),
 
-  placedOrder.value = {
-    id: wooOrder.id,
-    number: wooOrder.number,
-    createdAt: new Date().toISOString(),
-    status: wooOrder.status,
+      customer: {
+        name: form.name,
+        email: form.email,
+        address: form.address,
+        city: form.city,
+        postalCode: form.postalCode,
+      },
+    })
 
-    customer: {
-      name: form.name,
-      email: form.email,
-      address: form.address,
-      city: form.city,
-      postalCode: form.postalCode,
-    },
+    placedOrder.value = {
+      id: wooOrder.id,
+      number: wooOrder.number,
+      createdAt: new Date().toISOString(),
+      status: wooOrder.status,
 
-    items: cartItems.value.map((item) => ({
-      id: item.id,
-      parentId: item.parentId ?? null,
-      title: item.title,
-      variationLabel: item.variationLabel ?? '',
-      price: item.price,
-      quantity: item.quantity,
-      thumbnail: item.thumbnail,
-    })),
+      customer: {
+        name: form.name,
+        email: form.email,
+        address: form.address,
+        city: form.city,
+        postalCode: form.postalCode,
+      },
 
-    delivery: {
-      name: selectedDeliveryMethod.value.name,
-      cost: deliveryCost.value,
-    },
+      items: cartItems.value.map((item) => ({
+        id: item.id,
+        parentId: item.parentId ?? null,
+        title: item.title,
+        variationLabel: item.variationLabel ?? '',
+        price: item.price,
+        quantity: item.quantity,
+        thumbnail: item.thumbnail,
+      })),
 
-    payment: selectedPaymentMethod.value?.name ?? '',
+      delivery: {
+        name: selectedDeliveryMethod.value.name,
+        cost: deliveryCost.value,
+      },
 
-    paymentFee: paymentFee.value,
-    subtotal: cartTotal.value,
-    total: orderTotal.value,
+      payment: selectedPaymentMethod.value?.name ?? '',
 
-    coupon: appliedCoupon.value?.code ?? null,
-    discount: discount.value,
+      paymentFee: paymentFee.value,
+      subtotal: cartTotal.value,
+      total: orderTotal.value,
+
+      coupon: appliedCoupon.value?.code ?? null,
+      discount: discount.value,
+    }
+
+    addOrder(placedOrder.value)
+
+    orderPlaced.value = true
+    clearCart()
+  } catch (error) {
+    orderError.value = error.message || 'Could not place the order.'
+  } finally {
+    orderSubmitting.value = false
   }
-
-  addOrder(placedOrder.value)
-
-  orderPlaced.value = true
-  clearCart()
 }
 </script>
 
@@ -690,6 +701,10 @@ async function submitForm() {
 
           <div class="checkout-form__navigation">
             <button class="checkout-form__back" type="button" @click="goBack">Back</button>
+
+            <p v-if="orderError" class="checkout-order-error">
+              {{ orderError }}
+            </p>
 
             <button class="checkout-form__button" type="submit">
               Place order · {{ formatCurrency(orderTotal) }}
@@ -1545,6 +1560,12 @@ async function submitForm() {
 
   font-size: 11px;
   line-height: 1.5;
+}
+
+.checkout-order-error {
+  margin: 0 0 10px;
+  color: #b33f3f;
+  font-size: 13px;
 }
 
 @media (max-width: 767px) {
