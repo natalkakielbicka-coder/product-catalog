@@ -20,6 +20,20 @@ function formatOrderDate(date) {
 function getItemsCount(items) {
   return items.reduce((total, item) => total + item.quantity, 0)
 }
+
+function getOrderStatusLabel(status) {
+  const statuses = {
+    pending: 'Oczekujące na płatność',
+    'on-hold': 'Wstrzymane',
+    processing: 'W realizacji',
+    completed: 'Zrealizowane',
+    cancelled: 'Anulowane',
+    refunded: 'Zwrócone',
+    failed: 'Nieudane',
+  }
+
+  return statuses[status] ?? status
+}
 </script>
 
 <template>
@@ -53,7 +67,7 @@ function getItemsCount(items) {
 
           <div class="order-card__meta">
             <span class="order-status">
-              {{ order.status ?? 'Processing' }}
+              {{ getOrderStatusLabel(order.status) }}
             </span>
 
             <time :datetime="order.createdAt">

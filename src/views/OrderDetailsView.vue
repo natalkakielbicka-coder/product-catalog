@@ -7,9 +7,7 @@ import { formatCurrency } from '@/utils/currency'
 
 const route = useRoute()
 
-const { getOrderByNumber, updateOrderStatus } = useOrders()
-
-const orderStatuses = ['Processing', 'Shipped', 'Delivered', 'Cancelled']
+const { getOrderByNumber } = useOrders()
 
 const order = computed(() => {
   return getOrderByNumber(route.params.number)
@@ -30,6 +28,20 @@ function formatOrderDate(date) {
     dateStyle: 'medium',
     timeStyle: 'short',
   }).format(new Date(date))
+}
+
+function getOrderStatusLabel(status) {
+  const statuses = {
+    pending: 'Oczekujące na płatność',
+    'on-hold': 'Wstrzymane',
+    processing: 'W realizacji',
+    completed: 'Zrealizowane',
+    cancelled: 'Anulowane',
+    refunded: 'Zwrócone',
+    failed: 'Nieudane',
+  }
+
+  return statuses[status] ?? status
 }
 </script>
 
@@ -53,18 +65,9 @@ function formatOrderDate(date) {
           </h1>
         </div>
 
-        <label class="order-status-control">
-          <span>Status</span>
-
-          <select
-            :value="order.status ?? 'Processing'"
-            @change="updateOrderStatus(order.number, $event.target.value)"
-          >
-            <option v-for="status in orderStatuses" :key="status" :value="status">
-              {{ status }}
-            </option>
-          </select>
-        </label>
+        <span class="order-status">
+          {{ getOrderStatusLabel(order.status) }}
+        </span>
 
         <time :datetime="order.createdAt">
           {{ formatOrderDate(order.createdAt) }}
@@ -352,6 +355,17 @@ function formatOrderDate(date) {
   font-weight: 700;
 
   cursor: pointer;
+}
+
+.order-status {
+  display: inline-flex;
+  align-items: center;
+  padding: 7px 10px;
+  border-radius: 999px;
+  color: var(--color-accent);
+  background: var(--color-accent-light);
+  font-size: 11px;
+  font-weight: 700;
 }
 
 @media (max-width: 767px) {
