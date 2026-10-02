@@ -686,15 +686,13 @@ function submitForm() {
 
         <div class="order-summary__items">
           <div v-for="item in cartItems" :key="item.id" class="order-summary__item">
-            <div>
-              <strong>{{ item.title }}</strong>
+            <strong>{{ item.title }}</strong>
 
-              <span> {{ item.quantity }} × {{ formatCurrency(item.price) }} </span>
-            </div>
+            <span v-if="item.variationLabel">
+              {{ item.variationLabel }}
+            </span>
 
-            <strong>
-              {{ formatCurrency(item.price * item.quantity) }}
-            </strong>
+            <span> {{ item.quantity }} × {{ formatCurrency(item.price) }} </span>
           </div>
         </div>
 
@@ -725,7 +723,8 @@ function submitForm() {
         </div>
 
         <p v-if="!appliedCoupon" class="coupon__hint">
-          Try SAVE10 on orders over $100 or FREESHIPPING over $50.
+          Try SAVE10 on orders over {{ formatCurrency(100) }} or FREESHIPPING over
+          {{ formatCurrency(50) }}.
         </p>
 
         <div v-if="discount > 0" class="order-summary__row order-summary__row--discount">
