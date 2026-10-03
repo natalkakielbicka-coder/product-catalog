@@ -1,11 +1,12 @@
 <script setup>
-import { ref } from 'vue'
+import { onMounted, onUnmounted, ref } from 'vue'
 import { useOrders } from '@/composables/useOrders'
 import { useDocumentTitle } from '@/composables/useDocumentTitle'
 import { formatCurrency } from '@/utils/currency'
 import { getOrderStatusLabel } from '@/utils/orderStatus'
+import { getOrderStatus } from '@/services/orderService'
 
-const { orders } = useOrders()
+const { orders, updateOrderStatus } = useOrders()
 
 const pageTitle = ref('Orders | Product Catalog')
 
@@ -21,6 +22,32 @@ function formatOrderDate(date) {
 function getItemsCount(items) {
   return items.reduce((total, item) => total + item.quantity, 0)
 }
+
+async function refreshOrderStatuses() {
+  const refreshableOrders = orders.value.filter((order) => order.id && order.orderKey)
+
+  await Promise.allSettled(
+    refreshableOrders.map(async (order) => {
+      const data = await getOrderStatus(order.id, order.orderKey)
+
+      updateOrderStatus(order.number, data.status)
+    }),
+  )
+}
+
+function handleWindowFocus() {
+  refreshOrderStatuses()
+}
+
+onMounted(() => {
+  refreshOrderStatuses()
+
+  window.addEventListener('focus', handleWindowFocus)
+})
+
+onUnmounted(() => {
+  window.removeEventListener('focus', handleWindowFocus)
+})
 </script>
 
 <template>

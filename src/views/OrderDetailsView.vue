@@ -1,5 +1,5 @@
 <script setup>
-import { computed, onMounted, ref } from 'vue'
+import { computed, onMounted, onUnmounted, ref } from 'vue'
 import { useRoute } from 'vue-router'
 import { useOrders } from '@/composables/useOrders'
 import { useDocumentTitle } from '@/composables/useDocumentTitle'
@@ -45,8 +45,18 @@ async function refreshOrderStatus() {
   }
 }
 
+function handleWindowFocus() {
+  refreshOrderStatus()
+}
+
 onMounted(() => {
   refreshOrderStatus()
+
+  window.addEventListener('focus', handleWindowFocus)
+})
+
+onUnmounted(() => {
+  window.removeEventListener('focus', handleWindowFocus)
 })
 
 useDocumentTitle(pageTitle)
