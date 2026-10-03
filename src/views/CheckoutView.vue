@@ -243,6 +243,7 @@ async function submitForm() {
       orderKey: wooOrder.orderKey,
       createdAt: new Date().toISOString(),
       status: wooOrder.status,
+      statusName: wooOrder.statusName,
 
       customer: {
         name: form.name,

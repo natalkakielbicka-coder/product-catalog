@@ -11,7 +11,7 @@ export function useOrders() {
     return orders.value.find((order) => order.number === number)
   }
 
-  function updateOrderStatus(number, status) {
+  function updateOrderStatus(number, status, statusName) {
     orders.value = orders.value.map((order) => {
       if (order.number !== number) {
         return order
@@ -20,6 +20,7 @@ export function useOrders() {
       return {
         ...order,
         status,
+        statusName,
       }
     })
   }

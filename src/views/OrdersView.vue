@@ -3,7 +3,6 @@ import { onMounted, onUnmounted, ref } from 'vue'
 import { useOrders } from '@/composables/useOrders'
 import { useDocumentTitle } from '@/composables/useDocumentTitle'
 import { formatCurrency } from '@/utils/currency'
-import { getOrderStatusLabel } from '@/utils/orderStatus'
 import { getOrderStatus } from '@/services/orderService'
 
 const { orders, updateOrderStatus } = useOrders()
@@ -81,7 +80,7 @@ onUnmounted(() => {
 
           <div class="order-card__meta">
             <span class="order-status">
-              {{ getOrderStatusLabel(order.status) }}
+              {{ order.statusName || order.status }}
             </span>
 
             <time :datetime="order.createdAt">

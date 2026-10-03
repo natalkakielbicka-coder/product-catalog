@@ -4,7 +4,6 @@ import { useRoute } from 'vue-router'
 import { useOrders } from '@/composables/useOrders'
 import { useDocumentTitle } from '@/composables/useDocumentTitle'
 import { formatCurrency } from '@/utils/currency'
-import { getOrderStatusLabel } from '@/utils/orderStatus'
 import { getOrderStatus } from '@/services/orderService'
 
 const route = useRoute()
@@ -37,7 +36,7 @@ async function refreshOrderStatus() {
   try {
     const data = await getOrderStatus(order.value.id, order.value.orderKey)
 
-    updateOrderStatus(order.value.number, data.status)
+    updateOrderStatus(order.value.number, data.status, data.statusName)
   } catch (error) {
     statusError.value = error.message || 'Nie udało się pobrać statusu zamówienia.'
   } finally {
@@ -91,7 +90,7 @@ function formatOrderDate(date) {
 
         <div class="order-status-wrapper">
           <span class="order-status">
-            {{ getOrderStatusLabel(order.status) }}
+            {{ order.statusName || order.status }}
           </span>
 
           <small v-if="statusLoading" class="order-status-message">
