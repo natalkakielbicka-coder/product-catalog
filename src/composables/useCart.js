@@ -1,5 +1,6 @@
 import { computed } from 'vue'
 import { useLocalStorage } from '@/composables/useLocalStorage'
+import { getProduct, getProductVariations } from '@/services/productService'
 
 const cartItems = useLocalStorage('cart', [])
 
@@ -82,6 +83,69 @@ export function useCart() {
     cartItems.value = []
   }
 
+  async function getFreshCartProduct(item) {
+    if (item.parentId) {
+      const variations = await getProductVariations(item.parentId)
+
+      return variations.find((variation) => variation.id === item.id) ?? null
+    }
+
+    return getProduct(item.id)
+  }
+
+  async function refreshCartStock() {
+    const changes = []
+
+    for (const item of cartItems.value) {
+      try {
+        const freshProduct = await getFreshCartProduct(item)
+
+        if (!freshProduct) {
+          continue
+        }
+
+        const previousQuantity = item.quantity
+        item.isInStock = freshProduct.isInStock
+        item.stockQuantity = freshProduct.stockQuantity
+        item.manageStock = freshProduct.manageStock
+        item.backordersAllowed = freshProduct.backordersAllowed
+        const maximumQuantity = getMaximumQuantity(item)
+
+        if (!item.isInStock || maximumQuantity <= 0) {
+          removeFromCart(item.id)
+
+          changes.push({
+            title: item.title,
+            variationLabel: item.variationLabel ?? '',
+            previousQuantity,
+            quantity: 0,
+            removed: true,
+          })
+
+          continue
+        }
+
+        if (Number.isFinite(maximumQuantity) && item.quantity > maximumQuantity) {
+          item.quantity = maximumQuantity
+
+          changes.push({
+            title: item.title,
+            variationLabel: item.variationLabel ?? '',
+            previousQuantity,
+            quantity: item.quantity,
+            removed: false,
+          })
+        }
+      } catch {
+        // Nie zmieniamy pozycji,
+        // jeśli nie udało się pobrać
+        // aktualnego produktu.
+      }
+    }
+
+    return changes
+  }
+
   return {
     cartItems,
     cartCount,
@@ -92,5 +156,6 @@ export function useCart() {
     removeFromCart,
     clearCart,
     getMaximumQuantity,
+    refreshCartStock,
   }
 }

@@ -1,4 +1,14 @@
 const ORDERS_API_URL = '/wp-json/product-catalog/v1/orders'
+const COUPON_API_URL = '/wp-json/product-catalog/v1/coupon'
+const ORDER_STATUS_API_URL = '/wp-json/product-catalog/v1/order-status'
+
+function createApiError(data, fallbackMessage) {
+  const error = new Error(data.message || fallbackMessage)
+
+  error.code = data.code ?? null
+
+  return error
+}
 
 export async function createOrder(orderData) {
   const response = await fetch(ORDERS_API_URL, {
@@ -12,13 +22,11 @@ export async function createOrder(orderData) {
   const data = await response.json()
 
   if (!response.ok) {
-    throw new Error(data.message || 'Failed to create order')
+    throw createApiError(data, 'Failed to create order')
   }
 
   return data
 }
-
-const COUPON_API_URL = '/wp-json/product-catalog/v1/coupon'
 
 export async function validateCoupon(code, subtotal) {
   const response = await fetch(COUPON_API_URL, {
@@ -35,13 +43,11 @@ export async function validateCoupon(code, subtotal) {
   const data = await response.json()
 
   if (!response.ok) {
-    throw new Error(data.message || 'Invalid coupon code')
+    throw createApiError(data, 'Invalid coupon code')
   }
 
   return data
 }
-
-const ORDER_STATUS_API_URL = '/wp-json/product-catalog/v1/order-status'
 
 export async function getOrderStatus(id, orderKey) {
   const response = await fetch(ORDER_STATUS_API_URL, {
@@ -58,7 +64,7 @@ export async function getOrderStatus(id, orderKey) {
   const data = await response.json()
 
   if (!response.ok) {
-    throw new Error(data.message || 'Failed to fetch order status')
+    throw createApiError(data, 'Failed to fetch order status')
   }
 
   return data

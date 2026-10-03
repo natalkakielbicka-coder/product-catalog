@@ -67,7 +67,7 @@ const errors = reactive({
   cardCvc: '',
 })
 
-const { cartItems, cartTotal, clearCart } = useCart()
+const { cartItems, cartTotal, clearCart, refreshCartStock } = useCart()
 
 const { addOrder } = useOrders()
 
@@ -283,6 +283,32 @@ async function submitForm() {
     orderPlaced.value = true
     clearCart()
   } catch (error) {
+    const stockErrorCodes = ['insufficient_stock', 'out_of_stock']
+
+    if (stockErrorCodes.includes(error.code)) {
+      const changes = await refreshCartStock()
+
+      if (changes.length > 0) {
+        const changedItems = changes
+          .map((change) => {
+            const name = change.variationLabel
+              ? `${change.title} — ${change.variationLabel}`
+              : change.title
+
+            if (change.removed) {
+              return `${name}: produkt został usunięty z koszyka`
+            }
+
+            return `${name}: ilość zmieniona z ${change.previousQuantity} na ${change.quantity}`
+          })
+          .join('. ')
+
+        orderError.value = `Stan magazynowy uległ zmianie. ${changedItems}.`
+
+        return
+      }
+    }
+
     orderError.value = error.message || 'Could not place the order.'
   } finally {
     orderSubmitting.value = false
