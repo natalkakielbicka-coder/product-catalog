@@ -25,14 +25,22 @@ function handleWindowFocus() {
   refreshOrderStatuses()
 }
 
+let statusRefreshInterval
+
 onMounted(() => {
   refreshOrderStatuses()
 
   window.addEventListener('focus', handleWindowFocus)
+
+  statusRefreshInterval = window.setInterval(() => {
+    refreshOrderStatuses()
+  }, 30000)
 })
 
 onUnmounted(() => {
   window.removeEventListener('focus', handleWindowFocus)
+
+  window.clearInterval(statusRefreshInterval)
 })
 </script>
 

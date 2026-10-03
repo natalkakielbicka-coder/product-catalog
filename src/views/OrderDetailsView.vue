@@ -45,14 +45,22 @@ function handleWindowFocus() {
   syncOrderStatus()
 }
 
+let statusRefreshInterval
+
 onMounted(() => {
   syncOrderStatus()
 
   window.addEventListener('focus', handleWindowFocus)
+
+  statusRefreshInterval = window.setInterval(() => {
+    syncOrderStatus()
+  }, 30000)
 })
 
 onUnmounted(() => {
   window.removeEventListener('focus', handleWindowFocus)
+
+  window.clearInterval(statusRefreshInterval)
 })
 
 useDocumentTitle(pageTitle)
