@@ -3,6 +3,7 @@ import { onMounted, onUnmounted, ref } from 'vue'
 import { useOrders } from '@/composables/useOrders'
 import { useDocumentTitle } from '@/composables/useDocumentTitle'
 import { formatCurrency } from '@/utils/currency'
+import { getOrderStatusClass } from '@/utils/orderStatusClass'
 
 const { orders, refreshOrderStatuses } = useOrders()
 
@@ -74,7 +75,7 @@ onUnmounted(() => {
           </div>
 
           <div class="order-card__meta">
-            <span class="order-status">
+            <span class="order-status" :class="getOrderStatusClass(order.status)">
               {{ order.statusName || order.status }}
             </span>
 
@@ -164,7 +165,6 @@ onUnmounted(() => {
 <style scoped>
 .orders {
   width: min(var(--container), calc(100% - 40px));
-
   margin: 0 auto;
   padding: 64px 0 96px;
 }
@@ -175,9 +175,7 @@ onUnmounted(() => {
 
 .orders__eyebrow {
   margin: 0 0 8px;
-
   color: var(--color-accent);
-
   font-size: 12px;
   font-weight: 700;
   letter-spacing: 0.08em;
@@ -186,9 +184,7 @@ onUnmounted(() => {
 
 .orders h1 {
   margin: 0;
-
   color: var(--color-text);
-
   font-size: clamp(36px, 6vw, 54px);
   font-weight: 500;
   letter-spacing: -0.04em;
@@ -196,7 +192,6 @@ onUnmounted(() => {
 
 .orders__header > p:last-child {
   margin: 12px 0 0;
-
   color: var(--color-muted);
 }
 
@@ -207,10 +202,8 @@ onUnmounted(() => {
 
 .order-card {
   overflow: hidden;
-
   border: 1px solid var(--color-border);
   border-radius: 20px;
-
   background: var(--color-surface);
 }
 
@@ -218,12 +211,9 @@ onUnmounted(() => {
   display: flex;
   align-items: center;
   justify-content: space-between;
-
   gap: 20px;
   padding: 20px 24px;
-
   border-bottom: 1px solid var(--color-border);
-
   background: var(--color-image-bg);
 }
 
@@ -236,7 +226,6 @@ onUnmounted(() => {
 .order-card__header span,
 .order-card__header time {
   color: var(--color-muted);
-
   font-size: 12px;
 }
 
@@ -247,27 +236,21 @@ onUnmounted(() => {
 .order-card__products {
   display: grid;
   gap: 12px;
-
   padding: 20px 24px;
 }
 
 .order-product {
   display: grid;
   grid-template-columns: 60px 1fr;
-
   align-items: center;
-
   gap: 14px;
 }
 
 .order-product img {
   width: 60px;
   height: 60px;
-
   border-radius: 10px;
-
   object-fit: contain;
-
   background: var(--color-image-bg);
 }
 
@@ -283,15 +266,12 @@ onUnmounted(() => {
 
 .order-product span {
   color: var(--color-muted);
-
   font-size: 12px;
 }
 
 .order-card__more {
   margin: 4px 0 0;
-
   color: var(--color-accent);
-
   font-size: 12px;
   font-weight: 600;
 }
@@ -299,10 +279,8 @@ onUnmounted(() => {
 .order-card__footer {
   display: grid;
   grid-template-columns: repeat(4, minmax(0, 1fr));
-
   gap: 18px;
   padding: 18px 24px;
-
   border-top: 1px solid var(--color-border);
 }
 
@@ -314,7 +292,6 @@ onUnmounted(() => {
 
 .order-card__footer span {
   color: var(--color-muted);
-
   font-size: 11px;
 }
 
@@ -328,18 +305,14 @@ onUnmounted(() => {
 
 .order-card__total strong {
   color: var(--color-accent);
-
   font-size: 16px;
 }
 
 .orders-empty {
   padding: 60px 30px;
-
   border: 1px solid var(--color-border);
   border-radius: 20px;
-
   background: var(--color-surface);
-
   text-align: center;
 }
 
@@ -349,20 +322,15 @@ onUnmounted(() => {
 
 .orders-empty p {
   margin: 0 0 24px;
-
   color: var(--color-muted);
 }
 
 .orders-empty a {
   display: inline-flex;
-
   padding: 12px 18px;
-
   border-radius: 10px;
-
   color: #fff;
   background: var(--color-accent);
-
   font-weight: 700;
   text-decoration: none;
 }
@@ -370,11 +338,8 @@ onUnmounted(() => {
 .order-card__link {
   display: flex;
   justify-content: flex-end;
-
   padding: 0 24px 20px;
-
   color: var(--color-accent);
-
   font-size: 13px;
   font-weight: 700;
   text-decoration: none;
@@ -393,17 +358,48 @@ onUnmounted(() => {
 .order-status {
   display: inline-flex;
   align-items: center;
-
   padding: 6px 10px;
-
   border-radius: 999px;
-
   color: var(--color-accent);
   background: var(--color-accent-light);
-
   font-size: 11px;
   font-weight: 700;
   margin-bottom: 5px;
+}
+
+.order-status--pending {
+  color: #92400e;
+  background: #fef3c7;
+}
+
+.order-status--on-hold {
+  color: #9a3412;
+  background: #ffedd5;
+}
+
+.order-status--processing {
+  color: #1d4ed8;
+  background: #dbeafe;
+}
+
+.order-status--completed {
+  color: #166534;
+  background: #dcfce7;
+}
+
+.order-status--cancelled {
+  color: #475569;
+  background: #e2e8f0;
+}
+
+.order-status--refunded {
+  color: #6b21a8;
+  background: #f3e8ff;
+}
+
+.order-status--failed {
+  color: #991b1b;
+  background: #fee2e2;
 }
 
 @media (max-width: 767px) {
