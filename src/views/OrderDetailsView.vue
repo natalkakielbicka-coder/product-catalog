@@ -79,15 +79,19 @@ function formatOrderDate(date) {
           </h1>
         </div>
 
-        <span class="order-status">
-          {{ getOrderStatusLabel(order.status) }}
-        </span>
+        <div class="order-status-wrapper">
+          <span class="order-status">
+            {{ getOrderStatusLabel(order.status) }}
+          </span>
 
-        <small v-if="statusLoading"> Aktualizowanie statusu... </small>
+          <small v-if="statusLoading" class="order-status-message">
+            Aktualizowanie statusu...
+          </small>
 
-        <small v-else-if="statusError">
-          {{ statusError }}
-        </small>
+          <small v-else-if="statusError" class="order-status-message order-status-message--error">
+            {{ statusError }}
+          </small>
+        </div>
 
         <time :datetime="order.createdAt">
           {{ formatOrderDate(order.createdAt) }}
@@ -228,8 +232,33 @@ function formatOrderDate(date) {
   margin-bottom: 32px;
 }
 
-.order-details__header .order-status {
+.order-status-wrapper {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 5px;
   justify-self: center;
+}
+
+.order-status {
+  display: inline-flex;
+  align-items: center;
+  padding: 7px 10px;
+  border-radius: 999px;
+  color: var(--color-accent);
+  background: var(--color-accent-light);
+  font-size: 11px;
+  font-weight: 700;
+}
+
+.order-status-message {
+  min-height: 14px;
+  color: var(--color-muted);
+  font-size: 10px;
+}
+
+.order-status-message--error {
+  color: #b42318;
 }
 
 .order-details__header time {
@@ -238,11 +267,13 @@ function formatOrderDate(date) {
   font-size: 13px;
 }
 
+.order-details__header .order-status {
+  justify-self: center;
+}
+
 .order-details__header p {
   margin: 0 0 5px;
-
   color: var(--color-muted);
-
   font-size: 12px;
 }
 
@@ -252,37 +283,25 @@ function formatOrderDate(date) {
   font-size: clamp(28px, 5vw, 44px);
 }
 
-.order-details__header time {
-  color: var(--color-muted);
-
-  font-size: 13px;
-}
-
 .order-details__section,
 .order-details__summary {
   padding: 24px;
-
   border: 1px solid var(--color-border);
   border-radius: 18px;
-
   background: var(--color-surface);
 }
 
 .order-details__section h2 {
   margin: 0 0 20px;
-
   font-size: 18px;
 }
 
 .order-item {
   display: grid;
   grid-template-columns: 70px 1fr auto;
-
   align-items: center;
-
   gap: 16px;
   padding: 12px 0;
-
   border-bottom: 1px solid var(--color-border);
 }
 
@@ -293,38 +312,31 @@ function formatOrderDate(date) {
 .order-item img {
   width: 70px;
   height: 70px;
-
   border-radius: 10px;
-
   object-fit: contain;
-
   background: var(--color-image-bg);
 }
 
 .order-item__content {
   display: flex;
   flex-direction: column;
-
   gap: 5px;
 }
 
 .order-item__content span {
   color: var(--color-muted);
-
   font-size: 12px;
 }
 
 .order-details__grid {
   display: grid;
   grid-template-columns: 1fr 1fr;
-
   gap: 18px;
   margin: 18px 0;
 }
 
 .order-details__section p {
   color: var(--color-muted);
-
   font-size: 13px;
   line-height: 1.7;
 }
@@ -336,7 +348,6 @@ function formatOrderDate(date) {
 .order-details__summary > div {
   display: flex;
   justify-content: space-between;
-
   padding: 8px 0;
 }
 
@@ -347,43 +358,12 @@ function formatOrderDate(date) {
 .order-details__total {
   margin-top: 12px;
   padding-top: 18px !important;
-
   border-top: 1px solid var(--color-border);
-
   font-size: 18px;
 }
 
 .order-details__total strong {
   color: var(--color-accent);
-}
-
-.order-status-control {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-}
-
-.order-status-control > span {
-  color: var(--color-muted);
-
-  font-size: 11px;
-  font-weight: 600;
-}
-
-.order-status-control select {
-  padding: 7px 10px;
-
-  border: 1px solid var(--color-border);
-  border-radius: 999px;
-
-  color: var(--color-accent);
-  background: var(--color-accent-light);
-
-  font: inherit;
-  font-size: 11px;
-  font-weight: 700;
-
-  cursor: pointer;
 }
 
 .order-status {
@@ -404,9 +384,8 @@ function formatOrderDate(date) {
     flex-direction: column;
   }
 
-  .order-details__header .order-status,
-  .order-details__header time {
-    justify-self: auto;
+  .order-status-wrapper {
+    align-items: flex-start;
   }
 
   .order-details__grid {
