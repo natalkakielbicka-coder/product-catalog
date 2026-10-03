@@ -40,3 +40,26 @@ export async function validateCoupon(code, subtotal) {
 
   return data
 }
+
+const ORDER_STATUS_API_URL = '/wp-json/product-catalog/v1/order-status'
+
+export async function getOrderStatus(id, orderKey) {
+  const response = await fetch(ORDER_STATUS_API_URL, {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+    },
+    body: JSON.stringify({
+      id,
+      orderKey,
+    }),
+  })
+
+  const data = await response.json()
+
+  if (!response.ok) {
+    throw new Error(data.message || 'Failed to fetch order status')
+  }
+
+  return data
+}
