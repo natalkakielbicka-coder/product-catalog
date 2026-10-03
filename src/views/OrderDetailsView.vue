@@ -4,11 +4,10 @@ import { useRoute } from 'vue-router'
 import { useOrders } from '@/composables/useOrders'
 import { useDocumentTitle } from '@/composables/useDocumentTitle'
 import { formatCurrency } from '@/utils/currency'
-import { getOrderStatus } from '@/services/orderService'
 
 const route = useRoute()
 
-const { getOrderByNumber, updateOrderStatus } = useOrders()
+const { getOrderByNumber, refreshOrderStatus } = useOrders()
 
 const order = computed(() => {
   return getOrderByNumber(route.params.number)
@@ -25,8 +24,8 @@ const pageTitle = computed(() => {
 const statusLoading = ref(false)
 const statusError = ref('')
 
-async function refreshOrderStatus() {
-  if (!order.value?.id || !order.value?.orderKey) {
+async function syncOrderStatus() {
+  if (!order.value) {
     return
   }
 
@@ -34,9 +33,7 @@ async function refreshOrderStatus() {
   statusError.value = ''
 
   try {
-    const data = await getOrderStatus(order.value.id, order.value.orderKey)
-
-    updateOrderStatus(order.value.number, data.status, data.statusName)
+    await refreshOrderStatus(order.value)
   } catch (error) {
     statusError.value = error.message || 'Nie udało się pobrać statusu zamówienia.'
   } finally {
@@ -45,11 +42,11 @@ async function refreshOrderStatus() {
 }
 
 function handleWindowFocus() {
-  refreshOrderStatus()
+  syncOrderStatus()
 }
 
 onMounted(() => {
-  refreshOrderStatus()
+  syncOrderStatus()
 
   window.addEventListener('focus', handleWindowFocus)
 })
@@ -373,17 +370,6 @@ function formatOrderDate(date) {
 
 .order-details__total strong {
   color: var(--color-accent);
-}
-
-.order-status {
-  display: inline-flex;
-  align-items: center;
-  padding: 7px 10px;
-  border-radius: 999px;
-  color: var(--color-accent);
-  background: var(--color-accent-light);
-  font-size: 11px;
-  font-weight: 700;
 }
 
 @media (max-width: 767px) {

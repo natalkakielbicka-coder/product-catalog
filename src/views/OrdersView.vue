@@ -3,9 +3,8 @@ import { onMounted, onUnmounted, ref } from 'vue'
 import { useOrders } from '@/composables/useOrders'
 import { useDocumentTitle } from '@/composables/useDocumentTitle'
 import { formatCurrency } from '@/utils/currency'
-import { getOrderStatus } from '@/services/orderService'
 
-const { orders, updateOrderStatus } = useOrders()
+const { orders, refreshOrderStatuses } = useOrders()
 
 const pageTitle = ref('Orders | Product Catalog')
 
@@ -20,18 +19,6 @@ function formatOrderDate(date) {
 
 function getItemsCount(items) {
   return items.reduce((total, item) => total + item.quantity, 0)
-}
-
-async function refreshOrderStatuses() {
-  const refreshableOrders = orders.value.filter((order) => order.id && order.orderKey)
-
-  await Promise.allSettled(
-    refreshableOrders.map(async (order) => {
-      const data = await getOrderStatus(order.id, order.orderKey)
-
-      updateOrderStatus(order.number, data.status, data.statusName)
-    }),
-  )
 }
 
 function handleWindowFocus() {

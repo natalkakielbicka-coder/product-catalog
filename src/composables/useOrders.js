@@ -1,4 +1,5 @@
 import { useLocalStorage } from '@/composables/useLocalStorage'
+import { getOrderStatus } from '@/services/orderService'
 
 const orders = useLocalStorage('orders', [])
 
@@ -25,10 +26,30 @@ export function useOrders() {
     })
   }
 
+  async function refreshOrderStatus(order) {
+    if (!order?.id || !order?.orderKey) {
+      return null
+    }
+
+    const data = await getOrderStatus(order.id, order.orderKey)
+
+    updateOrderStatus(order.number, data.status, data.statusName)
+
+    return data
+  }
+
+  async function refreshOrderStatuses() {
+    const refreshableOrders = orders.value.filter((order) => order.id && order.orderKey)
+
+    return Promise.allSettled(refreshableOrders.map((order) => refreshOrderStatus(order)))
+  }
+
   return {
     orders,
     addOrder,
     getOrderByNumber,
     updateOrderStatus,
+    refreshOrderStatus,
+    refreshOrderStatuses,
   }
 }
