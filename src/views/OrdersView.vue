@@ -3,7 +3,7 @@ import { onMounted, onUnmounted, ref } from 'vue'
 import { useOrders } from '@/composables/useOrders'
 import { useDocumentTitle } from '@/composables/useDocumentTitle'
 import { formatCurrency } from '@/utils/currency'
-import { getOrderStatusClass } from '@/utils/orderStatusClass'
+import OrderStatusBadge from '@/components/OrderStatusBadge.vue'
 
 const { orders, refreshOrderStatuses } = useOrders()
 
@@ -75,9 +75,7 @@ onUnmounted(() => {
           </div>
 
           <div class="order-card__meta">
-            <span class="order-status" :class="getOrderStatusClass(order.status)">
-              {{ order.statusName || order.status }}
-            </span>
+            <OrderStatusBadge :status="order.status" :status-name="order.statusName" />
 
             <time :datetime="order.createdAt">
               {{ formatOrderDate(order.createdAt) }}
@@ -353,53 +351,6 @@ onUnmounted(() => {
   display: flex;
   align-items: center;
   gap: 12px;
-}
-
-.order-status {
-  display: inline-flex;
-  align-items: center;
-  padding: 6px 10px;
-  border-radius: 999px;
-  color: var(--color-accent);
-  background: var(--color-accent-light);
-  font-size: 11px;
-  font-weight: 700;
-  margin-bottom: 5px;
-}
-
-.order-status--pending {
-  color: #92400e;
-  background: #fef3c7;
-}
-
-.order-status--on-hold {
-  color: #9a3412;
-  background: #ffedd5;
-}
-
-.order-status--processing {
-  color: #1d4ed8;
-  background: #dbeafe;
-}
-
-.order-status--completed {
-  color: #166534;
-  background: #dcfce7;
-}
-
-.order-status--cancelled {
-  color: #475569;
-  background: #e2e8f0;
-}
-
-.order-status--refunded {
-  color: #6b21a8;
-  background: #f3e8ff;
-}
-
-.order-status--failed {
-  color: #991b1b;
-  background: #fee2e2;
 }
 
 @media (max-width: 767px) {

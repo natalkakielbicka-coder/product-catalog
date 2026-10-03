@@ -4,7 +4,7 @@ import { useRoute } from 'vue-router'
 import { useOrders } from '@/composables/useOrders'
 import { useDocumentTitle } from '@/composables/useDocumentTitle'
 import { formatCurrency } from '@/utils/currency'
-import { getOrderStatusClass } from '@/utils/orderStatusClass'
+import OrderStatusBadge from '@/components/OrderStatusBadge.vue'
 
 const route = useRoute()
 
@@ -91,9 +91,7 @@ function formatOrderDate(date) {
         </div>
 
         <div class="order-status-wrapper">
-          <span class="order-status" :class="getOrderStatusClass(order.status)">
-            {{ order.statusName || order.status }}
-          </span>
+          <OrderStatusBadge :status="order.status" :status-name="order.statusName" />
 
           <small v-if="statusError" class="order-status-message order-status-message--error">
             {{ statusError }}
@@ -243,17 +241,6 @@ function formatOrderDate(date) {
   justify-self: center;
 }
 
-.order-status {
-  display: inline-flex;
-  align-items: center;
-  padding: 7px 10px;
-  border-radius: 999px;
-  color: var(--color-accent);
-  background: var(--color-accent-light);
-  font-size: 11px;
-  font-weight: 700;
-}
-
 .order-status-message {
   min-height: 14px;
   color: var(--color-muted);
@@ -367,41 +354,6 @@ function formatOrderDate(date) {
 
 .order-details__total strong {
   color: var(--color-accent);
-}
-
-.order-status--pending {
-  color: #92400e;
-  background: #fef3c7;
-}
-
-.order-status--on-hold {
-  color: #9a3412;
-  background: #ffedd5;
-}
-
-.order-status--processing {
-  color: #1d4ed8;
-  background: #dbeafe;
-}
-
-.order-status--completed {
-  color: #166534;
-  background: #dcfce7;
-}
-
-.order-status--cancelled {
-  color: #475569;
-  background: #e2e8f0;
-}
-
-.order-status--refunded {
-  color: #6b21a8;
-  background: #f3e8ff;
-}
-
-.order-status--failed {
-  color: #991b1b;
-  background: #fee2e2;
 }
 
 @media (max-width: 767px) {
