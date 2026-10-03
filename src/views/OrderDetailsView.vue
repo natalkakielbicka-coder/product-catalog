@@ -21,7 +21,6 @@ const pageTitle = computed(() => {
   return `${order.value.number} | Product Catalog`
 })
 
-const statusLoading = ref(false)
 const statusError = ref('')
 
 async function syncOrderStatus() {
@@ -29,15 +28,12 @@ async function syncOrderStatus() {
     return
   }
 
-  statusLoading.value = true
   statusError.value = ''
 
   try {
     await refreshOrderStatus(order.value)
   } catch (error) {
     statusError.value = error.message || 'Nie udało się pobrać statusu zamówienia.'
-  } finally {
-    statusLoading.value = false
   }
 }
 
@@ -98,11 +94,7 @@ function formatOrderDate(date) {
             {{ order.statusName || order.status }}
           </span>
 
-          <small v-if="statusLoading" class="order-status-message">
-            Aktualizowanie statusu...
-          </small>
-
-          <small v-else-if="statusError" class="order-status-message order-status-message--error">
+          <small v-if="statusError" class="order-status-message order-status-message--error">
             {{ statusError }}
           </small>
         </div>
@@ -221,18 +213,14 @@ function formatOrderDate(date) {
 <style scoped>
 .order-details {
   width: min(900px, calc(100% - 40px));
-
   margin: 0 auto;
   padding: 64px 0 96px;
 }
 
 .order-details__back {
   display: inline-flex;
-
   margin-bottom: 28px;
-
   color: var(--color-accent);
-
   font-size: 13px;
   font-weight: 700;
   text-decoration: none;
