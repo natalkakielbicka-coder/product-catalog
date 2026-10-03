@@ -240,6 +240,7 @@ async function submitForm() {
     placedOrder.value = {
       id: wooOrder.id,
       number: wooOrder.number,
+      orderKey: wooOrder.orderKey,
       createdAt: new Date().toISOString(),
       status: wooOrder.status,
 

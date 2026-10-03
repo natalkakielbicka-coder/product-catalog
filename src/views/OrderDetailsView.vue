@@ -1,14 +1,15 @@
 <script setup>
-import { computed } from 'vue'
+import { computed, onMounted, ref } from 'vue'
 import { useRoute } from 'vue-router'
 import { useOrders } from '@/composables/useOrders'
 import { useDocumentTitle } from '@/composables/useDocumentTitle'
 import { formatCurrency } from '@/utils/currency'
 import { getOrderStatusLabel } from '@/utils/orderStatus'
+import { getOrderStatus } from '@/services/orderService'
 
 const route = useRoute()
 
-const { getOrderByNumber } = useOrders()
+const { getOrderByNumber, updateOrderStatus } = useOrders()
 
 const order = computed(() => {
   return getOrderByNumber(route.params.number)
@@ -20,6 +21,32 @@ const pageTitle = computed(() => {
   }
 
   return `${order.value.number} | Product Catalog`
+})
+
+const statusLoading = ref(false)
+const statusError = ref('')
+
+async function refreshOrderStatus() {
+  if (!order.value?.id || !order.value?.orderKey) {
+    return
+  }
+
+  statusLoading.value = true
+  statusError.value = ''
+
+  try {
+    const data = await getOrderStatus(order.value.id, order.value.orderKey)
+
+    updateOrderStatus(order.value.number, data.status)
+  } catch (error) {
+    statusError.value = error.message || 'Nie udało się pobrać statusu zamówienia.'
+  } finally {
+    statusLoading.value = false
+  }
+}
+
+onMounted(() => {
+  refreshOrderStatus()
 })
 
 useDocumentTitle(pageTitle)
@@ -55,6 +82,12 @@ function formatOrderDate(date) {
         <span class="order-status">
           {{ getOrderStatusLabel(order.status) }}
         </span>
+
+        <small v-if="statusLoading"> Aktualizowanie statusu... </small>
+
+        <small v-else-if="statusError">
+          {{ statusError }}
+        </small>
 
         <time :datetime="order.createdAt">
           {{ formatOrderDate(order.createdAt) }}
@@ -188,12 +221,21 @@ function formatOrderDate(date) {
 }
 
 .order-details__header {
-  display: flex;
-  align-items: flex-end;
-  justify-content: space-between;
-
+  display: grid;
+  grid-template-columns: 1fr auto 1fr;
+  align-items: end;
   gap: 24px;
   margin-bottom: 32px;
+}
+
+.order-details__header .order-status {
+  justify-self: center;
+}
+
+.order-details__header time {
+  justify-self: end;
+  color: var(--color-muted);
+  font-size: 13px;
 }
 
 .order-details__header p {
@@ -357,8 +399,14 @@ function formatOrderDate(date) {
 
 @media (max-width: 767px) {
   .order-details__header {
+    display: flex;
     align-items: flex-start;
     flex-direction: column;
+  }
+
+  .order-details__header .order-status,
+  .order-details__header time {
+    justify-self: auto;
   }
 
   .order-details__grid {
