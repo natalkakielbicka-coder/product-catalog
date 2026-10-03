@@ -29,7 +29,7 @@ async function refreshOrderStatuses() {
     refreshableOrders.map(async (order) => {
       const data = await getOrderStatus(order.id, order.orderKey)
 
-      updateOrderStatus(order.number, data.status)
+      updateOrderStatus(order.number, data.status, data.statusName)
     }),
   )
 }
