@@ -1,10 +1,11 @@
 <script setup>
-import { computed, onMounted, onUnmounted, ref } from 'vue'
+import { computed, ref } from 'vue'
 import { useRoute } from 'vue-router'
 import { useOrders } from '@/composables/useOrders'
 import { useDocumentTitle } from '@/composables/useDocumentTitle'
 import { formatCurrency } from '@/utils/currency'
 import OrderStatusBadge from '@/components/OrderStatusBadge.vue'
+import { useAutoRefresh } from '@/composables/useAutoRefresh'
 
 const route = useRoute()
 
@@ -38,27 +39,7 @@ async function syncOrderStatus() {
   }
 }
 
-function handleWindowFocus() {
-  syncOrderStatus()
-}
-
-let statusRefreshInterval
-
-onMounted(() => {
-  syncOrderStatus()
-
-  window.addEventListener('focus', handleWindowFocus)
-
-  statusRefreshInterval = window.setInterval(() => {
-    syncOrderStatus()
-  }, 30000)
-})
-
-onUnmounted(() => {
-  window.removeEventListener('focus', handleWindowFocus)
-
-  window.clearInterval(statusRefreshInterval)
-})
+useAutoRefresh(syncOrderStatus)
 
 useDocumentTitle(pageTitle)
 

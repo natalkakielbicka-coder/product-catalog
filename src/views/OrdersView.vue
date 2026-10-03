@@ -1,9 +1,10 @@
 <script setup>
-import { onMounted, onUnmounted, ref } from 'vue'
+import { ref } from 'vue'
 import { useOrders } from '@/composables/useOrders'
 import { useDocumentTitle } from '@/composables/useDocumentTitle'
 import { formatCurrency } from '@/utils/currency'
 import OrderStatusBadge from '@/components/OrderStatusBadge.vue'
+import { useAutoRefresh } from '@/composables/useAutoRefresh'
 
 const { orders, refreshOrderStatuses } = useOrders()
 
@@ -22,27 +23,7 @@ function getItemsCount(items) {
   return items.reduce((total, item) => total + item.quantity, 0)
 }
 
-function handleWindowFocus() {
-  refreshOrderStatuses()
-}
-
-let statusRefreshInterval
-
-onMounted(() => {
-  refreshOrderStatuses()
-
-  window.addEventListener('focus', handleWindowFocus)
-
-  statusRefreshInterval = window.setInterval(() => {
-    refreshOrderStatuses()
-  }, 30000)
-})
-
-onUnmounted(() => {
-  window.removeEventListener('focus', handleWindowFocus)
-
-  window.clearInterval(statusRefreshInterval)
-})
+useAutoRefresh(refreshOrderStatuses)
 </script>
 
 <template>
